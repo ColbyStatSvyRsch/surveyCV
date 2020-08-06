@@ -2,6 +2,20 @@
 #'
 #' This is a cross validation function for survey samples taken using a a simple
 #' random sample survey design
+#'
+#' @param Data CSV of dataset to be tested
+#' @param formulae Vector of formulas containing the variables to be compared in
+#'   cross validation
+#' @param nfolds Number of folds to be used during cross validation, defaults to
+#'   5
+#' @param N Number equal to the total population size
+#' @param method string, must be either linear or logistic, determines type of
+#'   model fit during cross validation, defaults to linear
+#' @examples
+#' #MSEs generated for a clustered test of a first and second degree polynomial
+#' # fit predicting mpg from horsepower in the Auto Dataset
+#' data("Auto")
+#' cv.srs.lm(Auto, c("mpg~poly(horsepower,1, raw = TRUE)", "mpg~poly(horsepower,2, raw = TRUE)"), nfolds = 10, N = 400)
 #' @export
 
 

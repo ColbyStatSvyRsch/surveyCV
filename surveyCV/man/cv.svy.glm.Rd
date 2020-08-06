@@ -17,6 +17,35 @@ cv.svy.glm(
   glm = NULL
 )
 }
+\arguments{
+\item{Data}{CSV of dataset to be tested}
+
+\item{formulae}{Vector of formulas containing the variables to be compared in
+cross validation}
+
+\item{nfolds}{Number of folds to be used during cross validation, defaults to
+5}
+
+\item{N}{Number equal to the total population size}
+
+\item{clusterID}{String of the variable used to cluster during sampling, must
+be the same as in the dataset used, ignore if clustering was not used}
+
+\item{strataID}{String of the variable used to stratify during sampling, must
+be the same as in the dataset used, ignore if stratification was not used}
+
+\item{method}{string, must be either linear or logistic, determines type of
+model fit during cross validation, defaults to linear}
+
+\item{sample_type}{string, must be either SRS, Cluster, or Strat, specifies
+which sampling method was used, defaults to SRS}
+
+\item{design_object}{Name of a Survey Design Object created using the Survey
+package if one is being used, defaults to NULL}
+
+\item{glm}{Name of a Survey GLM created from the survey package if one is
+to be used, defaults to NULL}
+}
 \description{
 This function combines the other cross validation functions in this package
 into a single function that is able to interpret datasets and also

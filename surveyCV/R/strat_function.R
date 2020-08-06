@@ -2,6 +2,23 @@
 #'
 #' this is a cross validation function designed for survey samples taken using a
 #' stratified sampling design
+#'
+#' @param Data CSV of dataset to be tested
+#' @param formulae Vector of formulas containing the variables to be compared in
+#'   cross validation
+#' @param nfolds Number of folds to be used during cross validation, defaults to
+#'   5
+#' @param strataID String of the variable used to Stratify during sampling, must
+#'   be the same as in the dataset used
+#' @param N Number equal to the total population size
+#' @param method string, must be either linear or logistic, determines type of
+#'   model fit during cross validation, defaults to linear
+#'  @examples
+#' #MSEs generated for a stratified test of a first and second degree polynomial
+#' # fit predicting mpg from horsepower in the Auto Dataset, Stratified on the
+#' # "year" variable
+#' data("Auto")
+#' cv.strat.lm(Auto, c("mpg~poly(horsepower,1, raw = TRUE)", "mpg~poly(horsepower,2, raw = TRUE)"), nfolds = 10, "year", 400)
 #' @export
 
 

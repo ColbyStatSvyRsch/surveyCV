@@ -3,6 +3,25 @@
 #' This function combines the other cross validation functions in this package
 #' into a single function that is able to interpret datasets and also
 #' survey design objects and survey glms
+#'
+#' @param Data CSV of dataset to be tested
+#' @param formulae Vector of formulas containing the variables to be compared in
+#'   cross validation
+#' @param nfolds Number of folds to be used during cross validation, defaults to
+#'   5
+#' @param clusterID String of the variable used to cluster during sampling, must
+#'   be the same as in the dataset used, ignore if clustering was not used
+#' @param strataID String of the variable used to stratify during sampling, must
+#'   be the same as in the dataset used, ignore if stratification was not used
+#' @param sample_type string, must be either SRS, Cluster, or Strat, specifies
+#'   which sampling method was used, defaults to SRS
+#' @param design_object Name of a Survey Design Object created using the Survey
+#'   package if one is being used, defaults to NULL
+#' @param glm Name of a Survey GLM created from the survey package if one is
+#'   to be used, defaults to NULL
+#' @param N Number equal to the total population size
+#' @param method string, must be either linear or logistic, determines type of
+#'   model fit during cross validation, defaults to linear
 #' @export
 
 

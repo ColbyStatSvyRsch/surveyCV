@@ -6,7 +6,27 @@
 \usage{
 cv.srs.lm(Data, formulae, nfolds = 5, N, method = "linear")
 }
+\arguments{
+\item{Data}{CSV of dataset to be tested}
+
+\item{formulae}{Vector of formulas containing the variables to be compared in
+cross validation}
+
+\item{nfolds}{Number of folds to be used during cross validation, defaults to
+5}
+
+\item{N}{Number equal to the total population size}
+
+\item{method}{string, must be either linear or logistic, determines type of
+model fit during cross validation, defaults to linear}
+}
 \description{
 This is a cross validation function for survey samples taken using a a simple
 random sample survey design
+}
+\examples{
+#MSEs generated for a clustered test of a first and second degree polynomial
+# fit predicting mpg from horsepower in the Auto Dataset
+data("Auto")
+cv.srs.lm(Auto, c("mpg~poly(horsepower,1, raw = TRUE)", "mpg~poly(horsepower,2, raw = TRUE)"), nfolds = 10, N = 400)
 }
