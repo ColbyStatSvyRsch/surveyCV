@@ -1,12 +1,30 @@
 Package: surveyCV
 Type: Package
-Title: What the Package Does (Title Case)
-Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
-Encoding: UTF-8
-LazyData: true
+Title: surveyCV: Cross Validation Based on Survey Design
+Version: 0.0.0.9000
+Author: c(
+    person("Cole", "Guerin", email = "cole@guerincreative.com", role = c("cre", "aut")),
+    person("Thomas", "McMahon", email = "twmcma21@colby.edu.com", role = c("cre", "aut")),
+    person("Jerzy", "Wieczorek", email = "jerzywieczorek@gmail.com", role = "aut"))
+Description: Functions to generate mean squared error estimates using cross validation, 
+    based on how a survey design is constructed (SRS, Cluster, Stratification).
+    You can input linear and logistic regrssion models, along with data and a 
+    type of survey design in order to get and output that can help you determine
+    which model best fits the data using K-fold cross validation.
+License: GPL-2 | GPL-3
+LazyData: TRUE
+Depends: R (>= 4.0.2)
+Import:
+    survey (>= 4.0)
+Suggests:
+    ISLR (>= 1.2),
+    dplyr (>= 1.4.4),
+    splines (>= 4.02),
+    gridExtra (>= 2.3),
+    grid (>= 4.02),
+    ggplot2 (>= 3.3.1),
+    lattice (>= 0.20-41),
+    knitr (>= 1.29),
+    rmarkdown (>= 2.2)
+VignetteBuilder: knitr
 RoxygenNote: 7.1.1
