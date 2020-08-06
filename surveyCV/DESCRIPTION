@@ -12,6 +12,7 @@ Description: Functions to generate mean squared error estimates using cross vali
     type of survey design in order to get and output that can help you determine
     which model best fits the data using K-fold cross validation.
 License: GPL-2 | GPL-3
+Encoding: UTF-8
 LazyData: TRUE
 Depends: R (>= 4.0.2)
 Import:
@@ -27,4 +28,4 @@ Suggests:
     knitr (>= 1.29),
     rmarkdown (>= 2.2)
 VignetteBuilder: knitr
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.1.9000
