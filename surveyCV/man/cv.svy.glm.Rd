@@ -35,7 +35,41 @@ be the same as in the dataset used, ignore if clustering was not used}
 be the same as in the dataset used, ignore if stratification was not used}
 
 \item{method}{string, must be either linear or logistic, determines type of
-model fit during cross validation, defaults to linear}
+  model fit during cross validation, defaults to linear
+  @examples
+#MSEs generated for different tests of first and second degree polynomial
+# fits predicting mpg from horsepower in the Auto Dataset. Clustering and
+Stratification were don along the was done along the "year"" variable
+data("Auto")
+cv.svy.glm(Auto, c("mpg~poly(horsepower,1, raw = TRUE)", "mpg~poly(horsepower,2, raw = TRUE)"), nfolds = 10, N = 400)
+cv.svy.glm(Auto, c("mpg~poly(horsepower,1, raw = TRUE)", "mpg~poly(horsepower,2, raw = TRUE)"), nfolds = 10, N = 400, clusterID = "year", sample_type = "Cluster")
+cv.svy.glm(Auto, c("mpg~poly(horsepower,1, raw = TRUE)", "mpg~poly(horsepower,2, raw = TRUE)"), nfolds = 10, N = 400, stratID = "year", sample_type = "Strat")
+#Using wither a survey design object or survey glm to generate MSEs
+data("Auto")
+auto.srs.svy <- svydesign(ids = ~0,
+                         strata = NULL,
+                         fpc = rep(1000, 392),
+                         data = Auto)
+srs.model <- svyglm(mpg~horsepower+I(horsepower^2)+I(horsepower^3), design = auto.srs.svy)
+auto.clus.svy <- svydesign(ids = ~year,
+                          strata = NULL,
+                          fpc = rep(1000, 392),
+                          data = Auto)
+clus.model <- svyglm(mpg~horsepower+I(horsepower^2)+I(horsepower^3), design = auto.clus.svy)
+auto.strat.svy <- svydesign(ids = ~0,
+                           strata = ~year,
+                           fpc = rep(1000, 392),
+                           data = Auto)
+strat.model <- svyglm(mpg~horsepower+I(horsepower^2)+I(horsepower^3), design = auto.strat.svy)
+cv.svy.glm(formulae = c("mpg~poly(horsepower,1, raw = TRUE)", "mpg~poly(horsepower,2, raw = TRUE)",
+                       "mpg~poly(horsepower,3, raw = TRUE)"), design_object = auto.srs.svy, nfolds = 10, N = 1000)
+cv.svy.glm(formulae = c("mpg~poly(horsepower,1, raw = TRUE)", "mpg~poly(horsepower,2, raw = TRUE)",
+                       "mpg~poly(horsepower,3, raw = TRUE)"), design_object = auto.clus.svy, nfolds = 10, N = 1000)
+cv.svy.glm(formulae = c("mpg~poly(horsepower,1, raw = TRUE)", "mpg~poly(horsepower,2, raw = TRUE)",
+                       "mpg~poly(horsepower,3, raw = TRUE)"), design_object = auto.strat.svy, nfolds = 10, N = 1000)
+cv.svy.glm(glm = srs.model, nfolds = 10, N = 1000)
+cv.svy.glm(glm = clus.model, nfolds = 10, N = 1000)
+cv.svy.glm(glm = strat.model, nfolds = 10, N = 1000)}
 
 \item{sample_type}{string, must be either SRS, Cluster, or Strat, specifies
 which sampling method was used, defaults to SRS}

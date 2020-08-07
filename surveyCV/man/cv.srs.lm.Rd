@@ -25,7 +25,7 @@ This is a cross validation function for survey samples taken using a a simple
 random sample survey design
 }
 \examples{
-#MSEs generated for a clustered test of a first and second degree polynomial
+#MSEs generated for a SRS test of a first and second degree polynomial
 # fit predicting mpg from horsepower in the Auto Dataset
 data("Auto")
 cv.srs.lm(Auto, c("mpg~poly(horsepower,1, raw = TRUE)", "mpg~poly(horsepower,2, raw = TRUE)"), nfolds = 10, N = 400)
