@@ -9,7 +9,7 @@
 #' on survey design is useful:
 #' \code{vignette("intro", package = "surveyCV")}.
 #' 
-#' #' The code for this package seeks to create an alternative for the
+#' The code for this package seeks to create an alternative for the
 #' \code{boot::cv.glm()}
 #' function, so that results correctly account for survey designs during 
 #' K-fold cross validation.

@@ -3,9 +3,9 @@ Type: Package
 Title: surveyCV: Cross Validation Based on Survey Design
 Version: 0.0.0.9000
 Author: c(
-    person("Cole", "Guerin", email = "cole@guerincreative.com", role = c("cre", "aut")),
-    person("Thomas", "McMahon", email = "twmcma21@colby.edu.com", role = c("cre", "aut")),
-    person("Jerzy", "Wieczorek", email = "jerzywieczorek@gmail.com", role = "aut"))
+    person("Cole", "Guerin", email = "cjguer21@colby.edu", role = c("cre", "aut")),
+    person("Thomas", "McMahon", email = "twmcma21@colby.edu", role = c("cre", "aut")),
+    person("Jerzy", "Wieczorek", email = "jawieczo@colby.edu", role = c("cre", "aut")))
 Description: Functions to generate mean squared error estimates using cross validation, 
     based on how a survey design is constructed (SRS, Cluster, Stratification).
     You can input linear and logistic regrssion models, along with data and a 
