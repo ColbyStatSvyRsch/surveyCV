@@ -16,6 +16,11 @@
 
 #' @importFrom survey svydesign svyglm svymean
 #' @importFrom stats predict
+#' @import dplyr
+#' @import ggplot2
+#' @import grid
+#' @importFrom gridExtra grid.arrange
+#' @import magrittr
 #'
 #' @docType package
 #' @name surveyCV
