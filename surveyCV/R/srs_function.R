@@ -11,6 +11,7 @@
 #' @param N Number equal to the total population size
 #' @param method string, must be either linear or logistic, determines type of
 #'   model fit during cross validation, defaults to linear
+#' @param weights Variable in data set that contains PPS weights
 #' @examples
 #' #MSEs generated for a SRS test of a first and second degree polynomial
 #' # fit predicting mpg from horsepower in the Auto Dataset
@@ -20,7 +21,7 @@
 
 
 # Cross Val for SRS
-cv.srs.lm <- function(Data, formulae, nfolds=5, N, method = "linear") {
+cv.srs.lm <- function(Data, formulae, nfolds=5, N, method = "linear", weights =  NULL) {
   # Other option for method is "logistic"
 
   #stop logic checking dataset specified
@@ -46,10 +47,18 @@ cv.srs.lm <- function(Data, formulae, nfolds=5, N, method = "linear") {
     test.rows <- which(fold.labels == fold)
     train <- Data[-test.rows,]
     test <- Data[test.rows,]
-    srs.svy <- svydesign(ids = ~0,
-                         strata = NULL,
-                         fpc = rep(N, nrow(train)),
-                         data = train)
+    if (is.null(weights) == TRUE) {
+      srs.svy <- svydesign(ids = ~0,
+                           strata = NULL,
+                           fpc = rep(N, nrow(train)),
+                           data = train)
+      } else {
+      srs.svy <- svydesign(ids = ~0,
+                           strata = NULL,
+                           fpc = rep(N, nrow(train)),
+                           weights = weights,
+                           data = train)
+      }
     # This loops through the formulas in our list of formulas and calculates the test errors
     # squared for thos formulas applied to each survey design made from each fold and plugs
     # those test errors squared back into the matrix we made earlier
@@ -75,10 +84,17 @@ cv.srs.lm <- function(Data, formulae, nfolds=5, N, method = "linear") {
   # Attaches our test errors squared back onto the original dataset
   complete_data <- cbind(Data, test_errors_sq.df)
   # Makes a survey design for based off of the whole dataset so we can calculate a mean
-  srs.svy <- svydesign(ids = ~0,
-                       strata = NULL,
-                       fpc = rep(N, nrow(complete_data)),
-                       data = complete_data)
+  if (is.null(weights) == TRUE) {
+    srs.svy <- svydesign(ids = ~0,
+                         strata = NULL,
+                         fpc = rep(N, nrow(complete_data)),
+                         data = complete_data)
+  } else {
+    srs.svy <- svydesign(ids = ~0,
+                         strata = NULL,
+                         fpc = rep(N, nrow(complete_data)),
+                         weights = weights,
+                         data = complete_data)}
   # Makes an empty matrix that we can pump the means and SE into for each formula by row
   means <- matrix(NA, nrow=(ncol(complete_data) - ncol(Data)), ncol=2)
   # Sets i for the loop to start at the first column in the dataset that contains test errors sq

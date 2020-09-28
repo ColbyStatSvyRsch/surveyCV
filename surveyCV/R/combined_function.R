@@ -22,6 +22,7 @@
 #' @param N Number equal to the total population size
 #' @param method string, must be either linear or logistic, determines type of
 #'   model fit during cross validation, defaults to linear
+#' @param weights Variable in data set that contains PPS weights
 #'   @examples
 #' #MSEs generated for different tests of first and second degree polynomial
 #' # fits predicting mpg from horsepower in the Auto Dataset. Clustering and
@@ -60,7 +61,7 @@
 
 
 
-cv.svy.glm <- function(Data, formulae, nfolds=5, N, clusterID, strataID, method = "linear", sample_type = "SRS",
+cv.svy.glm <- function(Data, formulae, nfolds=5, N, clusterID, strataID, method = "linear", sample_type = "SRS", weights = NULL,
                        design_object = NULL, glm = NULL) {
 
   if (is.null(glm) == FALSE) {
@@ -141,7 +142,7 @@ cv.svy.glm <- function(Data, formulae, nfolds=5, N, clusterID, strataID, method 
   }
 
   if (sample_type == "SRS") {
-    cv.srs.lm(Data, formulae, nfolds = nfolds, N = N, method = method)
+    cv.srs.lm(Data, formulae, nfolds = nfolds, N = N, method = method, weights = weights)
   } else if (sample_type == "Cluster") {
     cv.cluster.lm(Data, formulae, nfolds = nfolds, clusterID = clusterID, N = N, method = method)
   } else if (sample_type == "Strat") {
