@@ -13,6 +13,7 @@
 #' @param N Number equal to the total population size
 #' @param method string, must be either linear or logistic, determines type of
 #'   model fit during cross validation, defaults to linear
+#' @param weights Variable in data set that contains PPS weights
 #' @examples
 #' # MSEs generated for a clustered test of a first and second degree polynomial
 #' # fit predicting mpg from horsepower in the Auto Dataset, clustering using
@@ -73,6 +74,7 @@ cv.cluster.lm <- function(Data, formulae, nfolds=5, clusterID, N, method = "line
     clus.svy <- svydesign(ids = formula(paste0("~",clusterID)),
                           strata = NULL,
                           fpc = rep(N, n),
+                          weights = weights,
                           data = train)
     # This loops through the formulas in our list of formulas and calculates the test errors
     # squared for thos formulas applied to each survey design made from each fold and plugs
@@ -102,6 +104,7 @@ cv.cluster.lm <- function(Data, formulae, nfolds=5, clusterID, N, method = "line
   clus.svy <- svydesign(ids = formula(paste0("~",clusterID)),
                         strata = NULL, ## Figure out weights later
                         fpc = rep(N, nrow(complete_data)),
+                        weights = weights,
                         data = complete_data)
   # Makes an empty matrix that we can pump the means and SE into for each formula by row
   means <- matrix(NA, nrow=(ncol(complete_data) - ncol(Data)), ncol=2)

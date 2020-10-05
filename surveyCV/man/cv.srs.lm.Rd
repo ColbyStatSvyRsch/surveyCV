@@ -4,7 +4,7 @@
 \alias{cv.srs.lm}
 \title{SRS Function}
 \usage{
-cv.srs.lm(Data, formulae, nfolds = 5, N, method = "linear")
+cv.srs.lm(Data, formulae, nfolds = 5, N, method = "linear", weights = NULL)
 }
 \arguments{
 \item{Data}{CSV of dataset to be tested}
@@ -19,6 +19,8 @@ cross validation}
 
 \item{method}{string, must be either linear or logistic, determines type of
 model fit during cross validation, defaults to linear}
+
+\item{weights}{Variable in data set that contains PPS weights}
 }
 \description{
 This is a cross validation function for survey samples taken using a a simple

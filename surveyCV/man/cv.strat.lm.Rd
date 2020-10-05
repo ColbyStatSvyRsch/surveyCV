@@ -21,7 +21,9 @@ be the same as in the dataset used}
 \item{N}{Number equal to the total population size}
 
 \item{method}{string, must be either linear or logistic, determines type of
-  model fit during cross validation, defaults to linear
+model fit during cross validation, defaults to linear}
+
+\item{weights}{Variable in data set that contains PPS weights
  @examples
 #MSEs generated for a stratified test of a first and second degree polynomial
 # fit predicting mpg from horsepower in the Auto Dataset, Stratified on the

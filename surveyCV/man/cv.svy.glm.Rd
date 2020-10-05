@@ -13,6 +13,7 @@ cv.svy.glm(
   strataID,
   method = "linear",
   sample_type = "SRS",
+  weights = NULL,
   design_object = NULL,
   glm = NULL
 )
@@ -35,7 +36,12 @@ be the same as in the dataset used, ignore if clustering was not used}
 be the same as in the dataset used, ignore if stratification was not used}
 
 \item{method}{string, must be either linear or logistic, determines type of
-  model fit during cross validation, defaults to linear
+model fit during cross validation, defaults to linear}
+
+\item{sample_type}{string, must be either SRS, Cluster, or Strat, specifies
+which sampling method was used, defaults to SRS}
+
+\item{weights}{Variable in data set that contains PPS weights
   @examples
 #MSEs generated for different tests of first and second degree polynomial
 # fits predicting mpg from horsepower in the Auto Dataset. Clustering and
@@ -70,9 +76,6 @@ cv.svy.glm(formulae = c("mpg~poly(horsepower,1, raw = TRUE)", "mpg~poly(horsepow
 cv.svy.glm(glm = srs.model, nfolds = 10, N = 1000)
 cv.svy.glm(glm = clus.model, nfolds = 10, N = 1000)
 cv.svy.glm(glm = strat.model, nfolds = 10, N = 1000)}
-
-\item{sample_type}{string, must be either SRS, Cluster, or Strat, specifies
-which sampling method was used, defaults to SRS}
 
 \item{design_object}{Name of a Survey Design Object created using the Survey
 package if one is being used, defaults to NULL}

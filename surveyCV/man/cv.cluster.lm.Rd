@@ -22,6 +22,8 @@ be the same as in the dataset used}
 
 \item{method}{string, must be either linear or logistic, determines type of
 model fit during cross validation, defaults to linear}
+
+\item{weights}{Variable in data set that contains PPS weights}
 }
 \description{
 This is a cross validation function designed for samples taken using a
