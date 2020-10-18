@@ -50,7 +50,7 @@ cv.srs.lm <- function(Data, formulae, nfolds=5, N, method = "linear", weights = 
     srs.svy <- svydesign(ids = ~0,
                          strata = NULL,
                          fpc = rep(N, nrow(train)),
-                         weights = weights,
+                         weights = if(is.null(weights)) NULL else formula(paste0("~", weights)),
                          data = train)
     # This loops through the formulas in our list of formulas and calculates the test errors
     # squared for thos formulas applied to each survey design made from each fold and plugs
@@ -80,7 +80,7 @@ cv.srs.lm <- function(Data, formulae, nfolds=5, N, method = "linear", weights = 
   srs.svy <- svydesign(ids = ~0,
                        strata = NULL,
                        fpc = rep(N, nrow(complete_data)),
-                       weights = weights,
+                       weights = if(is.null(weights)) NULL else formula(paste0("~", weights)),
                        data = complete_data)
   # Makes an empty matrix that we can pump the means and SE into for each formula by row
   means <- matrix(NA, nrow=(ncol(complete_data) - ncol(Data)), ncol=2)

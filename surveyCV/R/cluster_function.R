@@ -24,7 +24,7 @@
 
 
 # Cross Val for Clusters
-cv.cluster.lm <- function(Data, formulae, nfolds=5, clusterID, N, method = "linear") {
+cv.cluster.lm <- function(Data, formulae, nfolds=5, clusterID, N, method = "linear", weights = NULL) {
   # Other option for method is "logistic"
 
   #stop logic checking dataset specified
@@ -74,7 +74,7 @@ cv.cluster.lm <- function(Data, formulae, nfolds=5, clusterID, N, method = "line
     clus.svy <- svydesign(ids = formula(paste0("~",clusterID)),
                           strata = NULL,
                           fpc = rep(N, n),
-                          weights = weights,
+                          weights = if(is.null(weights)) NULL else formula(paste0("~", weights)),
                           data = train)
     # This loops through the formulas in our list of formulas and calculates the test errors
     # squared for thos formulas applied to each survey design made from each fold and plugs
@@ -104,7 +104,7 @@ cv.cluster.lm <- function(Data, formulae, nfolds=5, clusterID, N, method = "line
   clus.svy <- svydesign(ids = formula(paste0("~",clusterID)),
                         strata = NULL, ## Figure out weights later
                         fpc = rep(N, nrow(complete_data)),
-                        weights = weights,
+                        weights = if(is.null(weights)) NULL else formula(paste0("~", weights)),
                         data = complete_data)
   # Makes an empty matrix that we can pump the means and SE into for each formula by row
   means <- matrix(NA, nrow=(ncol(complete_data) - ncol(Data)), ncol=2)

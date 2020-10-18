@@ -144,9 +144,9 @@ cv.svy.glm <- function(Data, formulae, nfolds=5, N, clusterID, strataID, method 
   if (sample_type == "SRS") {
     cv.srs.lm(Data, formulae, nfolds = nfolds, N = N, method = method, weights = weights)
   } else if (sample_type == "Cluster") {
-    cv.cluster.lm(Data, formulae, nfolds = nfolds, clusterID = clusterID, N = N, method = method)
+    cv.cluster.lm(Data, formulae, nfolds = nfolds, clusterID = clusterID, N = N, method = method, weights = weights)
   } else if (sample_type == "Strat") {
-    cv.strat.lm(Data, formulae, nfolds = nfolds, strataID = strataID, N = N, method = method)
+    cv.strat.lm(Data, formulae, nfolds = nfolds, strataID = strataID, N = N, method = method, weights = weights)
   }
 
 }
