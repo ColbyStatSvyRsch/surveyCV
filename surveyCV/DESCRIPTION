@@ -21,6 +21,7 @@ Suggests:
     ISLR (>= 1.2),
     dplyr (>= 1.4.4),
     splines (>= 4.02),
+    sampling (>= 2.8),
     gridExtra (>= 2.3),
     grid (>= 4.02),
     ggplot2 (>= 3.3.1),
