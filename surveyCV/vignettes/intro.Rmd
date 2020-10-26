@@ -35,11 +35,14 @@ plot_list <- surveyCV:::plot_generation()
 sim.clusvsrs.sd.n100 <- plot_list$sim.clusvsrs.sd.n100
 sim.clusvsrs.bp.n100 <- plot_list$sim.clusvsrs.bp.n100
 sim.stratvsrs.bp.n100 <- plot_list$sim.stratvsrs.bp.n100
+plot_list2 <- surveyCV:::plot_generation2()
+Main.weights.plot <- plot_list2$Main.weights.plot
+quad.sample.graph <- plot_list2$quad.sample.graph
 ```
 
 # Approach
 
-The purpose of the beginning of this document is to outline our findings when investigating the effects of accounting for complex survey designs on cross validation error estimates. We decided to look at differences in cross validation when using SRS, cluster, and stratification sampling designs. We decided that the difference in cross validation, based on these survey designs, would mainly come from how the folds for K-fold cross validation are generated. Here was our approach to this in our functions:
+The purpose of the beginning of this document is to outline our findings when investigating the effects of accounting for complex survey designs on cross validation error estimates. We decided to look at differences in cross validation when using SRS, cluster, and stratification sampling designs. We decided that the difference in cross validation, based on these survey designs, would mainly come from how the folds for K-fold cross validation are generated. We also looked at if accounting for sampling weights could  Here was our approach to this in our functions:
 
 When generating folds, if an SRS model is used, observations will be assigned randomly to each fold. If a clustered model is used, observations within each cluster are kept together so at least one full cluster will be in each fold. When folds are generated with a stratified model, the strata are broken up so at least one observation from each strata are in each fold. 
 
@@ -133,6 +136,15 @@ grid.draw(sim.stratvsrs.bp.n100)
 
 
 Next we will discuss stratified samples. Above we have a similar set of plots, with the sample size equal to 100, but instead using a stratified sample instead of a clustered one. The effects are harder to see here but, when using a SRS design to generate folds (rows 1 and 2),  the cross validation function has higher MSEs and may even choose a lower degree of freedom. When stratification is taken into consideration during fold generation, the MSEs appear lower, and models with greater DFs may be chosen. This is presumed to be caused by the overall increase in effective sampling size obtained when taking stratified samples which allows appropriately for higher confidence in more complex models.
+
+```{r, fig.width = 8, fig.height = 8, cache = TRUE}
+grid.draw(quad.sample.graph)
+```
+
+
+```{r, fig.width = 8, fig.height = 8, cache = TRUE}
+grid.draw(Main.weights.plot)
+```
 
 # Examples Using surveyCV Functions
 
