@@ -22,27 +22,29 @@
 #' # fit predicting mpg from horsepower in the Auto Dataset, Stratified on the
 #' # "year" variable
 #' data("Auto")
-#' cv.gen.lm(Auto, c("mpg~poly(horsepower,1, raw = TRUE)", "mpg~poly(horsepower,2, raw = TRUE)"), nfolds = 10, "year", 400)
+#' cv.gen.lm(Auto, c("mpg~poly(horsepower,1, raw = TRUE)", "mpg~poly(horsepower,2, raw = TRUE)"), nfolds = 10, strataID = "year", N = 400)
 #' @export
 
 
 # General Cross Validation
 cv.gen.lm <- function(Data, formulae, nfolds=5, strataID = NULL, clusterID = NULL, nest = FALSE, N, method = "linear", weights = NULL) {
   # Other option for method is "logistic"
-  
+
   #stop logic checking dataset specified
   if(nfolds < 1) {print ("nfolds is less that 1")}
   if(N<nrow(Data)) {print("N is less than observations in the defined dataset")}
   if(nfolds >= nrow(Data)) {print ("fold number exceeds observations")}
-  
+
   stopifnot(nfolds > 0, N >= nrow(Data), nfolds <= nrow(Data))
-  
+
   # Turns the strings of formulas into a list of formulas
   formulae <- sapply(formulae, as.formula)
   # Pushes the data into this full_ds data frame
   full_ds <- Data
+  # Creates an observation ID variable for the dataset
+  full_ds$ID <- 1:nrow(full_ds)
   # Runs our fold generation function seen in utils
-  appendfolds(Data = full_ds, nfolds = nfolds, strataID = strataID, custerID = clusterID)
+  full_ds <- appendfolds(Data = full_ds, nfolds = nfolds, strataID = strataID, clusterID = clusterID)
   # Makes a matrix that the test errors squared will be pumped back into inside the for loop
   test_errors_sq <- matrix(NA, nrow=nrow(full_ds), ncol=length(formulae))
   # This loops through each fold to create a training dataset and holdout (test) dataset for that
@@ -70,7 +72,7 @@ cv.gen.lm <- function(Data, formulae, nfolds=5, strataID = NULL, clusterID = NUL
                            fpc = rep(N, n),
                            weights = if(is.null(weights)) NULL else formula(paste0("~", weights)),
                            data = train)
-   
+
     } else {
       gen.svy <- svydesign(ids = formula(paste0("~",clusterID)),
                            strata = formula(paste0('~',strataID)),
@@ -78,7 +80,7 @@ cv.gen.lm <- function(Data, formulae, nfolds=5, strataID = NULL, clusterID = NUL
                            fpc = rep(N, n),
                            weights = if(is.null(weights)) NULL else formula(paste0("~", weights)),
                            data = train)
-      
+
     }
     # This loops through the formulas in our list of formulas and calculates the test errors
     # squared for thos formulas applied to each survey design made from each fold and plugs

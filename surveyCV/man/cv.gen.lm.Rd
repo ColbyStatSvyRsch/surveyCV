@@ -37,7 +37,7 @@ be the same as in the dataset used}
 # fit predicting mpg from horsepower in the Auto Dataset, Stratified on the
 # "year" variable
 data("Auto")
-cv.gen.lm(Auto, c("mpg~poly(horsepower,1, raw = TRUE)", "mpg~poly(horsepower,2, raw = TRUE)"), nfolds = 10, "year", 400)}
+cv.gen.lm(Auto, c("mpg~poly(horsepower,1, raw = TRUE)", "mpg~poly(horsepower,2, raw = TRUE)"), nfolds = 10, strataID = "year", N = 400)}
 
 \item{N}{Number equal to the total population size}
 
