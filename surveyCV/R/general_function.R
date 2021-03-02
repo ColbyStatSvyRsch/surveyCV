@@ -39,49 +39,25 @@ cv.gen.lm <- function(Data, formulae, nfolds=5, strataID = NULL, clusterID = NUL
 
   # Turns the strings of formulas into a list of formulas
   formulae <- sapply(formulae, as.formula)
-  # Pushes the data into this full_ds data frame
-  full_ds <- Data
   # Creates an observation ID variable for the dataset
-  full_ds$ID <- 1:nrow(full_ds)
+  Data$ID <- 1:nrow(Data)
   # Runs our fold generation function seen in utils
-  full_ds <- appendfolds(Data = full_ds, nfolds = nfolds, strataID = strataID, clusterID = clusterID)
+  Data <- appendfolds(Data = Data, nfolds = nfolds, strataID = strataID, clusterID = clusterID)
   # Makes a matrix that the test errors squared will be pumped back into inside the for loop
   test_errors_sq <- matrix(NA, nrow=nrow(full_ds), ncol=length(formulae))
   # This loops through each fold to create a training dataset and holdout (test) dataset for that
   # k-fold, while also making the svydesign for that fold based on the training dataset
   for (fold in 1:nfolds) {
-    test.rows <- which(full_ds$.foldID == fold)
-    train <- full_ds[-test.rows,]
-    test <- full_ds[test.rows,]
+    test.rows <- which(Data$.foldID == fold)
+    train <- Data[-test.rows,]
+    test <- Data[test.rows,]
     n = nrow(train)
-    if(is.null(strataID) & is.null(clusterID)) {
-      gen.svy <- svydesign(ids = ~0,
-                           strata = NULL,
+      gen.svy <- svydesign(ids = if(is.null(clusterID)) NULL else formula(paste0("~", clusterID)),
+                           strata = if(is.null(strataID)) NULL else formula(paste0("~", strataID)),
                            fpc = rep(N, nrow(train)),
                            weights = if(is.null(weights)) NULL else formula(paste0("~", weights)),
-                           data = train)
-    } else if(is.null(strataID)) {
-      gen.svy <- svydesign(ids = formula(paste0("~",clusterID)),
-                            strata = NULL,
-                            fpc = rep(N, n),
-                            weights = if(is.null(weights)) NULL else formula(paste0("~", weights)),
-                            data = train)
-    } else if(is.null(clusterID)) {
-    gen.svy <- svydesign(ids = ~0,
-                           strata = formula(paste0('~',strataID)),
-                           fpc = rep(N, n),
-                           weights = if(is.null(weights)) NULL else formula(paste0("~", weights)),
-                           data = train)
-
-    } else {
-      gen.svy <- svydesign(ids = formula(paste0("~",clusterID)),
-                           strata = formula(paste0('~',strataID)),
                            nest = nest,
-                           fpc = rep(N, n),
-                           weights = if(is.null(weights)) NULL else formula(paste0("~", weights)),
                            data = train)
-
-    }
     # This loops through the formulas in our list of formulas and calculates the test errors
     # squared for thos formulas applied to each survey design made from each fold and plugs
     # those test errors squared back into the matrix we made earlier
@@ -105,34 +81,15 @@ cv.gen.lm <- function(Data, formulae, nfolds=5, strataID = NULL, clusterID = NUL
   # This converts our matrix into a data frame so it can more easily manipulated
   test_errors_sq.df <- as.data.frame(test_errors_sq)
   # Attaches our test errors squared back onto the original dataset
-  complete_data <- cbind(full_ds, test_errors_sq.df)
+  complete_data <- cbind(Data, test_errors_sq.df)
   # Makes a survey design for based off of the whole dataset so we can calculate a mean
-  if(is.null(strataID) & is.null(clusterID)) {
-    gen.svy <- svydesign(ids = ~0,
-                         strata = NULL,
-                         fpc = rep(N, nrow(complete_data)),
+  gen.svy <- svydesign(ids = if(is.null(clusterID)) NULL else formula(paste0("~", clusterID)),
+                         strata = if(is.null(strataID)) NULL else formula(paste0("~", strataID)),
+                         fpc = rep(N, nrow(train)),
                          weights = if(is.null(weights)) NULL else formula(paste0("~", weights)),
-                         data = complete_data)
-  } else if(is.null(strataID)) {
-    gen.svy <- svydesign(ids = formula(paste0("~",clusterID)),
-                          strata = NULL, ## Figure out weights later
-                          fpc = rep(N, nrow(complete_data)),
-                          weights = if(is.null(weights)) NULL else formula(paste0("~", weights)),
-                          data = complete_data)
-  } else if(is.null(clusterID)) {
-    gen.svy <- svydesign(ids = ~0,
-                         strata = formula(paste0('~',strataID)),
-                         fpc = rep(N, nrow(complete_data)),
-                         weights = if(is.null(weights)) NULL else formula(paste0("~", weights)),
-                         data = complete_data)
-  } else {
-    gen.svy <- svydesign(ids = formula(paste0("~",clusterID)),
-                         strata = formula(paste0('~',strataID)),
                          nest = nest,
-                         fpc = rep(N, nrow(complete_data)),
-                         weights = if(is.null(weights)) NULL else formula(paste0("~", weights)),
                          data = complete_data)
-  }
+  
   # Makes an empty matrix that we can pump the means and SE into for each formula by row
   means <- matrix(NA, nrow=(ncol(complete_data) - ncol(full_ds)), ncol=2)
   # Sets i for the loop to start at the first column in the dataset that contains test errors sq
