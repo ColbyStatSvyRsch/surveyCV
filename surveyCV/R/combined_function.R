@@ -135,7 +135,7 @@ cv.svy.glm <- function(formulae, nfolds=5, N, clusterID = NULL, strataID = NULL,
       strataID = paste0(design_object[["call"]][["strata"]][[2]])
     }
     
-    if (design_object[["call"]][["nest"]] == TRUE) {
+    if (design_object[["call"]][["nest"]] > 0) {
       nest = TRUE
     } else {nest = FALSE}
 
