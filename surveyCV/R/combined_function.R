@@ -61,7 +61,7 @@
 
 
 
-cv.svy.glm <- function(Data, formulae, nfolds=5, N, clusterID, strataID, method = "linear", sample_type = "SRS", weights = NULL,
+cv.svy.glm <- function(formulae, nfolds=5, N, clusterID = NULL, strataID = NULL, method = "linear", weights = NULL,
                        design_object = NULL, glm = NULL) {
 
   if (is.null(glm) == FALSE) {
@@ -138,16 +138,15 @@ cv.svy.glm <- function(Data, formulae, nfolds=5, N, clusterID, strataID, method 
       sample_type = "Strat"
       strataID = paste0(design_object[["call"]][["strata"]][[2]])
     }
+    
+    if (design_object[["call"]][["nest"]] == TRUE) {
+      nest = TRUE
+    } else {nest = FALSE}
 
   }
+  
+  cv.gen.lm(Data, formulae, nfolds = nfolds, clusterID = clusterID, strataID = strataID, N = N, method = method, 
+            weights = weights, nest = nest)
 
-  if (sample_type == "SRS") {
-    cv.srs.lm(Data, formulae, nfolds = nfolds, N = N, method = method, weights = weights)
-  } else if (sample_type == "Cluster") {
-    cv.cluster.lm(Data, formulae, nfolds = nfolds, clusterID = clusterID, N = N, method = method, weights = weights)
-  } else if (sample_type == "Strat") {
-    cv.strat.lm(Data, formulae, nfolds = nfolds, strataID = strataID, N = N, method = method, weights = weights)
   }
-
-}
 
