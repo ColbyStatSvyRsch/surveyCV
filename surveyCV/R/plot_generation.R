@@ -184,29 +184,29 @@ plot_generation <- function() {
     
     # Turns the strings of formulas into a list of formulas
     formulae <- sapply(formulae, as.formula)
-    # Pushes the data into this full_ds data frame
-    full_ds <- Data
+    # Pushes the data into this Data data frame
+    
     # Creates an observation ID variable for the dataset
-    full_ds$ID <- 1:nrow(full_ds)
-    # Creates a new dataset that is a copy of full_ds that we can now scramble 
+    Data$ID <- 1:nrow(Data)
+    # Creates a new dataset that is a copy of Data that we can now scramble 
     # and then order by the variable we are stratifying on
-    randomized_ds <- data.frame(ID = full_ds$ID, stratumID = full_ds[[strataID]])
+    randomized_ds <- data.frame(ID = Data$ID, stratumID = Data[[strataID]])
     randomized_ds <- randomized_ds[sample(1:nrow(randomized_ds)),]
     randomized_ds <- randomized_ds[order(randomized_ds$stratumID),]
     # Assigns a fold ID to to all of the observations
     randomized_ds$foldID <- rep(1:nfolds, length.out=nrow(randomized_ds))
     # Orders the scrambled datset by the observation ID so that this dataset is in orginal order,
-    # and then attches the fold ID variable to the full_ds data frame
+    # and then attches the fold ID variable to the Data data frame
     randomized_ds <- randomized_ds[order(randomized_ds$ID),]
-    full_ds$foldID <- randomized_ds$foldID
+    Data$foldID <- randomized_ds$foldID
     # Makes a matrix that the test errors squared will be pumped back into inside the for loop
-    test_errors_sq <- matrix(NA, nrow=nrow(full_ds), ncol=length(formulae))
+    test_errors_sq <- matrix(NA, nrow=nrow(Data), ncol=length(formulae))
     # This loops through each fold to create a training dataset and holdout (test) dataset for that
     # k-fold, while also making the svydesign for that fold based on the training dataset
     for (fold in 1:nfolds) {
-      test.rows <- which(full_ds$foldID == fold)
-      train <- full_ds[-test.rows,]
-      test <- full_ds[test.rows,]
+      test.rows <- which(Data$foldID == fold)
+      train <- Data[-test.rows,]
+      test <- Data[test.rows,]
       strat.svy <- svydesign(ids = ~0,
                              strata = formula(paste0('~',strataID)), 
                              fpc = rep(N, nrow(train)),
@@ -263,16 +263,16 @@ plot_generation <- function() {
     # This converts our matrix into a data frame so it can more easily manipulated
     test_errors_sq.df <- as.data.frame(test_errors_sq)
     # Attaches our test errors squared back onto the original dataset
-    complete_data <- cbind(full_ds, test_errors_sq.df)
+    complete_data <- cbind(Data, test_errors_sq.df)
     # Makes a survey design for based off of the whole dataset so we can calculate a mean
     strat.svy <- svydesign(ids = ~0,
                            strata = formula(paste0('~',strataID)), 
                            fpc = rep(N, nrow(complete_data)),
                            data = complete_data)
     # Makes an empty matrix that we can pump the means and SE into for each formula by row
-    means <- matrix(NA, nrow=(ncol(complete_data) - ncol(full_ds)), ncol=2)
+    means <- matrix(NA, nrow=(ncol(complete_data) - ncol(Data)), ncol=2)
     # Sets i for the loop to start at the first column in the dataset that contains test errors sq
-    i = ncol(full_ds) + 1
+    i = ncol(Data) + 1
     # Sets the loop to start on column one of the matrix
     y = 1
     # Makes a data frame of the output from the svymean function and then plugs the Mean output 
