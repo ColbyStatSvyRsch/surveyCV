@@ -81,6 +81,7 @@ cv.gen.lm <- function(Data, formulae, nfolds=5, strataID = NULL, clusterID = NUL
   # This converts our matrix into a data frame so it can more easily manipulated
   test_errors_sq.df <- as.data.frame(test_errors_sq)
   # Attaches our test errors squared back onto the original dataset
+  #append right into data$test_errors_sq
   complete_data <- cbind(Data, test_errors_sq.df)
   # Makes a survey design for based off of the whole dataset so we can calculate a mean
   gen.svy <- svydesign(ids = if(is.null(clusterID)) NULL else formula(paste0("~", clusterID)),
@@ -91,9 +92,9 @@ cv.gen.lm <- function(Data, formulae, nfolds=5, strataID = NULL, clusterID = NUL
                          data = complete_data)
   
   # Makes an empty matrix that we can pump the means and SE into for each formula by row
-  means <- matrix(NA, nrow=(ncol(complete_data) - ncol(full_ds)), ncol=2)
+  means <- matrix(NA, nrow=(ncol(complete_data) - ncol(Data)), ncol=2)
   # Sets i for the loop to start at the first column in the dataset that contains test errors sq
-  i = ncol(full_ds) + 1
+  i = ncol(Data) + 1
   # Sets the loop to start on column one of the matrix
   y = 1
   # Makes a data frame of the output from the svymean function and then plugs the Mean output
