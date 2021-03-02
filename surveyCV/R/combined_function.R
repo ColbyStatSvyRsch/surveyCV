@@ -27,10 +27,6 @@
 #' #MSEs generated for different tests of first and second degree polynomial
 #' # fits predicting mpg from horsepower in the Auto Dataset. Clustering and
 #' Stratification were done along the was done along the "year" variable
-#' data("Auto")
-#' cv.svy.glm(Auto, c("mpg~poly(horsepower,1, raw = TRUE)", "mpg~poly(horsepower,2, raw = TRUE)"), nfolds = 10, N = 400)
-#' cv.svy.glm(Auto, c("mpg~poly(horsepower,1, raw = TRUE)", "mpg~poly(horsepower,2, raw = TRUE)"), nfolds = 10, N = 400, clusterID = "year", sample_type = "Cluster")
-#' cv.svy.glm(Auto, c("mpg~poly(horsepower,1, raw = TRUE)", "mpg~poly(horsepower,2, raw = TRUE)"), nfolds = 10, N = 400, strataID = "year", sample_type = "Strat")
 #' #Using either a survey design object or survey glm to generate MSEs
 #' data("Auto")
 #' auto.srs.svy <- svydesign(ids = ~0,
