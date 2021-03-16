@@ -5,22 +5,18 @@
 \title{CV Survey function}
 \usage{
 cv.svy.glm(
-  Data,
   formulae,
   nfolds = 5,
   N,
-  clusterID,
-  strataID,
+  clusterID = NULL,
+  strataID = NULL,
   method = "linear",
-  sample_type = "SRS",
   weights = NULL,
   design_object = NULL,
   glm = NULL
 )
 }
 \arguments{
-\item{Data}{CSV of dataset to be tested}
-
 \item{formulae}{Vector of formulas containing the variables to be compared in
 cross validation}
 
@@ -38,18 +34,11 @@ be the same as in the dataset used, ignore if stratification was not used}
 \item{method}{string, must be either linear or logistic, determines type of
 model fit during cross validation, defaults to linear}
 
-\item{sample_type}{string, must be either SRS, Cluster, or Strat, specifies
-which sampling method was used, defaults to SRS}
-
 \item{weights}{Variable in data set that contains PPS weights
   @examples
 #MSEs generated for different tests of first and second degree polynomial
 # fits predicting mpg from horsepower in the Auto Dataset. Clustering and
 Stratification were done along the was done along the "year" variable
-data("Auto")
-cv.svy.glm(Auto, c("mpg~poly(horsepower,1, raw = TRUE)", "mpg~poly(horsepower,2, raw = TRUE)"), nfolds = 10, N = 400)
-cv.svy.glm(Auto, c("mpg~poly(horsepower,1, raw = TRUE)", "mpg~poly(horsepower,2, raw = TRUE)"), nfolds = 10, N = 400, clusterID = "year", sample_type = "Cluster")
-cv.svy.glm(Auto, c("mpg~poly(horsepower,1, raw = TRUE)", "mpg~poly(horsepower,2, raw = TRUE)"), nfolds = 10, N = 400, strataID = "year", sample_type = "Strat")
 #Using either a survey design object or survey glm to generate MSEs
 data("Auto")
 auto.srs.svy <- svydesign(ids = ~0,
@@ -82,6 +71,11 @@ package if one is being used, defaults to NULL}
 
 \item{glm}{Name of a Survey GLM created from the survey package if one is
 to be used, defaults to NULL}
+
+\item{Data}{CSV of dataset to be tested}
+
+\item{sample_type}{string, must be either SRS, Cluster, or Strat, specifies
+which sampling method was used, defaults to SRS}
 }
 \description{
 This function combines the other cross validation functions in this package
