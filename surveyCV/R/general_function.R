@@ -46,7 +46,7 @@ cv.svy <- function(Data, formulae, nfolds=5, strataID = NULL, clusterID = NULL ,
   if (afolds == TRUE) {
     Data <- appendfolds(Data = Data, nfolds = nfolds, strataID = strataID, clusterID = clusterID)
   } else  {
-    appendfolds(Data = Data, nfolds = nfolds)
+    Data <- appendfolds(Data = Data, nfolds = nfolds)
   }
  
   # Makes a matrix that the test errors squared will be pumped back into inside the for loop
