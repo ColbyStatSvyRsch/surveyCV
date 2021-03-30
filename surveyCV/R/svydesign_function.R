@@ -50,7 +50,7 @@ cv.svydesign <- function(formulae, nfolds=5, N, clusterID = NULL, strataID = NUL
                       design_object = NULL) {
   # When a survey design object is specified, then the function can pull pieces of information needed from the design object
   if (is.null(design_object) == FALSE) {
-    Data = cbind(design_object[["variables"]], design_object[["cluster"]], design_object[["strata"]])
+    .data <- design_object[["variables"]]
     cluster_var = gsub("~", "", paste0(design_object[["call"]][["ids"]]))
     # Creates a clusterID variable if it is present in the design object
     if (cluster_var[2] != "0" & cluster_var[2] != "1") {
@@ -63,7 +63,9 @@ cv.svydesign <- function(formulae, nfolds=5, N, clusterID = NULL, strataID = NUL
       strataID = paste0(design_object[["call"]][["strata"]][[2]])
     }
     # Makes a nest = TRUE for later use if needed
-    if (design_object[["call"]][["nest"]] > 0) {
+    if (is.null(design_object[["call"]][["nest"]]) == TRUE) {
+      nest = FALSE
+    } else if (design_object[["call"]][["nest"]] == TRUE) {
       nest = TRUE
     } else {nest = FALSE}
     # Makes a weights variable if present in the design object
@@ -73,7 +75,7 @@ cv.svydesign <- function(formulae, nfolds=5, N, clusterID = NULL, strataID = NUL
     
   }
   # Runs our general cv.svy() function with all of the variables and data pulled from the design object
-  cv.svy(Data, formulae, nfolds = nfolds, clusterID = clusterID, strataID = strataID, N = N, method = method, 
+  cv.svy(Data = .data, formulae = formulae, nfolds = nfolds, clusterID = clusterID, strataID = strataID, N = N, method = method, 
             weights = weights, nest = nest)
   
 }
