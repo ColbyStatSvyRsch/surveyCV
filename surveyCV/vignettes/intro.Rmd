@@ -158,6 +158,10 @@ With weighted tests MSEs and unweighted model fitting, MSEs are higher for all t
 
 When weights are accounted for in both model fitting and MSE generation, we see more of what we need. The training data fits wigglier high-df splines, and on the test data we look for models that do well beyond the points on the quadratic line. So in terms of talking about our function, it has displayed that it can take into account sampling weights correctly when it identifies the weights in the process of model fitting and MSE generation, which gives us a great amount of confidence in our function since taking into account sampling weights appears to have an effect in situations like this.
 
+# NSFG Dataset Findings
+
+Here we wanted to confirm our previous findings on a real dataset and test when we had both strata and clusters in our dataset. To do this, we decided to use a National Survey of Family Growth dataset. We downloaded this data from the NSFG website and cleaned it following Hunter Raltiffs methods foud at https://rpubs.com/HunterRatliff1/NSFG_Wrangle
+
 # Examples Using surveyCV Functions
 
 Notes: 
