@@ -129,7 +129,7 @@ cv.svyglm <- function(nfolds=5, N, clusterID = NULL, strataID = NULL, method = "
   }
   # Runs our cv.svydesign() function using the pieces pulled from the glm object,
   # which will later push all of this information into our general cv.svy() function.
-  cv.svydesign(formulae = formulae, nfolds = nfolds, method = method, N = N)
+  cv.svydesign(formulae = formulae, nfolds = nfolds, method = method, N = N, design_object = design_object)
 
   }
 
