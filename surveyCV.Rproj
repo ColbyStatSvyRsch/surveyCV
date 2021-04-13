@@ -12,7 +12,9 @@ Encoding: UTF-8
 RnwWeave: Sweave
 LaTeX: pdfLaTeX
 
+AutoAppendNewline: Yes
+StripTrailingWhitespace: Yes
+
 BuildType: Package
 PackageUseDevtools: Yes
-PackagePath: surveyCV
 PackageInstallArgs: --no-multiarch --with-keep.source
