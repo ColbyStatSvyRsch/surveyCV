@@ -12,42 +12,37 @@ if(FALSE) {
     geom_smooth(method = "loess", se = TRUE) +
     facet_wrap(strata~., ncol = 2)
   library(splines)
-  cv.svy(NSFG_data, "income~ns(YrEdu, df = 5)", nfolds = 4, strataID = "strata",
-         clusterID = "SECU", nest = TRUE, weights = "wgt", N = 5100, afolds = FALSE)
-  cv.svy(NSFG_data, "income~ns(YrEdu, df = 5)", nfolds = 4, strataID = "strata",
-         clusterID = "SECU", nest = TRUE, weights = "wgt", N = 5100, afolds = TRUE)
 
+  cv.svy(NSFG_data, "income~ns(YrEdu, df = 5)", nfolds = 4, weights = "wgt", N = 5100)
+  cv.svy(NSFG_data, "income~ns(YrEdu, df = 5)", nfolds = 4, strataID = "strata",
+         clusterID = "SECU", nest = TRUE, weights = "wgt", N = 5100)
+
+  cv.svy(NSFG_data, "income~race", nfolds = 4, weights = "wgt", N = 5100)
   cv.svy(NSFG_data, "income~race", nfolds = 4, strataID = "strata",
-         clusterID = "SECU", nest = TRUE, weights = "wgt", N = 5100, afolds = FALSE)
-  cv.svy(NSFG_data, "income~race", nfolds = 4, strataID = "strata",
-         clusterID = "SECU", nest = TRUE, weights = "wgt", N = 5100, afolds = TRUE)
+         clusterID = "SECU", nest = TRUE, weights = "wgt", N = 5100)
 
   library(dplyr)
   NSFG_hispanic <- NSFG_data %>%
     filter(race == "Hispanic")
 
+  cv.svy(NSFG_hispanic, "income~ns(YrEdu, df = 5)", nfolds = 4, weights = "wgt", N = 1250)
   cv.svy(NSFG_hispanic, "income~ns(YrEdu, df = 5)", nfolds = 4, strataID = "strata",
-         clusterID = "SECU", nest = TRUE, weights = "wgt", N = 1250, afolds = FALSE)
-  cv.svy(NSFG_hispanic, "income~ns(YrEdu, df = 5)", nfolds = 4, strataID = "strata",
-         clusterID = "SECU", nest = TRUE, weights = "wgt", N = 1250, afolds = TRUE)
+         clusterID = "SECU", nest = TRUE, weights = "wgt", N = 1250)
 
+  cv.svy(NSFG_hispanic, "income~race", nfolds = 4, weights = "wgt", N = 1250)
   cv.svy(NSFG_hispanic, "income~race", nfolds = 4, strataID = "strata",
-         clusterID = "SECU", nest = TRUE, weights = "wgt", N = 1250, afolds = FALSE)
-  cv.svy(NSFG_hispanic, "income~race", nfolds = 4, strataID = "strata",
-         clusterID = "SECU", nest = TRUE, weights = "wgt", N = 1250, afolds = TRUE)
+         clusterID = "SECU", nest = TRUE, weights = "wgt", N = 1250)
 
   NSFG_black <- NSFG_data %>%
     filter(race == "Black")
 
+  cv.svy(NSFG_black, "income~ns(YrEdu, df = 5)", nfolds = 4, weights = "wgt", N = 1250)
   cv.svy(NSFG_black, "income~ns(YrEdu, df = 5)", nfolds = 4, strataID = "strata",
-         clusterID = "SECU", nest = TRUE, weights = "wgt", N = 1250, afolds = FALSE)
-  cv.svy(NSFG_black, "income~ns(YrEdu, df = 5)", nfolds = 4, strataID = "strata",
-         clusterID = "SECU", nest = TRUE, weights = "wgt", N = 1250, afolds = TRUE)
+         clusterID = "SECU", nest = TRUE, weights = "wgt", N = 1250)
 
+  cv.svy(NSFG_black, "income~race", nfolds = 4, weights = "wgt", N = 1250)
   cv.svy(NSFG_black, "income~race", nfolds = 4, strataID = "strata",
-         clusterID = "SECU", nest = TRUE, weights = "wgt", N = 1250, afolds = FALSE)
-  cv.svy(NSFG_black, "income~race", nfolds = 4, strataID = "strata",
-         clusterID = "SECU", nest = TRUE, weights = "wgt", N = 1250, afolds = TRUE)
+         clusterID = "SECU", nest = TRUE, weights = "wgt", N = 1250)
 
   NSFG_data %>%
     count(SECU)
@@ -76,11 +71,10 @@ if(FALSE) {
   NSFG_PreMe <- NSFG_data %>%
     filter(PreMe == "Premature")
 
-  cv.svy(NSFG_PreMe, "income~ns(YrEdu, df = 5)", nfolds = 4, strataID = "strata",
-         clusterID = "SECU", nest = TRUE, weights = "wgt", N = 700, afolds = FALSE)
+  cv.svy(NSFG_PreMe, "income~ns(YrEdu, df = 5)", nfolds = 4, weights = "wgt", N = 700)
 
   cv.svy(NSFG_PreMe, "income~ns(YrEdu, df = 5)", nfolds = 4, strataID = "strata",
-         clusterID = "SECU", nest = TRUE, weights = "wgt", N = 700, afolds = TRUE)
+         clusterID = "SECU", nest = TRUE, weights = "wgt", N = 700)
 
   ggplot(NSFG_PreMe, aes(x = YrEdu, y = income)) +
     geom_jitter() +
