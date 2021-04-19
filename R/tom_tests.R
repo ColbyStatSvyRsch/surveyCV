@@ -40,31 +40,27 @@ HSNSFG %>%
 
 #both the strat and clusters have a decent amount of observations in each group so this could be a good place to dive in deeper
 
-cv.svy(HSNSFG, "income~race+YrEdu", nfolds = 4, strataID = "strata",
-       clusterID = "SECU", nest = TRUE, weights = "wgt", N = 5100, afolds = FALSE)
+cv.svy(HSNSFG, "income~race+YrEdu", nfolds = 4, nest = TRUE, weights = "wgt", N = 5100)
 cv.svy(HSNSFG, "income~race+YrEdu", nfolds = 4, strataID = "strata",
        clusterID = "SECU", nest = TRUE, weights = "wgt", N = 5100, afolds = TRUE)
 
 #this shows some difference but not a whole ton
 
-cv.svy(HSNSFG, "income~race+BMI", nfolds = 4, strataID = "strata",
-       clusterID = "SECU", nest = TRUE, weights = "wgt", N = 5100, afolds = FALSE)
+cv.svy(HSNSFG, "income~race+BMI", nfolds = 4, nest = TRUE, weights = "wgt", N = 5100)
 cv.svy(HSNSFG, "income~race+BMI", nfolds = 4, strataID = "strata",
        clusterID = "SECU", nest = TRUE, weights = "wgt", N = 5100, afolds = TRUE)
 #again above were still within one SD
 
 HSNSFG$PreMeInd <- 0
 HSNSFG$PreMeInd[HSNSFG$PreMe == "Term"] <- 1
-cv.svy(HSNSFG, "PreMeInd~race+income+Wanted", nfolds = 4, strataID = "strata",
-       clusterID = "SECU", nest = TRUE, weights = "wgt", N = 5100, afolds = FALSE, method = "logistic")
+cv.svy(HSNSFG, "PreMeInd~race+income+Wanted", nfolds = 4, nest = TRUE, weights = "wgt", N = 5100, afolds = FALSE, method = "logistic")
 
 cv.svy(HSNSFG, "PreMeInd~race+income+Wanted", nfolds = 4, strataID = "strata",
        clusterID = "SECU", nest = TRUE, weights = "wgt", N = 5100, afolds = TRUE, method = "logistic")
 
 #here we are getting kinda close
 
-cv.svy(HSNSFG, "PreMeInd~race+income+Wanted", nfolds = 4, strataID = "strata",
-       clusterID = "SECU", nest = TRUE, weights = "wgt", N = 2500, afolds = FALSE, method = "logistic")
+cv.svy(HSNSFG, "PreMeInd~race+income+Wanted", nfolds = 4, weights = "wgt", N = 2500, afolds = FALSE, method = "logistic")
 
 cv.svy(HSNSFG, "PreMeInd~race+income+Wanted", nfolds = 4, strataID = "strata",
        clusterID = "SECU", nest = TRUE, weights = "wgt", N = 2500, afolds = TRUE, method = "logistic")
@@ -76,29 +72,28 @@ BSNSFG <-NSFG_data[NSFG_data$eduCat=="Bachelors",]
 
 BSNSFG$PreMeInd <- 0
 BSNSFG$PreMeInd[BNSFG$PreMe == "Term"] <- 1
-cv.svy(BSNSFG, "income~race+YrEdu", nfolds = 4, strataID = "strata",
-       clusterID = "SECU", nest = TRUE, weights = "wgt", N = 5100, afolds = FALSE)
+cv.svy(BSNSFG, "income~race+YrEdu", nfolds = 4, nest = TRUE, weights = "wgt", N = 5100, afolds = FALSE)
 cv.svy(BSNSFG, "income~race+YrEdu", nfolds = 4, strataID = "strata",
        clusterID = "SECU", nest = TRUE, weights = "wgt", N = 5100, afolds = TRUE)
 
 #this shows some difference but not a whole ton
 
-cv.svy(BSNSFG, "income~race+BMI", nfolds = 4, strataID = "strata",
-       clusterID = "SECU", nest = TRUE, weights = "wgt", N = 5100, afolds = FALSE)
+cv.svy(BSNSFG, "income~race+BMI", nfolds = 4, nest = TRUE, weights = "wgt", N = 5100, afolds = FALSE)
 cv.svy(BSNSFG, "income~race+BMI", nfolds = 4, strataID = "strata",
        clusterID = "SECU", nest = TRUE, weights = "wgt", N = 5100, afolds = TRUE)
 #maybe a bit more difference
 
-cv.svy(BSNSFG, "PreMeInd~race+income+Wanted", nfolds = 4, strataID = "strata",
-       clusterID = "SECU", nest = TRUE, weights = "wgt", N = 5100, afolds = FALSE, method = "logistic")
+cv.svy(BSNSFG, "PreMeInd~race+income+Wanted", nfolds = 4, nest = TRUE, weights = "wgt", N = 5100, afolds = FALSE, method = "logistic")
 
 cv.svy(BSNSFG, "PreMeInd~race+income+Wanted", nfolds = 4, strataID = "strata",
        clusterID = "SECU", nest = TRUE, weights = "wgt", N = 5100, afolds = TRUE, method = "logistic")
 
-#not super close here
+#again not super close
 
 
 #lets try a different breakdown
 SCNSFG <-NSFG_data[NSFG_data$eduCat=="Some college",]
 
 # not enough PSU
+
+}
