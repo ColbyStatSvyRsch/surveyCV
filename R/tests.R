@@ -13,6 +13,9 @@ if(FALSE) {
     facet_wrap(strata~., ncol = 2)
   library(splines)
 
+  # These two examples are interesting because the MSEs are pretty different, but the SE is very different.
+  # They are worth exploring further, but this is not done on any subset of data.
+
   cv.svy(NSFG_data, "income~ns(YrEdu, df = 5)", nfolds = 4, weights = "wgt", N = 5100)
   cv.svy(NSFG_data, "income~ns(YrEdu, df = 5)", nfolds = 4, strataID = "strata",
          clusterID = "SECU", nest = TRUE, weights = "wgt", N = 5100)
@@ -24,6 +27,10 @@ if(FALSE) {
   library(dplyr)
   NSFG_hispanic <- NSFG_data %>%
     filter(race == "Hispanic")
+
+  # These were examples of using possible subsets of data,
+  # but each one cut down the amount of observations in at least one stratum or cluster,
+  # that the function could not run.
 
   cv.svy(NSFG_hispanic, "income~ns(YrEdu, df = 5)", nfolds = 4, weights = "wgt", N = 1250)
   cv.svy(NSFG_hispanic, "income~ns(YrEdu, df = 5)", nfolds = 4, strataID = "strata",
@@ -67,6 +74,9 @@ if(FALSE) {
 
   NSFG_data %>%
     count(PreMe)
+
+  # This subset of observations allows the functions to run,
+  # but there is no discernible difference between when we account for the correct survey design or not.
 
   NSFG_PreMe <- NSFG_data %>%
     filter(PreMe == "Premature")
