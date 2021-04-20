@@ -1237,6 +1237,9 @@ plot_generation2 <- function() {
 }
 
 plot_generation3 <- function(){
+  NSFG_data$strata <- as.factor(NSFG_data$strata)
+  NSFG_data$SECU <- as.factor(NSFG_data$SECU)
+
   income.year_edu.plot <- function(loops) {
     # Making an empty data set for output when we take into consideration the design method
     method.ds <- data.frame(MSE = c())
