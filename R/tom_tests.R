@@ -113,6 +113,8 @@ income.year_edu.plot <- function(loops) {
   method.ds <- data.frame(MSE = c())
   # Making an empty data set for output when we ignore the design method
   ignore.ds <- data.frame(MSE = c())
+  #Making an empty dataset for output when we take into account everything except during fold generation
+  method.fold.ds <- data.frame(MSE = c())
    # looping and generating MSEs
   for (i in 1:loops) {
     set.seed(i)
@@ -123,22 +125,31 @@ income.year_edu.plot <- function(loops) {
     ignore.data <- cv.svy(NSFG_data, "income~ns(YrEdu, df = 5)", nfolds = 4, weights = "wgt", N = 5100)
     ignore.ds2 <- data.frame(df = 5, MSE = ignore.data[,1])
     ignore.ds <- rbind(ignore.ds, ignore.ds2)
+    method.fold.data <- cv.svy(NSFG_data, "income~ns(YrEdu, df = 5)", nfolds = 4, strataID = "strata",
+                          clusterID = "SECU", nest = TRUE, weights = "wgt", N = 5100, afolds = FALSE)
+    method.fold.ds2 <- data.frame(df = 5, MSE = method.fold.data[,1])
+    method.fold.ds <- rbind(method.ds, method.ds2)
   }
   ignore.ds$df <- as.factor(ignore.ds$df)
   method.ds$df <- as.factor(method.ds$df)
+  method.fold.ds$df <- as.factor(method.fold.ds$df)
 
+  # Making a ggplot object for the MSE spread comparison
   plot1 <- ggplot(data = ignore.ds, mapping = aes(x = df, y = MSE)) +
     geom_boxplot() +
-    ggtitle("MSEs When Ignoring Survey Design") +
+    ggtitle("Ignoring Design") +
     ylim(18000, 19000)
-  # Making a ggplot object for the MSE spread comparison
-  plot2 <- ggplot(data = method.ds, mapping = aes(x = df, y = MSE)) +
+  plot2 <- ggplot(data = method.fold.ds, mapping = aes(x = df, y = MSE)) +
     geom_boxplot() +
-    ggtitle("MSEs When Taking Into Account the Survey Design") +
+    ggtitle("No Folds") +
+    ylim(18000, 19000)
+  plot3 <- ggplot(data = method.ds, mapping = aes(x = df, y = MSE)) +
+    geom_boxplot() +
+    ggtitle("Accounting for Design") +
     ylim(18000, 19000)
 
   # Making a grid display of the two plot objects above
-  grid.arrange(plot1,plot2, ncol = 2)
+  grid.arrange(plot1,plot2,plot3, ncol = 3)
 
 }
 
@@ -163,12 +174,12 @@ income.race.plot <- function(loops) {
 
   plot1 <- ggplot(data = ignore.ds, mapping = aes(x = df, y = MSE)) +
     geom_boxplot() +
-    ggtitle("MSEs When Ignoring Survey Design")
+    ggtitle("Ignoring Design")
     #ylim(18000, 19000)
   # Making a ggplot object for the MSE spread comparison
   plot2 <- ggplot(data = method.ds, mapping = aes(x = df, y = MSE)) +
     geom_boxplot() +
-    ggtitle("MSEs When Taking Into Account the Survey Design")
+    ggtitle("Account for Design")
     #ylim(18000, 19000)
 
   # Making a grid display of the two plot objects above
