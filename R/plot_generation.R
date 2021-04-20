@@ -3,44 +3,44 @@ plot_generation <- function() {
   set.seed(47)
   x1 = runif(1:500, min = 26, max = 38)
   y1 = (x1-29)^3 - 13*(x1-29)^2 + 0*(x1-29) + 900
-  
+
   set.seed(47)
   x2 = runif(1:500, min = 38, max = 50)
   y2 = (x2-36)^3 - 10*(x2-36)^2 + 2*(x2-36) + 600
-  
+
   set.seed(47)
   z1 = jitter(y1, 15000)
   z1 = jitter(y1, 15000)
   z2 = jitter(y2, 15000)
-  
+
   ds1 <- data.frame(Response = z1, Predictor = x1)
   ds2 <- data.frame(Response = z2, Predictor = x2)
-  
+
   ds <- rbind(ds1, ds2)
-  
+
   b <- data.frame(ID = c(1:1000))
   spline.df2 <- cbind(b, ds)
   spline.df2 <- spline.df2 %>%
     arrange(Predictor) %>%
     mutate(Stratum = row_number(),
-           Cluster = row_number())  
+           Cluster = row_number())
   spline.df2$Stratum <- cut(spline.df2$Stratum,5, 1:5)
-  spline.df2$Cluster <- cut(spline.df2$Cluster,100, 1:100) 
+  spline.df2$Cluster <- cut(spline.df2$Cluster,100, 1:100)
   spline.df2 <- spline.df2 %>%
     arrange(ID) %>%
     select(ID, Response, Predictor, Cluster, Stratum)
-  
+
   # Cross Val for SRS and Strat/Cluster
   cv.srs.mixed.lm <- function(Data, formulae, nfolds=5, N, scID, method = "linear", model = "SRS", error_calc = "SRS"){
     # Other option for method is "logistic"
-    
+
     #stop logic checking dataset specified
     if(nfolds < 1) {print ("nfolds is less that 1")}
     if(N<nrow(Data)) {print("N is less than observations in the defined dataset")}
     if(nfolds > nrow(Data)) {print ("fold number exceeds observations")}
     stopifnot(nfolds > 0, N >= nrow(Data), nfolds < nrow(Data))
-    
-    
+
+
     # Creates an observation ID variable for the dataset
     Data$ID <- 1:nrow(Data)
     # Turns the strings of formulas into a list of formulas
@@ -59,10 +59,10 @@ plot_generation <- function() {
                            strata = NULL,
                            fpc = rep(N, nrow(train)),
                            data = train)
-      
+
       ###
       strat.svy  <- svydesign(ids = ~0,
-                              strata = formula(paste0('~',scID)), 
+                              strata = formula(paste0('~',scID)),
                               fpc = rep(N, nrow(train)),
                               data = train)
       ###
@@ -70,14 +70,14 @@ plot_generation <- function() {
                             strata = NULL,
                             fpc = rep(N, nrow(train)),
                             data = train)
-      # This loops through the formulas in our list of formulas and calculates the test errors 
-      # squared for thos formulas applied to each survey design made from each fold and plugs 
+      # This loops through the formulas in our list of formulas and calculates the test errors
+      # squared for thos formulas applied to each survey design made from each fold and plugs
       # those test errors squared back into the matrix we made earlier
       if (model == "SRS") {
         if (method == "linear") {
           for (form in 1:length(formulae)) {
             current.model <- svyglm(formula=formulae[[form]], design=srs.svy)
-            predictions <- predict(current.model, newdata=test) 
+            predictions <- predict(current.model, newdata=test)
             test.responses <- eval(formulae[[form]][[2]], envir=test)
             test.errors <- test.responses - predictions
             test_errors_sq[test$ID, form] <- test.errors^2
@@ -94,7 +94,7 @@ plot_generation <- function() {
         if (method == "linear") {
           for (form in 1:length(formulae)) {
             current.model <- svyglm(formula=formulae[[form]], design=strat.svy)
-            predictions <- predict(current.model, newdata=test) 
+            predictions <- predict(current.model, newdata=test)
             test.responses <- eval(formulae[[form]][[2]], envir=test)
             test.errors <- test.responses - predictions
             test_errors_sq[test$ID, form] <- test.errors^2
@@ -111,7 +111,7 @@ plot_generation <- function() {
         if (method == "linear") {
           for (form in 1:length(formulae)) {
             current.model <- svyglm(formula=formulae[[form]], design=clus.svy)
-            predictions <- predict(current.model, newdata=test) 
+            predictions <- predict(current.model, newdata=test)
             test.responses <- eval(formulae[[form]][[2]], envir=test)
             test.errors <- test.responses - predictions
             test_errors_sq[test$ID, form] <- test.errors^2
@@ -156,7 +156,7 @@ plot_generation <- function() {
     i = ncol(Data) + 1
     # Sets the loop to start on column one of the matrix
     y = 1
-    # Makes a data frame of the output from the svymean function and then plugs the Mean output 
+    # Makes a data frame of the output from the svymean function and then plugs the Mean output
     # into the first column of the matrix and the SE output into the second column of the matrix
     while (i <= ncol(complete_data)) {
       meansd <- data.frame(svymean(complete_data[,i],final.svy))
@@ -168,27 +168,27 @@ plot_generation <- function() {
     # Returns the resulting matrix to the console
     return(means)
   }
-  
-  
-  
+
+
+
   # Cross Val for Stratafication and SRS
   cv.strat.srs.lm <- function(Data, formulae, nfolds=5, strataID, N, method = "linear", model = "Strat") {
     # Other option for method is "logistic"
-    
+
     #stop logic checking dataset specified
     if(nfolds < 1) {print ("nfolds is less that 1")}
     if(N<nrow(Data)) {print("N is less than observations in the defined dataset")}
     if(nfolds >= nrow(Data)) {print ("fold number exceeds observations")}
-    
+
     stopifnot(nfolds > 0, N >= nrow(Data), nfolds <= nrow(Data))
-    
+
     # Turns the strings of formulas into a list of formulas
     formulae <- sapply(formulae, as.formula)
     # Pushes the data into this Data data frame
-    
+
     # Creates an observation ID variable for the dataset
     Data$ID <- 1:nrow(Data)
-    # Creates a new dataset that is a copy of Data that we can now scramble 
+    # Creates a new dataset that is a copy of Data that we can now scramble
     # and then order by the variable we are stratifying on
     randomized_ds <- data.frame(ID = Data$ID, stratumID = Data[[strataID]])
     randomized_ds <- randomized_ds[sample(1:nrow(randomized_ds)),]
@@ -208,7 +208,7 @@ plot_generation <- function() {
       train <- Data[-test.rows,]
       test <- Data[test.rows,]
       strat.svy <- svydesign(ids = ~0,
-                             strata = formula(paste0('~',strataID)), 
+                             strata = formula(paste0('~',strataID)),
                              fpc = rep(N, nrow(train)),
                              data = train)
       #
@@ -219,13 +219,13 @@ plot_generation <- function() {
                            fpc = rep(N, nrow(train)),
                            data = train)
       if (model == "Strat") {
-        # This loops through the formulas in our list of formulas and calculates the test errors 
-        # squared for thos formulas applied to each survey design made from each fold and plugs 
+        # This loops through the formulas in our list of formulas and calculates the test errors
+        # squared for thos formulas applied to each survey design made from each fold and plugs
         # those test errors squared back into the matrix we made earlier
         if (method == "linear") {
           for (form in 1:length(formulae)) {
             current.model <- svyglm(formula=formulae[[form]], design=strat.svy)
-            predictions <- predict(current.model, newdata=test) 
+            predictions <- predict(current.model, newdata=test)
             test.responses <- eval(formulae[[form]][[2]], envir=test)
             test.errors <- test.responses - predictions
             test_errors_sq[test$ID, form] <- test.errors^2
@@ -242,7 +242,7 @@ plot_generation <- function() {
         if (method == "linear") {
           for (form in 1:length(formulae)) {
             current.model <- svyglm(formula=formulae[[form]], design=srs.svy)
-            predictions <- predict(current.model, newdata=test) 
+            predictions <- predict(current.model, newdata=test)
             test.responses <- eval(formulae[[form]][[2]], envir=test)
             test.errors <- test.responses - predictions
             test_errors_sq[test$ID, form] <- test.errors^2
@@ -266,7 +266,7 @@ plot_generation <- function() {
     complete_data <- cbind(Data, test_errors_sq.df)
     # Makes a survey design for based off of the whole dataset so we can calculate a mean
     strat.svy <- svydesign(ids = ~0,
-                           strata = formula(paste0('~',strataID)), 
+                           strata = formula(paste0('~',strataID)),
                            fpc = rep(N, nrow(complete_data)),
                            data = complete_data)
     # Makes an empty matrix that we can pump the means and SE into for each formula by row
@@ -275,7 +275,7 @@ plot_generation <- function() {
     i = ncol(Data) + 1
     # Sets the loop to start on column one of the matrix
     y = 1
-    # Makes a data frame of the output from the svymean function and then plugs the Mean output 
+    # Makes a data frame of the output from the svymean function and then plugs the Mean output
     # into the first column of the matrix and the SE output into the second column of the matrix
     while (i <= ncol(complete_data)) {
       meansd <- data.frame(svymean(complete_data[,i],strat.svy))
@@ -287,20 +287,20 @@ plot_generation <- function() {
     # Returns the resulting matrix to the console
     return(means)
   }
-  
-  
+
+
   # Cross val for cluster and srs
-  
+
   cv.cluster.srs.lm <- function(Data, formulae, nfolds=5, clusterID, N, method = "linear", model = "Cluster") {
     # Other option for method is "logistic"
-    
+
     #stop logic checking dataset specified
     if(nfolds < 1) {print ("nfolds is less that 1")}
     if(N<nrow(Data)) {print("N is less than observations in the defined dataset")}
     if(nfolds >= nrow(Data)) {print ("fold number exceeds observations")}
     if(nfolds > length(unique(Data[[clusterID]]))) {print ("nfolds is larger than the number of clusters")}
     stopifnot(nfolds > 0, N >= nrow(Data), nfolds <= nrow(Data), nfolds <= length(unique(Data[[clusterID]])))
-    
+
     # Turns the strings of formulas into a list of formulas
     formulae <- sapply(formulae, as.formula)
     # Creates an observation ID variable for the dataset
@@ -312,10 +312,10 @@ plot_generation <- function() {
     Clusters <- split(unique_cluster_IDs, factor(sort(rank(unique_cluster_IDs)%%nfolds)))
     # Sets x=1 for the start of the loop so it will start on fold 1
     x=1
-    # Assigns a fold ID to the original dataset just so that the variable alrady exhists before 
+    # Assigns a fold ID to the original dataset just so that the variable alrady exhists before
     # the while loop. This information will be replaced whenthe while loop runs.
     Data$foldID <- 1:nrow(Data)
-    # This loop runs through each of the number of folds to try and place whole clusters into 
+    # This loop runs through each of the number of folds to try and place whole clusters into
     # each fold
     while (x < (nfolds+1)) {
       sample_cluster <- Clusters[[x]]
@@ -339,23 +339,23 @@ plot_generation <- function() {
                             strata = NULL,
                             fpc = rep(N, nrow(train)),
                             data = train)
-      
+
       ###
-      
+
       srs.svy <- svydesign(ids = ~0,
                            strata = NULL,
                            fpc = rep(N, nrow(train)),
                            data = train)
-      
+
       ###
-      # This loops through the formulas in our list of formulas and calculates the test errors 
-      # squared for thos formulas applied to each survey design made from each fold and plugs 
+      # This loops through the formulas in our list of formulas and calculates the test errors
+      # squared for thos formulas applied to each survey design made from each fold and plugs
       # those test errors squared back into the matrix we made earlier
       if(model == "Cluster"){
         if (method == "linear") {
           for (form in 1:length(formulae)) {
             current.model <- svyglm(formula=formulae[[form]], design=clus.svy)
-            predictions <- predict(current.model, newdata=test) 
+            predictions <- predict(current.model, newdata=test)
             test.responses <- eval(formulae[[form]][[2]], envir=test)
             test.errors <- test.responses - predictions
             test_errors_sq[test$ID, form] <- test.errors^2
@@ -372,7 +372,7 @@ plot_generation <- function() {
         if (method == "linear") {
           for (form in 1:length(formulae)) {
             current.model <- svyglm(formula=formulae[[form]], design=srs.svy)
-            predictions <- predict(current.model, newdata=test) 
+            predictions <- predict(current.model, newdata=test)
             test.responses <- eval(formulae[[form]][[2]], envir=test)
             test.errors <- test.responses - predictions
             test_errors_sq[test$ID, form] <- test.errors^2
@@ -402,7 +402,7 @@ plot_generation <- function() {
     i = ncol(Data) + 1
     # Sets the loop to start on column one of the matrix
     y = 1
-    # Makes a data frame of the output from the svymean function and then plugs the Mean output 
+    # Makes a data frame of the output from the svymean function and then plugs the Mean output
     # into the first column of the matrix and the SE output into the second column of the matrix
     while (i <= ncol(complete_data)) {
       meansd <- data.frame(svymean(complete_data[,i],clus.svy))
@@ -414,7 +414,7 @@ plot_generation <- function() {
     # Returns the resulting matrix to the console
     return(means)
   }
-  
+
   clusVsrs.cross.cv.spline.plot <- function(n, loops) {
     # Making an empty data set for output when we use SRS samples and make SRS folds
     srssrsds <- data.frame(df = c(), MSE = c())
@@ -431,12 +431,12 @@ plot_generation <- function() {
       # Using our SRS function on SRS samples to get MSE outputs from cross validation using 5 folds
       srs.data <- cv.srs.lm(sim.srs, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
                                        "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
-                                       "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"), 
+                                       "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"),
                             nfolds = 5, N = 1000)
       # Using our Cluster function on SRS samples to get MSE outputs from cross validation using 5 folds
       clus.data <- cv.cluster.lm(sim.srs, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
                                             "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
-                                            "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"), 
+                                            "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"),
                                  clusterID = "Cluster", nfolds = 5, N = 1000)
       # Taking the outputs from using the SRS function on SRS samples and compiling them into one data frame
       srssrsds2 <- data.frame(df = 1:6, MSE = srs.data[,1])
@@ -448,17 +448,17 @@ plot_generation <- function() {
     # Making as many cluster samples as we specify for 'loops'
     for (i in 1:loops) {
       set.seed(i)
-      c <- unique(spline.df2[["Cluster"]]) 
+      c <- unique(spline.df2[["Cluster"]])
       sim.clus <- spline.df2[spline.df2[["Cluster"]] %in% sample(c, n/10),]
       # Using our Cluster function on Cluster samples to get MSE outputs from cross validation using 5 folds
       clus.data <- cv.cluster.lm(sim.clus, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
                                              "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
-                                             "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"), 
+                                             "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"),
                                  clusterID = "Cluster", nfolds = 5, N = 1000)
       # Using our SRS function on Cluster samples to get MSE outputs from cross validation using 5 folds
       srs.data <- cv.srs.lm(sim.clus, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
                                         "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
-                                        "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"), 
+                                        "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"),
                             nfolds = 5, N = 1000)
       # Taking the outputs from using the Cluster function on Cluster samples and compiling them into one data frame
       clusclusds2 <- data.frame(df = 1:6, MSE = clus.data[,1])
@@ -474,29 +474,29 @@ plot_generation <- function() {
     clussrsds$df <- as.factor(clussrsds$df)
     # Making a ggplot object for the MSEs where the SRS function was used on SRS samples
     plot1 <- ggplot(data = srssrsds, mapping = aes(x = df, y = MSE)) +
-      geom_boxplot() + 
+      geom_boxplot() +
       ggtitle("SRS folds with SRS sample") +
       ylim(20000, 250000)
     # Making a ggplot object for the MSEs where the Cluster function was used on SRS samples
     plot2 <- ggplot(data = srsclusds, mapping = aes(x = df, y = MSE)) +
-      geom_boxplot() + 
+      geom_boxplot() +
       ggtitle("Cluster folds with SRS sample") +
       ylim(20000, 250000)
     # Making a ggplot object for the MSEs where the Cluster function was used on Cluster samples
     plot3 <- ggplot(data = clusclusds, mapping = aes(x = df, y = MSE)) +
-      geom_boxplot() + 
+      geom_boxplot() +
       ggtitle("Cluster folds with Cluster sample") +
       ylim(20000, 250000)
     # Making a ggplot object for the MSEs where the SRS function was used on Cluster samples
     plot4 <- ggplot(data = clussrsds, mapping = aes(x = df, y = MSE)) +
-      geom_boxplot() + 
+      geom_boxplot() +
       ggtitle("SRS folds with Cluster sample") +
       ylim(20000, 250000)
     # Making a grid display of the four plot objects above
-    grid.arrange(plot1,plot2,plot4,plot3, ncol = 2, 
+    grid.arrange(plot1,plot2,plot4,plot3, ncol = 2,
                  top = paste0("Simulated Spline Data (Sample Size = ", n, ", Clusters = ", n/10, ", Loops = ", loops, ")"))
   }
-  
+
   clusVsrs.mixed.cv.spline.plot <- function(n, loops, plot) {
     # Making an empty data set for output when we make SRS folds, use SRS models, and calculate MSEs using SRS design
     srssrssrs <- data.frame(df = c(), MSE = c())
@@ -513,17 +513,17 @@ plot_generation <- function() {
     # Making as many Cluster samples as we specify for 'loops'
     for (i in 1:loops) {
       set.seed(i)
-      c <- unique(spline.df2[["Cluster"]]) 
+      c <- unique(spline.df2[["Cluster"]])
       sim.clus <- spline.df2[spline.df2[["Cluster"]] %in% sample(c, n/10),]
       # Collecting MSE outputs when using SRS folds, SRS models, and SRS design for error calculations
       srs.data <- cv.srs.mixed.lm(sim.clus, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
                                               "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
-                                              "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"), 
+                                              "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"),
                                   scID = "Cluster", nfolds = 5, N = 1000, error_calc = "SRS")
       # Collecting MSE outputs when using SRS folds, Clus models, and SRS design for error calculations
       clus.data <- cv.srs.mixed.lm(sim.clus, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
                                                "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
-                                               "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"), 
+                                               "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"),
                                    scID = "Cluster", nfolds = 5, N = 1000, model = "Cluster", error_calc = "SRS")
       # Taking the outputs from using SRS folds, SRS models, and SRS design for error calculations,
       # and compiling them into one data frame
@@ -536,12 +536,12 @@ plot_generation <- function() {
       # Collecting MSE outputs when using Clus folds, Clus models, and Clus design for error calculations
       clus.data <- cv.cluster.srs.lm(sim.clus, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
                                                  "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
-                                                 "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"), 
+                                                 "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"),
                                      clusterID = "Cluster", nfolds = 5, N = 1000)
       # Collecting MSE outputs when using Clus folds, SRS models, and Clus design for error calculations
       srs.data <- cv.cluster.srs.lm(sim.clus, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
                                                 "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
-                                                "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"), 
+                                                "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"),
                                     clusterID = "Cluster", nfolds = 5, N = 1000, model = "SRS")
       # Taking the outputs from using Clus folds, Clus models, and Clus design for error calculations,
       # and compiling them into one data frame
@@ -554,12 +554,12 @@ plot_generation <- function() {
       # Collecting MSE outputs when using SRS folds, SRS models, and Clus design for error calculations
       srs.data <- cv.srs.mixed.lm(sim.clus, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
                                               "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
-                                              "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"), 
+                                              "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"),
                                   scID = "Cluster", nfolds = 5, N = 1000, error_calc = "Cluster")
       # Collecting MSE outputs when using SRS folds, Clus models, and Clus design for error calculations
       clus.data <- cv.srs.mixed.lm(sim.clus, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
                                                "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
-                                               "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"), 
+                                               "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"),
                                    scID = "Cluster", nfolds = 5, N = 1000, model = "Cluster", error_calc = "Cluster")
       # Taking the outputs from using SRS folds, SRS models, and Clus design for error calculations,
       # and compiling them into one data frame
@@ -625,11 +625,11 @@ plot_generation <- function() {
       plot6 <- p6 + geom_line(aes(group = sample, colour = sample)) + theme(legend.position = "none")
     }
     # Making a grid display of the six plot objects above
-    grid.arrange(plot1,plot2,plot5,plot6,plot4,plot3, ncol = 2, 
-                 top = paste0("Simulated Spline Data (Sample Size = ", n, ", Clusters = ", n/10, 
+    grid.arrange(plot1,plot2,plot5,plot6,plot4,plot3, ncol = 2,
+                 top = paste0("Simulated Spline Data (Sample Size = ", n, ", Clusters = ", n/10,
                               ", Loops = ", loops, ")"))
   }
-  
+
   stratVsrs.mixed.cv.spline.plot <- function(n, loops, plot) {
     # Making an empty data set for output when we make SRS folds, use SRS models, and calculate MSEs using SRS design
     srssrssrs <- data.frame(df = c(), MSE = c())
@@ -651,12 +651,12 @@ plot_generation <- function() {
       # Collecting MSE outputs when using SRS folds, SRS models, and SRS design for error calculations
       srs.data <- cv.srs.mixed.lm(sim.strat, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
                                                "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
-                                               "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"), 
+                                               "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"),
                                   scID = "Stratum", nfolds = 5, N = 1000)
       # Collecting MSE outputs when using SRS folds, Strat models, and SRS design for error calculations
       strat.data <- cv.srs.mixed.lm(sim.strat, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
                                                  "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
-                                                 "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"), 
+                                                 "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"),
                                     scID = "Stratum", nfolds = 5, N = 1000, model = "Strat")
       # Taking the outputs from using SRS folds, SRS models, and SRS design for error calculations,
       # and compiling them into one data frame
@@ -669,12 +669,12 @@ plot_generation <- function() {
       # Collecting MSE outputs when using Strat folds, Strat models, and Strat design for error calculations
       strat.data <- cv.strat.srs.lm(sim.strat, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
                                                  "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
-                                                 "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"), 
+                                                 "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"),
                                     strataID = "Stratum", nfolds = 5, N = 1000)
       # Collecting MSE outputs when using Strat folds, SRS models, and Strat design for error calculations
       srs.data <- cv.strat.srs.lm(sim.strat, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
                                                "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
-                                               "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"), 
+                                               "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"),
                                   strataID = "Stratum", nfolds = 5, N = 1000, model = "SRS")
       # Taking the outputs from using Strat folds, Strat models, and Strat design for error calculations,
       # and compiling them into one data frame
@@ -687,12 +687,12 @@ plot_generation <- function() {
       # Collecting MSE outputs when using SRS folds, SRS models, and Strat design for error calculations
       srs.data <- cv.srs.mixed.lm(sim.strat, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
                                                "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
-                                               "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"), 
+                                               "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"),
                                   scID = "Stratum", nfolds = 5, N = 1000, error_calc = "Strat")
       # Collecting MSE outputs when using SRS folds, Strat models, and Strat design for error calculations
       strat.data <- cv.srs.mixed.lm(sim.strat, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
                                                  "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
-                                                 "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"), 
+                                                 "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"),
                                     scID = "Stratum", nfolds = 5, N = 1000, model = "Strat", error_calc = "Strat")
       # Taking the outputs from using SRS folds, SRS models, and Strat design for error calculations,
       # and compiling them into one data frame
@@ -758,84 +758,84 @@ plot_generation <- function() {
       plot6 <- p6 + geom_line(aes(group = sample, colour = sample)) + theme(legend.position = "none")
     }
     # Making a grid display of the six plot objects above
-    grid.arrange(plot1,plot2,plot5,plot6,plot4,plot3, ncol = 2, 
-                 top = paste0("Simulated Spline Data (Sample Size = ", n, 
+    grid.arrange(plot1,plot2,plot5,plot6,plot4,plot3, ncol = 2,
+                 top = paste0("Simulated Spline Data (Sample Size = ", n,
                               ", Strata = 5, Loops = ", loops, ")"))
   }
-  
+
   sim.clusvsrs.sd.n100 <- clusVsrs.cross.cv.spline.plot(n=100, loops=100)
   sim.clusvsrs.bp.n100 <- clusVsrs.mixed.cv.spline.plot(n=100, loops=100, plot = "box")
   sim.stratvsrs.bp.n100 <- stratVsrs.mixed.cv.spline.plot(n=100, loops=100, plot = "box")
- 
+
   return(list(sim.clusvsrs.sd.n100 = sim.clusvsrs.sd.n100,
               sim.clusvsrs.bp.n100 = sim.clusvsrs.bp.n100,
               sim.stratvsrs.bp.n100 = sim.stratvsrs.bp.n100))
 }
 
 plot_generation2 <- function() {
-  
+
   # Simulating Splined data
-  
+
   set.seed(47)
   x1 = runif(1:500, min = 2, max = 14)
   y1 = x1^3 - 17*x1^2 + 10*x1 + 1000
-  
-  
+
+
   set.seed(47)
   x2 = runif(1:500, min = 14, max = 26)
   y2 = -1*(x2-12)^3 + 14*(x2-12)^2 + 15*(x2-12) + 500
   plot(y2~x2)
-  
+
   set.seed(47)
   x3 = runif(1:500, min = 26, max = 38)
   y3 = (x3-29)^3 - 13*(x3-29)^2 + 0*(x3-29) + 900
-  
-  
+
+
   set.seed(47)
   x4 = runif(1:500, min = 38, max = 50)
   y4 = (x4-36)^3 - 10*(x4-36)^2 + 2*(x4-36) + 600
-  
-  
+
+
   set.seed(47)
   z1 = jitter(y1, 15000)
   z1 = jitter(y1, 15000)
   z2 = jitter(y2, 15000)
   z3 = jitter(y3, 15000)
   z4 = jitter(y4, 15000)
-  
+
   ds1 <- data.frame(Response = z1, Predictor = x1)
   ds2 <- data.frame(Response = z2, Predictor = x2)
   ds3 <- data.frame(Response = z3, Predictor = x3)
   ds4 <- data.frame(Response = z4, Predictor = x4)
-  
+
   ds <- rbind(ds3, ds4)
-  
-  
+
+
   b <- data.frame(ID = c(1:1000))
   spline.df2 <- cbind(b, ds)
   spline.df2 <- spline.df2 %>%
     arrange(Predictor) %>%
     mutate(Stratum = row_number(),
-           Cluster = row_number())  
+           Cluster = row_number())
   spline.df2$Stratum <- cut(spline.df2$Stratum,5, 1:5)
-  spline.df2$Cluster <- cut(spline.df2$Cluster,100, 1:100) 
+  spline.df2$Cluster <- cut(spline.df2$Cluster,100, 1:100)
   spline.df2 <- spline.df2 %>%
     arrange(ID) %>%
     select(ID, Response, Predictor, Cluster, Stratum)
-  
+
   # Adding weights
-  
+
   # samp_prob = log(y)/sum(log(y))
-  
+
   ysum = sum(log(spline.df2$Response))
-  
+
   spline.df3 <- spline.df2 %>%
     mutate(samp_prob = log(Response)/sum(log(spline.df2$Response)))
-  
-  
-  
+
+
+
   # Try some other ways to generate sampling probs:
-  
+
   # Maybe log(Resp)/sum(log(Resp)) just didn't provide enough spread?
   # The ratio of max to min samp probs was around log(1600) to log(500) or around 1.2,
   # so largest prob was only 20% more than smallest.
@@ -843,9 +843,9 @@ plot_generation2 <- function() {
   # where largest ratio would be around 1600/500 = 3.2.
   spline.df3$samp_prob_rawratio <- with(spline.df3, Response / sum(Response))
   sum(spline.df3$samp_prob_rawratio)
-  
- 
-  
+
+
+
   # But even so, the sampling probs for highest y-values
   # are are pretty similar across range of x,
   # and same for samp probs for lowest y-values.
@@ -855,40 +855,40 @@ plot_generation2 <- function() {
   # Maybe instead, we need to oversample points
   # that are close to a POOR FIT to the data?
   # Let's try fitting a quadratic (clearly bad fit)...
-  
+
   # ...then oversample points NEAR THIS LINE,
   # so that unweighted fit should be close to this quadratic,
   # while weighted fit should be closer to correct high-df spline.
   lm_quad <- lm(Response ~ Predictor + I(Predictor^2), data = spline.df3)
   spline.df3$samp_prob_quad <- (1/(abs(lm_quad$residuals))) / sum(1/(abs(lm_quad$residuals)))
-  
+
   quad.sample.graph <- ggplot(spline.df3, aes(x = Predictor, y = Response, size = samp_prob_quad)) +
     geom_point(alpha = 0.2) +
     stat_smooth(method = "lm", formula = y ~ x + I(x^2))
-  
+
   # Try the same thing but with a linear fit -- even simpler
   lm_lin <- lm(Response ~ Predictor, data = spline.df3)
   spline.df3$samp_prob_lin <- (1/(abs(lm_lin$residuals))) / sum(1/(abs(lm_lin$residuals)))
 
-  
-  
+
+
   spline.df3$samp_wt <- 1/spline.df3$samp_prob
   spline.df3$samp_wt_rawratio <- 1/spline.df3$samp_prob_rawratio
   spline.df3$samp_wt_lin <- 1/spline.df3$samp_prob_lin
   spline.df3$samp_wt_quad <- 1/spline.df3$samp_prob_quad
 
-  
-  
+
+
   cv.srs.lm1 <- function(Data, formulae, nfolds=5, N, method = "linear", weights =  NULL) {
     # Other option for method is "logistic"
-    
+
     #stop logic checking dataset specified
     if(nfolds < 1) {print ("nfolds is less that 1")}
     if(N<nrow(Data)) {print("N is less than observations in the defined dataset")}
     if(nfolds > nrow(Data)) {print ("fold number exceeds observations")}
     stopifnot(nfolds > 0, N >= nrow(Data), nfolds < nrow(Data))
-    
-    
+
+
     # Creates an observation ID variable for the dataset
     Data$ID <- 1:nrow(Data)
     # Turns the strings of formulas into a list of formulas
@@ -958,18 +958,18 @@ plot_generation2 <- function() {
     # Returns the resulting matrix to the console
     return(means)
   }
-  
-  
+
+
   cv.srs.lm2 <- function(Data, formulae, nfolds=5, N, method = "linear", weights =  NULL) {
     # Other option for method is "logistic"
-    
+
     #stop logic checking dataset specified
     if(nfolds < 1) {print ("nfolds is less that 1")}
     if(N<nrow(Data)) {print("N is less than observations in the defined dataset")}
     if(nfolds > nrow(Data)) {print ("fold number exceeds observations")}
     stopifnot(nfolds > 0, N >= nrow(Data), nfolds < nrow(Data))
-    
-    
+
+
     # Creates an observation ID variable for the dataset
     Data$ID <- 1:nrow(Data)
     # Turns the strings of formulas into a list of formulas
@@ -1038,17 +1038,17 @@ plot_generation2 <- function() {
     # Returns the resulting matrix to the console
     return(means)
   }
-  
+
   cv.srs.lm3 <- function(Data, formulae, nfolds=5, N, method = "linear", weights =  NULL) {
     # Other option for method is "logistic"
-    
+
     #stop logic checking dataset specified
     if(nfolds < 1) {print ("nfolds is less that 1")}
     if(N<nrow(Data)) {print("N is less than observations in the defined dataset")}
     if(nfolds > nrow(Data)) {print ("fold number exceeds observations")}
     stopifnot(nfolds > 0, N >= nrow(Data), nfolds < nrow(Data))
-    
-    
+
+
     # Creates an observation ID variable for the dataset
     Data$ID <- 1:nrow(Data)
     # Turns the strings of formulas into a list of formulas
@@ -1117,10 +1117,10 @@ plot_generation2 <- function() {
     # Returns the resulting matrix to the console
     return(means)
   }
-  
-  
+
+
   #CV1 uses weights for both MSE and model generation, CV2 uses  it when modeling but not during MSE generation and CV3 uses it only during MSE generation
-  
+
   SRS.Weight.plot <- function(n, loops, plot, weights) {
     # Making an empty data set for output when we make SRS folds, use SRS models, and calculate MSEs using SRS design
     AllW <- data.frame(df = c(), MSE = c())
@@ -1139,21 +1139,21 @@ plot_generation2 <- function() {
       # Collecting MSE outputs when using SRS folds, SRS models, and SRS design for error calculations
       AllWdat <- cv.srs.lm1(spline.df3.sample, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
                                                  "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
-                                                 "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"), 
+                                                 "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"),
                             nfolds = 5, N = 1000, weights = weights)
       NoWdat <- cv.srs.lm1(spline.df3.sample, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
                                                 "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
-                                                "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"), 
+                                                "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"),
                            nfolds = 5, N = 1000)
       ModWdat <- cv.srs.lm2(spline.df3.sample, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
                                                  "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
-                                                 "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"), 
+                                                 "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"),
                             nfolds = 5, N = 1000, weights = weights)
       MSEWdat <- cv.srs.lm3(spline.df3.sample, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
                                                  "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
-                                                 "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"), 
+                                                 "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"),
                             nfolds = 5, N = 1000, weights = weights)
-      
+
       # compiling one data frame
       AllW2 <- data.frame(df = 1:6, MSE = AllWdat[,1], sample = rep(i, length.out = 6))
       AllW <- rbind(AllW, AllW2)
@@ -1193,7 +1193,7 @@ plot_generation2 <- function() {
     p4 <- ggplot(data = MSEW, mapping = aes(x = df, y = MSE)) +
       ggtitle("Weights when MSE gen") +
       ylim(ymin, ymax)
-    
+
     # Either turning our ggplot objects into boxplots or spaghetti plots (as objects still)
     if (plot == "box") {
       plot1 <- p1 + geom_boxplot()
@@ -1207,20 +1207,20 @@ plot_generation2 <- function() {
       plot4 <- p4 + geom_line(aes(group = sample, colour = sample)) + theme(legend.position = "none")
     }
     # Making a grid display of the six plot objects above
-    grid.arrange(plot1,plot2,plot3,plot4, ncol = 2, 
-                 top = paste0("Simulated Spline Data (Sample Size = ", n, 
+    grid.arrange(plot1,plot2,plot3,plot4, ncol = 2,
+                 top = paste0("Simulated Spline Data (Sample Size = ", n,
                               ", Loops = ", loops, ", Weights = ", weights, ")"))
   }
-  
-  
-  Main.weights.plot <- SRS.Weight.plot(200,10,"box","samp_wt_quad")
-  
-  
-  
-  
 
-  
-  
+
+  Main.weights.plot <- SRS.Weight.plot(200,10,"box","samp_wt_quad")
+
+
+
+
+
+
+
   # checking what individual weighted samples may look like.
   # for samp_wt_quad, we'd expect most of the sampled points
   #   to fall near the quadratic-fit line,
@@ -1232,6 +1232,43 @@ plot_generation2 <- function() {
     geom_point()
   ggplot(spline.df3, aes(x = Predictor, y = Response, size = samp_prob_quad, alpha = samp_prob_quad)) +
     geom_point()
-  
+
   return(list(Main.weights.plot = Main.weights.plot, quad.sample.graph = quad.sample.graph))
+}
+
+plot.gen3 <- function(){
+income.year_edu.plot <- function(loops) {
+  # Making an empty data set for output when we take into consideration the design method
+  method.ds <- data.frame(MSE = c())
+  # Making an empty data set for output when we ignore the design method
+  ignore.ds <- data.frame(MSE = c())
+  # looping and generating MSEs
+  for (i in 1:loops) {
+    set.seed(i)
+    method.data <- cv.svy(NSFG_data, "income~ns(YrEdu, df = 5)", nfolds = 4, strataID = "strata",
+                          clusterID = "SECU", nest = TRUE, weights = "wgt", N = 5100)
+    method.ds2 <- data.frame(df = 5, MSE = method.data[,1])
+    method.ds <- rbind(method.ds, method.ds2)
+    ignore.data <- cv.svy(NSFG_data, "income~ns(YrEdu, df = 5)", nfolds = 4, weights = "wgt", N = 5100)
+    ignore.ds2 <- data.frame(df = 5, MSE = ignore.data[,1])
+    ignore.ds <- rbind(ignore.ds, ignore.ds2)
+  }
+  ignore.ds$df <- as.factor(ignore.ds$df)
+  method.ds$df <- as.factor(method.ds$df)
+
+  # Making a ggplot object for the MSE spread comparison
+  plot1 <- ggplot(data = ignore.ds, mapping = aes(x = df, y = MSE)) +
+    geom_boxplot() +
+    ggtitle("Ignoring Design") +
+    ylim(18000, 19000)
+  plot2 <- ggplot(data = method.ds, mapping = aes(x = df, y = MSE)) +
+    geom_boxplot() +
+    ggtitle("Accounting for Design") +
+    ylim(18000, 19000)
+
+  # Making a grid display of the two plot objects above
+grid.arrange(plot1,plot2, ncol = 2)
+}
+NSFG.plot<- income.year_edu.plot(100)
+return()
 }
