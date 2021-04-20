@@ -4,7 +4,7 @@
 \alias{cv.srs.lm}
 \title{SRS Function}
 \usage{
-\method{cv}{srs.lm}(Data, formulae, nfolds = 5, N, method = "linear", weights = NULL)
+cv.srs.lm(Data, formulae, nfolds = 5, N, method = "linear", weights = NULL)
 }
 \arguments{
 \item{Data}{CSV of dataset to be tested}

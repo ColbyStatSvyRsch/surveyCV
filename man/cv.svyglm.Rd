@@ -4,7 +4,7 @@
 \alias{cv.svyglm}
 \title{CV Survey GLM function}
 \usage{
-\method{cv}{svyglm}(
+cv.svyglm(
   nfolds = 5,
   N,
   clusterID = NULL,

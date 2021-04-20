@@ -4,7 +4,15 @@
 \alias{cv.strat.lm}
 \title{Stratified function}
 \usage{
-\method{cv}{strat.lm}(Data, formulae, nfolds = 5, strataID, N, method = "linear", weights = NULL)
+cv.strat.lm(
+  Data,
+  formulae,
+  nfolds = 5,
+  strataID,
+  N,
+  method = "linear",
+  weights = NULL
+)
 }
 \arguments{
 \item{Data}{CSV of dataset to be tested}
