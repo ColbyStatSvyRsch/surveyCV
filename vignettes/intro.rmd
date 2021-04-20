@@ -150,7 +150,10 @@ When weights are accounted for in both model fitting and MSE generation, we see 
 
 # NSFG Dataset Findings
 
-Here we wanted to confirm our previous findings on a real dataset and test when we had both strata and clusters in our dataset. To do this, we decided to use a National Survey of Family Growth dataset. We downloaded this data from the NSFG website and cleaned it following Hunter Raltiffs methods foud at https://rpubs.com/HunterRatliff1/NSFG_Wrangle
+Here we wanted to confirm our previous findings on a real dataset and test when we had both stratum and clusters in our dataset. To do this, we decided to use a National Survey of Family Growth dataset. We downloaded this data from the NSFG website and cleaned it following Hunter Raltiffs methods found at https://rpubs.com/HunterRatliff1/NSFG_Wrangle
+
+When looking at the variables for Income and Years Educated in relation too each other, we can see that there are sizable differences in trends across different clusters and stratum.
+
 
 # Examples Using surveyCV Functions
 
