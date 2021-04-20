@@ -1278,12 +1278,16 @@ plot_generation3 <- function(){
   NSFG.cluster.plot <- ggplot(NSFG_data, aes(x = YrEdu, y = income)) +
     geom_jitter() +
     geom_smooth(method = "loess", se = TRUE) +
-    facet_wrap(SECU~., ncol = 2)
+    facet_wrap(SECU~., ncol = 2) +
+    labs(x = "Years Educated", y = "Income (Expressed as % of Poverty Level)",
+         title = "Relationship Separated by Cluster")
 
   NSFG.strata.plot <- ggplot(NSFG_data, aes(x = YrEdu, y = income)) +
     geom_jitter() +
     geom_smooth(method = "loess", se = TRUE) +
-    facet_wrap(strata~., ncol = 2)
+    facet_wrap(strata~., ncol = 2) +
+    labs(x = "Years Educated", y = "Income (Expressed as % of Poverty Level)",
+         title = "Relationship Separated by Stratum")
 
   return(list(NSFG.plot = NSFG.plot, NSFG.cluster.plot = NSFG.cluster.plot, NSFG.strata.plot = NSFG.strata.plot))
 }
