@@ -38,6 +38,10 @@ sim.stratvsrs.bp.n100 <- plot_list$sim.stratvsrs.bp.n100
 plot_list2 <- surveyCV:::plot_generation2()
 Main.weights.plot <- plot_list2$Main.weights.plot
 quad.sample.graph <- plot_list2$quad.sample.graph
+plot_list3 <- surveyCV:::plot_generation3()
+NSFG.plot <- plot_list3$NSFG.plot
+NSFG.cluster.plot <- plot_list3$NSFG.cluster.plot
+NSFG.strata.plot <- plot_list3$NSFG.strata.plot
 ```
 
 # Approach
@@ -154,6 +158,21 @@ Here we wanted to confirm our previous findings on a real dataset and test when 
 
 When looking at the variables for Income and Years Educated in relation too each other, we can see that there are sizable differences in trends across different clusters and stratum.
 
+```{r}
+grid.draw(NSFG.cluster.plot)
+```
+
+```{r}
+grid.draw(NSFG.strata.plot)
+```
+
+This is evidence that cross validation for a model using these two variables could give different results depending on if the proper survey design is taken into account. For this example, we will use a natural splines model with degrees of freedom of five, that uses the Years Educated variable to predict the Income variable. Here is the resulting boxplots of a distribution of 100 MSEs generated from using our cv.svy function when we account for the survey design and when we don't.
+
+```{r}
+grid.draw(NSFG.plot)
+```
+
+Based on the plots above, we can see evidence that when we don't take into account the actual survey design (which was a nested stratified and clustered design) the cross validation function is giving us overconfidence in our model compared to if we did take into account the survey design. This is consistent with our previous testing on the simulated data and the Auto data set. This is also very encouraging because this example includes data that was gathered from a survey whose design involved both stratification and clustering. 
 
 # Examples Using surveyCV Functions
 

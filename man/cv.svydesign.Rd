@@ -4,7 +4,7 @@
 \alias{cv.svydesign}
 \title{CV Survey Design function}
 \usage{
-cv.svydesign(
+\method{cv}{svydesign}(
   formulae,
   nfolds = 5,
   N,

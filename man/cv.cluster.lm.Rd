@@ -4,15 +4,7 @@
 \alias{cv.cluster.lm}
 \title{Cluster Function}
 \usage{
-cv.cluster.lm(
-  Data,
-  formulae,
-  nfolds = 5,
-  clusterID,
-  N,
-  method = "linear",
-  weights = NULL
-)
+\method{cv}{cluster.lm}(Data, formulae, nfolds = 5, clusterID, N, method = "linear", weights = NULL)
 }
 \arguments{
 \item{Data}{CSV of dataset to be tested}

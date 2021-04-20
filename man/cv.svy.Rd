@@ -4,7 +4,7 @@
 \alias{cv.svy}
 \title{General CV function}
 \usage{
-cv.svy(
+\method{cv}{svy}(
   Data,
   formulae,
   nfolds = 5,
