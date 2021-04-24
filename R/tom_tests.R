@@ -100,8 +100,8 @@ SCNSFG <-NSFG_data[NSFG_data$eduCat=="Some college",]
 
 ##cole found some examples that looked promising (see below) gonna write a plotting function for them
 
-cv.svy(NSFG_data, "income~ns(YrEdu, df = 5)", nfolds = 4, weights = "wgt", N = 5100)
-cv.svy(NSFG_data, "income~ns(YrEdu, df = 5)", nfolds = 4, strataID = "strata",
+cv.svy(NSFG_data, c("income~ns(YrEdu, df = 1)","income~ns(YrEdu, df = 2)","income~ns(YrEdu, df = 3)","income~ns(YrEdu, df = 4)","income~ns(YrEdu, df = 5)"), nfolds = 4, weights = "wgt", N = 5100)
+cv.svy(NSFG_data, c("income~ns(YrEdu, df = 1)","income~ns(YrEdu, df = 2)","income~ns(YrEdu, df = 3)","income~ns(YrEdu, df = 4)","income~ns(YrEdu, df = 5)"), nfolds = 4, strataID = "strata",
        clusterID = "SECU", nest = TRUE, weights = "wgt", N = 5100)
 
 cv.svy(NSFG_data, "income~race", nfolds = 4, weights = "wgt", N = 5100)
@@ -118,16 +118,16 @@ income.year_edu.plot <- function(loops) {
    # looping and generating MSEs
   for (i in 1:loops) {
     set.seed(i)
-    method.data <- cv.svy(NSFG_data, "income~ns(YrEdu, df = 5)", nfolds = 4, strataID = "strata",
+    method.data <- cv.svy(NSFG_data, c("income~ns(YrEdu, df = 1)","income~ns(YrEdu, df = 2)","income~ns(YrEdu, df = 3)","income~ns(YrEdu, df = 4)","income~ns(YrEdu, df = 5)","income~ns(YrEdu, df = 6)"), nfolds = 4, strataID = "strata",
                           clusterID = "SECU", nest = TRUE, weights = "wgt", N = 5100)
-    method.ds2 <- data.frame(df = 5, MSE = method.data[,1])
+    method.ds2 <- data.frame(df = 1:6, MSE = method.data[,1])
     method.ds <- rbind(method.ds, method.ds2)
-    ignore.data <- cv.svy(NSFG_data, "income~ns(YrEdu, df = 5)", nfolds = 4, weights = "wgt", N = 5100)
-    ignore.ds2 <- data.frame(df = 5, MSE = ignore.data[,1])
+    ignore.data <- cv.svy(NSFG_data, c("income~ns(YrEdu, df = 1)","income~ns(YrEdu, df = 2)","income~ns(YrEdu, df = 3)","income~ns(YrEdu, df = 4)","income~ns(YrEdu, df = 5)","income~ns(YrEdu, df = 6)"), nfolds = 4, weights = "wgt", N = 5100)
+    ignore.ds2 <- data.frame(df = 1:6, MSE = ignore.data[,1])
     ignore.ds <- rbind(ignore.ds, ignore.ds2)
-    method.fold.data <- cv.svy(NSFG_data, "income~ns(YrEdu, df = 5)", nfolds = 4, strataID = "strata",
+    method.fold.data <- cv.svy(NSFG_data, c("income~ns(YrEdu, df = 1)","income~ns(YrEdu, df = 2)","income~ns(YrEdu, df = 3)","income~ns(YrEdu, df = 4)","income~ns(YrEdu, df = 5)","income~ns(YrEdu, df = 6)"), nfolds = 4, strataID = "strata",
                           clusterID = "SECU", nest = TRUE, weights = "wgt", N = 5100, afolds = FALSE)
-    method.fold.ds2 <- data.frame(df = 5, MSE = method.fold.data[,1])
+    method.fold.ds2 <- data.frame(df = 1:6, MSE = method.fold.data[,1])
     method.fold.ds <- rbind(method.ds, method.ds2)
   }
   ignore.ds$df <- as.factor(ignore.ds$df)
