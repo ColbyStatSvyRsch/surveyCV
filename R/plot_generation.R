@@ -429,12 +429,12 @@ plot_generation <- function() {
       set.seed(i)
       sim.srs <- sample_n(spline.df2, n)
       # Using our SRS function on SRS samples to get MSE outputs from cross validation using 5 folds
-      srs.data <- cv.srs.lm(sim.srs, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
+      srs.data <- cv.svy(sim.srs, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
                                        "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
                                        "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"),
                             nfolds = 5, N = 1000)
       # Using our Cluster function on SRS samples to get MSE outputs from cross validation using 5 folds
-      clus.data <- cv.cluster.lm(sim.srs, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
+      clus.data <- cv.svy(sim.srs, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
                                             "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
                                             "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"),
                                  clusterID = "Cluster", nfolds = 5, N = 1000)
@@ -451,12 +451,12 @@ plot_generation <- function() {
       c <- unique(spline.df2[["Cluster"]])
       sim.clus <- spline.df2[spline.df2[["Cluster"]] %in% sample(c, n/10),]
       # Using our Cluster function on Cluster samples to get MSE outputs from cross validation using 5 folds
-      clus.data <- cv.cluster.lm(sim.clus, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
+      clus.data <- cv.svy(sim.clus, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
                                              "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
                                              "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"),
                                  clusterID = "Cluster", nfolds = 5, N = 1000)
       # Using our SRS function on Cluster samples to get MSE outputs from cross validation using 5 folds
-      srs.data <- cv.srs.lm(sim.clus, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
+      srs.data <- cv.svy(sim.clus, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
                                         "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
                                         "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"),
                             nfolds = 5, N = 1000)
@@ -1245,6 +1245,7 @@ plot_generation3 <- function(){
     method.ds <- data.frame(MSE = c())
     # Making an empty data set for output when we ignore the design method
     ignore.ds <- data.frame(MSE = c())
+    fold.ds <- data.frame(MSE = c())
     # looping and generating MSEs
     for (i in 1:loops) {
       set.seed(i)
@@ -1252,25 +1253,33 @@ plot_generation3 <- function(){
                             clusterID = "SECU", nest = TRUE, weights = "wgt", N = 5100)
       method.ds2 <- data.frame(df = 1:6, MSE = method.data[,1])
       method.ds <- rbind(method.ds, method.ds2)
-      ignore.data <- cv.svy(NSFG_data, c("income~ns(YrEdu, df = 1)","income~ns(YrEdu, df = 2)","income~ns(YrEdu, df = 3)","income~ns(YrEdu, df = 4)","income~ns(YrEdu, df = 5)","income~ns(YrEdu, df = 6)"), nfolds = 4, weights = "wgt", N = 5100)
+      ignore.data <- cv.svy(NSFG_data, c("income~ns(YrEdu, df = 1)","income~ns(YrEdu, df = 2)","income~ns(YrEdu, df = 3)","income~ns(YrEdu, df = 4)","income~ns(YrEdu, df = 5)","income~ns(YrEdu, df = 6)"), nfolds = 4, N = 5100)
       ignore.ds2 <- data.frame(df = 1:6, MSE = ignore.data[,1])
       ignore.ds <- rbind(ignore.ds, ignore.ds2)
-    }
+      fold.data <- cv.svy(NSFG_data, c("income~ns(YrEdu, df = 1)","income~ns(YrEdu, df = 2)","income~ns(YrEdu, df = 3)","income~ns(YrEdu, df = 4)","income~ns(YrEdu, df = 5)","income~ns(YrEdu, df = 6)"), nfolds = 4, strataID = "strata",
+                            clusterID = "SECU", nest = TRUE, weights = "wgt", N = 5100, afolds = FALSE)
+      fold.ds2 <- data.frame(df = 1:6, MSE = fold.data[,1])
+      fold.ds <- rbind(fold.ds, fold.ds2)
+      }
     ignore.ds$df <- as.factor(ignore.ds$df)
     method.ds$df <- as.factor(method.ds$df)
-
+    fold.ds$df <- as.factor(fold.ds$df)
     # Making a ggplot object for the MSE spread comparison
     plot1 <- ggplot(data = ignore.ds, mapping = aes(x = df, y = MSE)) +
       geom_boxplot() +
       ggtitle("Ignoring Design") +
       ylim(18000, 19000)
-    plot2 <- ggplot(data = method.ds, mapping = aes(x = df, y = MSE)) +
+    plot2 <- ggplot(data = fold.ds, mapping = aes(x = df, y = MSE)) +
+      geom_boxplot() +
+      ggtitle("Ignoring Design for Folds") +
+      ylim(18000, 19000)
+    plot3 <- ggplot(data = method.ds, mapping = aes(x = df, y = MSE)) +
       geom_boxplot() +
       ggtitle("Accounting for Design") +
       ylim(18000, 19000)
 
     # Making a grid display of the two plot objects above
-    grid.arrange(plot1,plot2, ncol = 2)
+    grid.arrange(plot1,plot2,plot3, ncol = 3)
   }
 
   NSFG.plot <- income.year_edu.plot(100)
@@ -1285,7 +1294,7 @@ plot_generation3 <- function(){
   NSFG.strata.plot <- ggplot(NSFG_data, aes(x = YrEdu, y = income)) +
     geom_jitter() +
     geom_smooth(method = "loess", se = TRUE) +
-    facet_wrap(strata~., ncol = 2) +
+    facet_wrap(strata~., ncol = 6) +
     labs(x = "Years Educated", y = "Income (Expressed as % of Poverty Level)",
          title = "Relationship Separated by Stratum")
 
