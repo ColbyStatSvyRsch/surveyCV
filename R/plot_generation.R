@@ -429,12 +429,12 @@ plot_generation <- function() {
       set.seed(i)
       sim.srs <- sample_n(spline.df2, n)
       # Using our SRS function on SRS samples to get MSE outputs from cross validation using 5 folds
-      srs.data <- cv.srs.lm(sim.srs, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
+      srs.data <- cv.svy(sim.srs, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
                                        "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
                                        "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"),
                             nfolds = 5, N = 1000)
       # Using our Cluster function on SRS samples to get MSE outputs from cross validation using 5 folds
-      clus.data <- cv.cluster.lm(sim.srs, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
+      clus.data <- cv.svy(sim.srs, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
                                             "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
                                             "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"),
                                  clusterID = "Cluster", nfolds = 5, N = 1000)
@@ -451,12 +451,12 @@ plot_generation <- function() {
       c <- unique(spline.df2[["Cluster"]])
       sim.clus <- spline.df2[spline.df2[["Cluster"]] %in% sample(c, n/10),]
       # Using our Cluster function on Cluster samples to get MSE outputs from cross validation using 5 folds
-      clus.data <- cv.cluster.lm(sim.clus, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
+      clus.data <- cv.svy(sim.clus, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
                                              "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
                                              "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"),
                                  clusterID = "Cluster", nfolds = 5, N = 1000)
       # Using our SRS function on Cluster samples to get MSE outputs from cross validation using 5 folds
-      srs.data <- cv.srs.lm(sim.clus, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
+      srs.data <- cv.svy(sim.clus, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
                                         "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
                                         "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"),
                             nfolds = 5, N = 1000)
@@ -1285,7 +1285,7 @@ plot_generation3 <- function(){
   NSFG.strata.plot <- ggplot(NSFG_data, aes(x = YrEdu, y = income)) +
     geom_jitter() +
     geom_smooth(method = "loess", se = TRUE) +
-    facet_wrap(strata~., ncol = 2) +
+    facet_wrap(strata~., ncol = 6) +
     labs(x = "Years Educated", y = "Income (Expressed as % of Poverty Level)",
          title = "Relationship Separated by Stratum")
 
