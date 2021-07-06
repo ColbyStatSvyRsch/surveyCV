@@ -2,9 +2,9 @@ Package: surveyCV
 Type: Package
 Title: surveyCV: Cross Validation Based on Survey Design
 Version: 0.0.0.9000
-Author: c(
-    person("Cole", "Guerin", email = "cjguer21@colby.edu", role = c("cre", "aut")),
-    person("Thomas", "McMahon", email = "twmcma21@colby.edu", role = c("cre", "aut")),
+Authors@R: c(
+    person("Cole", "Guerin", email = "cjguer21@colby.edu", role = "aut"),
+    person("Thomas", "McMahon", email = "twmcma21@colby.edu", role = "aut"),
     person("Jerzy", "Wieczorek", email = "jawieczo@colby.edu", role = c("cre", "aut")))
 Description: Functions to generate mean squared error estimates using cross validation, 
     based on how a survey design is constructed (SRS, Cluster, Stratification).
@@ -27,6 +27,7 @@ Suggests:
     ggplot2 (>= 3.3.1),
     lattice (>= 0.20-41),
     knitr (>= 1.29),
-    rmarkdown (>= 2.2)
+    rmarkdown (>= 2.2),
+    testthat
 VignetteBuilder: knitr
 RoxygenNote: 7.1.1.9000
