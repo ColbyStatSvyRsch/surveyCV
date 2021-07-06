@@ -1,35 +1,35 @@
-# Utility functions for creating folds based on the survey design. 
+# Utility functions for creating folds based on the survey design.
 
 # (Next steps:
 #  Write a wrapper for appendfolds() that reads strata/clusters out of svydesign object.
-#  Call appendfolds() from with a separate CV function that *uses* these folds.)
+#  Call appendfolds() from within a separate CV function that *uses* these folds.)
 
 
 
 # TODO: DOCUMENTATION WILL NEED TO BE UPDATED
 # Inputs:
-#   the dataset, 
-#   number of folds, 
+#   the dataset,
+#   number of folds,
 #   and strings for the names of the stratum and cluster variables in Data
-# Outputs: 
+# Outputs:
 #   same dataset with fold IDs appended
 appendfolds <- function(Data, nfolds, strataID = NULL, clusterID = NULL) {
   stopifnot(nfolds <= nrow(Data))
-  
+
   if(is.null(strataID) & is.null(clusterID)) {
-    
+
     # SRS CV
     .foldID <- sample(rep(1:nfolds, length.out = nrow(Data)))
-    
+
   } else if(is.null(strataID)) {
-    
+
     # if(FALSE){
     #   # TESTING with 8 clusters, 3 folds, n=100
     #   clus <- sample(rep(1:8, length.out = 100))
     #   nfolds <- 3
     # }
 
-    
+
     # Clustered CV
     # Ignoring unequal cluster sizes for now,
     # just assign each cluster to a fold at random
@@ -44,7 +44,7 @@ appendfolds <- function(Data, nfolds, strataID = NULL, clusterID = NULL) {
     # Sort them to be in the dataset's original order
     foldID.df <- foldID.df[order(foldID.df$id), ]
     .foldID <- foldID.df$foldID
-    
+
     # if(FALSE){
     #   # CONTINUED TESTING
     #   # make sure the merged df is in the same order as before merging
@@ -55,7 +55,7 @@ appendfolds <- function(Data, nfolds, strataID = NULL, clusterID = NULL) {
     # }
 
   } else if(is.null(clusterID)) {
-    
+
     # if(FALSE){
     #   # TESTING with 8 strata, 3 folds, n=100
     #   strat <- sample(rep(1:8, length.out = 100))
@@ -87,9 +87,9 @@ appendfolds <- function(Data, nfolds, strataID = NULL, clusterID = NULL) {
     #   # make sure all cases from a given stratum are equally spread across folds
     #   table(foldID.df$strat, foldID.df$foldID)
     # }
-  
+
   } else {
-    
+
     # TODO: CV with both strata and clusters
     # (Could we make this function even more modular?
     # Make separate appendfolds functions for strat vs clus vs SRS,
@@ -110,7 +110,7 @@ appendfolds <- function(Data, nfolds, strataID = NULL, clusterID = NULL) {
     # (This should work whether or not nest=TRUE,
     # i.e. whether or not clusters in different strata have different names.)
 
-    
+
     # if(FALSE){
     #   # TESTING with 4 strata, 8 clusters in each stratum, 3 folds, n=100
     #   strat <- rep(1:4, each = 25)
@@ -119,16 +119,16 @@ appendfolds <- function(Data, nfolds, strataID = NULL, clusterID = NULL) {
     #   data.frame(strat, clus)
     #   table(paste(strat, clus, sep = "."))
     # }
-        
+
     strat <- Data[[strataID]]
     clus <- Data[[clusterID]]
     n <- length(strat)
-    
+
     # Get all unique stratum-cluster combos
     foldID.clus <- unique(data.frame(strat, clus))
     # Each fold should be able to have at least one cluster from each stratum
     stopifnot(nfolds <= table(foldID.clus$strat))
-    
+
     # Then do as for stratified CV, but at the cluster level first:
     # Scramble, then reorder by stratum
     foldID.clus <- foldID.clus[sample(1:nrow(foldID.clus)), ]
@@ -136,7 +136,7 @@ appendfolds <- function(Data, nfolds, strataID = NULL, clusterID = NULL) {
     # Assign fold IDs sequentially -- now folds will be balanced across strata,
     # but random within each stratum
     foldID.clus$foldID <- rep(1:nfolds, length.out = nrow(foldID.clus))
-    
+
     # Then assign these cluster-level foldIDs to the corresponding rows of data
     foldID.df <- merge(data.frame(id = 1:n, strat = strat, clus = clus),
                        foldID.clus)
@@ -144,8 +144,8 @@ appendfolds <- function(Data, nfolds, strataID = NULL, clusterID = NULL) {
     # Sort them to be in the dataset's original order
     foldID.df <- foldID.df[order(foldID.df$id), ]
     .foldID <- foldID.df$foldID
-    
-    
+
+
     # if(FALSE){
     #   # CONTINUED TESTING
     #   # make sure the merged df is in the same order as before merging
@@ -158,9 +158,9 @@ appendfolds <- function(Data, nfolds, strataID = NULL, clusterID = NULL) {
     #   # make sure all cases from a given strat-cluster pair are in the same fold
     #   addmargins(table(strat.clus = paste(foldID.df$strat,foldID.df$clus,sep="."), fold = foldID.df$foldID))
     # }
-    
+
   }
-  
+
   return(cbind(Data, .foldID = .foldID))
 }
 
@@ -179,16 +179,16 @@ if(FALSE) {
   addmargins(table(strat = df$strat))
   addmargins(table(clus = df$clus))
   addmargins(table(strat = df$strat, clus = df$clus))
-  
-  
+
+
   # TEST SRS
   df.f <- appendfolds(Data = df, nfolds = 3)
   head(df)
   head(df.f)
   # Make sure all cases are about equally spread across folds
   addmargins(table(fold = df.f$.foldID))
-  
-  
+
+
   # TEST CLUSTERS
   df.f <- appendfolds(Data = df, nfolds = 3, clusterID = "clus")
   head(df)
@@ -200,8 +200,8 @@ if(FALSE) {
   # Are all *cases* about equally spread across folds?
   # (Not necessarily expected if we have unequal cluster sizes)
   addmargins(table(fold = df.f$.foldID))
-  
-  
+
+
   # TEST STRATA
   df.f <- appendfolds(Data = df, nfolds = 3, strataID = "strat")
   head(df)
@@ -210,8 +210,8 @@ if(FALSE) {
   addmargins(table(df.f$strat, df.f$.foldID))
   # Make sure all cases are about equally spread across folds
   addmargins(table(fold = df.f$.foldID))
-  
-  
+
+
   # TEST COMBINED STRATA + CLUSTERS
   df.f <- appendfolds(Data = df, nfolds = 3, strataID = "strat", clusterID = "clus")
   head(df)
@@ -227,11 +227,11 @@ if(FALSE) {
   # Are all *cases* about equally spread across folds?
   # (Not necessarily expected if we have unequal cluster sizes)
   addmargins(table(fold = df.f$.foldID))
-  
-  
+
+
   # TEST STOPIFNOT -- these should all give errors
   df.f <- appendfolds(Data = df, nfolds = 10, clusterID = "clus")
   df.f <- appendfolds(Data = df, nfolds = 30, strataID = "strat")
   df.f <- appendfolds(Data = df, nfolds = 10, strataID = "strat", clusterID = "clus")
-  
+
 }
