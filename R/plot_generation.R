@@ -1285,9 +1285,9 @@ plot_generation3 <- function(){
   NSFG.plot <- income.year_edu.plot(100)
 
   NSFG.cluster.plot <- ggplot(NSFG_data, aes(x = YrEdu, y = income)) +
-    geom_jitter() +
+    geom_jitter(pch='.') +
     geom_smooth(method = "loess", se = TRUE) +
-    facet_wrap(SECU~., ncol = 2) +
+    facet_grid(strata~SECU) +  ## SECUs are nested within strata
     labs(x = "Years Educated", y = "Income (Expressed as % of Poverty Level)",
          title = "Relationship Separated by Cluster")
 
