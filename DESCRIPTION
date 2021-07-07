@@ -8,7 +8,7 @@ Authors@R: c(
     person("Jerzy", "Wieczorek", email = "jawieczo@colby.edu", role = c("cre", "aut")))
 Description: Functions to generate mean squared error estimates using cross validation, 
     based on how a survey design is constructed (SRS, Cluster, Stratification).
-    You can input linear and logistic regrssion models, along with data and a 
+    You can input linear and logistic regression models, along with data and a 
     type of survey design in order to get and output that can help you determine
     which model best fits the data using K-fold cross validation.
 License: GPL-2 | GPL-3

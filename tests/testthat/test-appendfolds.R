@@ -84,4 +84,54 @@ test_that("Stratified folds spread out cases evenly across folds", {
 })
 
 
-# TODO: add tests for the combined strat+clus case
+
+
+test_that("Clust+strat folds spread out cases evenly across folds", {
+  df.f <- appendfolds(Data = df, nfolds = 3, strataID = "strat", clusterID = "clus")
+
+  # Make sure rows are still in original order
+  expect_equal(row.names(df), row.names(df.f))
+
+  # Make sure all cases from a given strat-clus *pair* are in the same fold:
+  # table() the dataset with rows="strat.clus", cols=folds,
+  # and ensure there's exactly one nonzero entry in each row
+  df.f$strat.clus <- paste(df.f$strat, df.f$clus, sep=".")
+  expect_equal((table(strat.clus = df.f$strat.clus, fold = df.f$.foldID) > 0) %>%
+                 rowSums %>%
+                 unname,
+               rep(1, nclus*nstrat))
+
+  # Make sure all *clusters* from a given stratum are about equally spread across folds:
+  # table() the dataset of unique strat.clus combos with rows=strat, cols=folds,
+  # and ensure the range is 0 or 1 within each row
+  df.f.unique <- df.f[row.names(unique(data.frame(strat, clus))),]
+  expect_equal(table(strat = df.f.unique$strat, fold = df.f.unique$.foldID) %>%
+                 apply(1, function(x) diff(range(x))) %>%
+                 unname,
+               rep(0, nstrat),
+               tolerance = 1)
+
+  # Should all *cases* be about equally spread across folds?
+  # And should all *cases from a given stratum* be about equally spread across folds?
+  # No, not necessarily expected if we have unequal cluster sizes...
+  # addmargins(table(fold = df.f$.foldID))
+  # addmargins(table(strat = df.f$strat, fold = df.f$.foldID))
+})
+
+
+
+test_that("stopifnot catches bad inputs", {
+  # Stop if nfolds > nclus
+  expect_error(df.f <- appendfolds(Data = df, nfolds = 10, clusterID = "clus"),
+               "nfolds <= nClus is not TRUE")
+
+  # Stop if nfolds > size of any stratum
+  expect_error(df.f <- appendfolds(Data = df, nfolds = 30, strataID = "strat"),
+               paste0("\\Q", "nfolds <= min(table(strat))", "\\E"))
+  # Using \\Q and \\E to say: match this EXACT TEXT
+  # instead of trying to parse (,),$ as regex
+
+  # Stop if nfolds > nr of clusters in any stratum
+  expect_error(df.f <- appendfolds(Data = df, nfolds = 10, strataID = "strat", clusterID = "clus"),
+               paste0("\\Q", "nfolds <= table(foldID.clus$strat)", "\\E"))
+})
