@@ -28,6 +28,7 @@ Suggests:
     lattice (>= 0.20-41),
     knitr (>= 1.29),
     rmarkdown (>= 2.2),
-    testthat
+    testthat,
+    magrittr
 VignetteBuilder: knitr
 RoxygenNote: 7.1.1.9000
