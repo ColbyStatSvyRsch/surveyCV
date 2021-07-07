@@ -2,10 +2,38 @@
 
 
 # TODO: DOCUMENTATION WILL NEED TO BE UPDATED
+#   (eventually, though perhaps no rush, since
+#   this is not currently meant to be a user-facing function)
+
+# TODO: Combine all these 4 cases (SRS, Clus, Strat, and Clus+Strat)
+#   into one Clus+Strat case where we just
+#   set all cluster IDs to 1:n if there's no clustering, and/or
+#   set all stratum IDs to 1 if there's no stratification
+
+# TODO: Change the stopifnot() error message for strata:
+#   if some strata are too small and you don't want to decrease nfolds,
+#   you could instead manually create larger pseudo-strata
+#   by combining several smaller ones... e.g. see Lumley p43?
+
+# TODO: Add a `verbose` argument, and if(verbose),
+#   print() or cat() a report about the nr of samples and PSUs
+#   in each fold or each strat-by-fold combo
+
+# TODO: Maybe separate this out into appendfolds() vs makefolds(),
+#   where appendfolds() is a wrapper (returns the dataset with .foldID in it),
+#   but makefolds() returns ONLY .foldID, in case that's ever needed alone?
+#   Perhaps may be useful for speeding up work with very large datasets?
+
+
+
+
+# appendfolds()
 # Inputs:
 #   the dataset,
 #   number of folds,
 #   and strings for the names of the stratum and cluster variables in Data
+#   (we don't ask whether nest=TRUE or FALSE because the code is written
+#    to handle clusters separately within each stratum, if strata are given)
 # Outputs:
 #   same dataset with fold IDs appended in a .foldID variable
 appendfolds <- function(Data, nfolds, strataID = NULL, clusterID = NULL) {
@@ -37,7 +65,7 @@ appendfolds <- function(Data, nfolds, strataID = NULL, clusterID = NULL) {
 
     # Stratified CV
     strat <- Data[[strataID]]
-    n <- length(strat)
+    n <- nrow(Data)
     # Each fold should be able to have at least one obs from each stratum
     stopifnot(nfolds <= min(table(strat)))
 
@@ -77,7 +105,7 @@ appendfolds <- function(Data, nfolds, strataID = NULL, clusterID = NULL) {
 
     strat <- Data[[strataID]]
     clus <- Data[[clusterID]]
-    n <- length(strat)
+    n <- nrow(Data)
 
     # Get all unique stratum-cluster combos
     foldID.clus <- unique(data.frame(strat, clus))
