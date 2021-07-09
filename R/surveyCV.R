@@ -14,8 +14,8 @@
 #' function, so that results correctly account for survey designs during
 #' K-fold cross validation.
 
-#' @importFrom survey svydesign svyglm svymean
-#' @importFrom stats predict
+#' @importFrom survey svydesign svyglm svymean make.formula
+#' @importFrom stats predict as.formula formula quasibinomial
 #'
 #' @docType package
 #' @name surveyCV

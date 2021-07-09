@@ -16,7 +16,7 @@ cv.svydesign(
 )
 }
 \arguments{
-\item{formulae}{Vector of formulas containing the variables to be compared in
+\item{formulae}{Vector of formulas (as strings) for the GLMs to be compared in
 cross validation}
 
 \item{nfolds}{Number of folds to be used during cross validation, defaults to
@@ -33,13 +33,23 @@ be the same as in the dataset used, ignore if stratification was not used}
 \item{method}{string, must be either linear or logistic, determines type of
 model fit during cross validation, defaults to linear}
 
-\item{weights}{Variable in data set that contains PPS weights
-  @examples
-#MSEs generated for different tests of first and second degree polynomial
-# fits predicting mpg from horsepower in the Auto Dataset. Clustering and
-Stratification was done along the "year" variable.
-#Using a survey design object to generate MSEs.
-data("Auto")
+\item{weights}{Variable in data set that contains PPS weights}
+
+\item{design_object}{Name of a Survey Design Object created using the Survey
+package if one is being used, defaults to NULL}
+}
+\description{
+Wrapper function which takes a `svydesign` object
+and a vector of model formulas (as strings),
+and passes it into `cv.svy()`.
+}
+\examples{
+# MSEs generated for different tests of first and second degree polynomial
+# fits predicting mpg from horsepower in the Auto dataset. Clustering and
+# Stratification was done along the "year" variable.
+# Using a survey design object to generate MSEs.
+data("Auto", package = "ISLR")
+library(survey)
 auto.srs.svy <- svydesign(ids = ~0,
                          strata = NULL,
                          fpc = rep(1000, 392),
@@ -52,18 +62,16 @@ auto.strat.svy <- svydesign(ids = ~0,
                            strata = ~year,
                            fpc = rep(1000, 392),
                            data = Auto)
-cv.svy.glm(formulae = c("mpg~poly(horsepower,1, raw = TRUE)", "mpg~poly(horsepower,2, raw = TRUE)",
-                       "mpg~poly(horsepower,3, raw = TRUE)"), design_object = auto.srs.svy, nfolds = 10, N = 1000)
-cv.svy.glm(formulae = c("mpg~poly(horsepower,1, raw = TRUE)", "mpg~poly(horsepower,2, raw = TRUE)",
-                       "mpg~poly(horsepower,3, raw = TRUE)"), design_object = auto.clus.svy, nfolds = 10, N = 1000)
-cv.svy.glm(formulae = c("mpg~poly(horsepower,1, raw = TRUE)", "mpg~poly(horsepower,2, raw = TRUE)",
-                       "mpg~poly(horsepower,3, raw = TRUE)"), design_object = auto.strat.svy, nfolds = 10, N = 1000)}
-
-\item{design_object}{Name of a Survey Design Object created using the Survey
-package if one is being used, defaults to NULL}
-}
-\description{
-This function combines the other cross validation functions in this package
-into a single function that is able to interpret datasets and also
-survey design objects and survey glms
+cv.svydesign(formulae = c("mpg~poly(horsepower,1, raw = TRUE)",
+                          "mpg~poly(horsepower,2, raw = TRUE)",
+                          "mpg~poly(horsepower,3, raw = TRUE)"),
+             design_object = auto.srs.svy, nfolds = 10, N = 1000)
+cv.svydesign(formulae = c("mpg~poly(horsepower,1, raw = TRUE)",
+                          "mpg~poly(horsepower,2, raw = TRUE)",
+                          "mpg~poly(horsepower,3, raw = TRUE)"),
+             design_object = auto.clus.svy, nfolds = 10, N = 1000)
+cv.svydesign(formulae = c("mpg~poly(horsepower,1, raw = TRUE)",
+                          "mpg~poly(horsepower,2, raw = TRUE)",
+                          "mpg~poly(horsepower,3, raw = TRUE)"),
+             design_object = auto.strat.svy, nfolds = 10, N = 1000)
 }

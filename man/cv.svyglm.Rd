@@ -29,37 +29,42 @@ be the same as in the dataset used, ignore if stratification was not used}
 \item{method}{string, must be either linear or logistic, determines type of
 model fit during cross validation, defaults to linear}
 
-\item{weights}{Variable in data set that contains PPS weights
-  @examples
-#MSEs generated for different tests of first and second degree polynomial
-# fits predicting mpg from horsepower in the Auto Dataset. Clustering and
-Stratification was done along the "year" variable.
-#Using a survey glm to generate MSEs.
-data("Auto")
-auto.srs.svy <- svydesign(ids = ~0,
-                         strata = NULL,
-                         fpc = rep(1000, 392),
-                         data = Auto)
-srs.model <- svyglm(mpg~horsepower+I(horsepower^2)+I(horsepower^3), design = auto.srs.svy)
-auto.clus.svy <- svydesign(ids = ~year,
-                          strata = NULL,
-                          fpc = rep(1000, 392),
-                          data = Auto)
-clus.model <- svyglm(mpg~horsepower+I(horsepower^2)+I(horsepower^3), design = auto.clus.svy)
-auto.strat.svy <- svydesign(ids = ~0,
-                           strata = ~year,
-                           fpc = rep(1000, 392),
-                           data = Auto)
-strat.model <- svyglm(mpg~horsepower+I(horsepower^2)+I(horsepower^3), design = auto.strat.svy)
-cv.svyglm(glm = srs.model, nfolds = 10, N = 1000)
-cv.svyglm(glm = clus.model, nfolds = 10, N = 1000)
-cv.svyglm(glm = strat.model, nfolds = 10, N = 1000)}
+\item{weights}{Variable in data set that contains PPS weights}
 
 \item{glm}{Name of a Survey GLM created from the survey package if one is
 to be used, defaults to NULL}
 }
 \description{
-This function combines the other cross validation functions in this package
-into a single function that is able to interpret datasets and also
-survey design objects and survey glms
+Wrapper function which takes a `svyglm` object
+(which itself contains a `svydesign` object)
+and passes it through `cv.svydesign()` to `cv.svy()`.
+}
+\examples{
+# MSEs generated for different tests of first and second degree polynomial
+# fits predicting mpg from horsepower in the Auto dataset. Clustering and
+# Stratification was done along the "year" variable.
+# Using a survey glm to generate MSEs.
+data("Auto", package = "ISLR")
+library(survey)
+auto.srs.svy <- svydesign(ids = ~0,
+                         strata = NULL,
+                         fpc = rep(1000, 392),
+                         data = Auto)
+srs.model <- svyglm(mpg~horsepower+I(horsepower^2)+I(horsepower^3),
+                    design = auto.srs.svy)
+auto.clus.svy <- svydesign(ids = ~year,
+                          strata = NULL,
+                          fpc = rep(1000, 392),
+                          data = Auto)
+clus.model <- svyglm(mpg~horsepower+I(horsepower^2)+I(horsepower^3),
+                     design = auto.clus.svy)
+auto.strat.svy <- svydesign(ids = ~0,
+                           strata = ~year,
+                           fpc = rep(1000, 392),
+                           data = Auto)
+strat.model <- svyglm(mpg~horsepower+I(horsepower^2)+I(horsepower^3),
+                      design = auto.strat.svy)
+cv.svyglm(glm = srs.model, nfolds = 10, N = 1000)
+cv.svyglm(glm = clus.model, nfolds = 10, N = 1000)
+cv.svyglm(glm = strat.model, nfolds = 10, N = 1000)
 }

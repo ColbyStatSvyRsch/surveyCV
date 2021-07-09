@@ -1,10 +1,10 @@
 #' CV Survey Design function
 #'
-#' This function combines the other cross validation functions in this package
-#' into a single function that is able to interpret datasets and also
-#' survey design objects and survey glms
+#' Wrapper function which takes a `svydesign` object
+#' and a vector of model formulas (as strings),
+#' and passes it into `cv.svy()`.
 #'
-#' @param formulae Vector of formulas containing the variables to be compared in
+#' @param formulae Vector of formulas (as strings) for the GLMs to be compared in
 #'   cross validation
 #' @param nfolds Number of folds to be used during cross validation, defaults to
 #'   5
@@ -18,12 +18,13 @@
 #' @param method string, must be either linear or logistic, determines type of
 #'   model fit during cross validation, defaults to linear
 #' @param weights Variable in data set that contains PPS weights
-#'   @examples
-#' #MSEs generated for different tests of first and second degree polynomial
-#' # fits predicting mpg from horsepower in the Auto Dataset. Clustering and
-#' Stratification was done along the "year" variable.
-#' #Using a survey design object to generate MSEs.
-#' data("Auto")
+#' @examples
+#' # MSEs generated for different tests of first and second degree polynomial
+#' # fits predicting mpg from horsepower in the Auto dataset. Clustering and
+#' # Stratification was done along the "year" variable.
+#' # Using a survey design object to generate MSEs.
+#' data("Auto", package = "ISLR")
+#' library(survey)
 #' auto.srs.svy <- svydesign(ids = ~0,
 #'                          strata = NULL,
 #'                          fpc = rep(1000, 392),
@@ -36,13 +37,28 @@
 #'                            strata = ~year,
 #'                            fpc = rep(1000, 392),
 #'                            data = Auto)
-#' cv.svy.glm(formulae = c("mpg~poly(horsepower,1, raw = TRUE)", "mpg~poly(horsepower,2, raw = TRUE)",
-#'                        "mpg~poly(horsepower,3, raw = TRUE)"), design_object = auto.srs.svy, nfolds = 10, N = 1000)
-#' cv.svy.glm(formulae = c("mpg~poly(horsepower,1, raw = TRUE)", "mpg~poly(horsepower,2, raw = TRUE)",
-#'                        "mpg~poly(horsepower,3, raw = TRUE)"), design_object = auto.clus.svy, nfolds = 10, N = 1000)
-#' cv.svy.glm(formulae = c("mpg~poly(horsepower,1, raw = TRUE)", "mpg~poly(horsepower,2, raw = TRUE)",
-#'                        "mpg~poly(horsepower,3, raw = TRUE)"), design_object = auto.strat.svy, nfolds = 10, N = 1000)
+#' cv.svydesign(formulae = c("mpg~poly(horsepower,1, raw = TRUE)",
+#'                           "mpg~poly(horsepower,2, raw = TRUE)",
+#'                           "mpg~poly(horsepower,3, raw = TRUE)"),
+#'              design_object = auto.srs.svy, nfolds = 10, N = 1000)
+#' cv.svydesign(formulae = c("mpg~poly(horsepower,1, raw = TRUE)",
+#'                           "mpg~poly(horsepower,2, raw = TRUE)",
+#'                           "mpg~poly(horsepower,3, raw = TRUE)"),
+#'              design_object = auto.clus.svy, nfolds = 10, N = 1000)
+#' cv.svydesign(formulae = c("mpg~poly(horsepower,1, raw = TRUE)",
+#'                           "mpg~poly(horsepower,2, raw = TRUE)",
+#'                           "mpg~poly(horsepower,3, raw = TRUE)"),
+#'              design_object = auto.strat.svy, nfolds = 10, N = 1000)
 #' @export
+
+
+# TODO: Write formal unit tests
+
+# TODO: Make the documentation and fn args consistent with cv.svy and cv.svyglm
+
+# TODO: Remove strataID, clusterID, and other things you can extract
+#       from a svydesign -- the whole point of this fn is to pass in a svydesign
+#       so you don't have to specify those things again
 
 
 
@@ -72,11 +88,11 @@ cv.svydesign <- function(formulae, nfolds=5, N, clusterID = NULL, strataID = NUL
     if (is.null(design_object[["call"]][["weights"]]) == FALSE) {
       weights = paste0(design_object[["call"]][["weights"]][[2]])
     } else {weights = FALSE}
-    
+
   }
   # Runs our general cv.svy() function with all of the variables and data pulled from the design object
-  cv.svy(Data = .data, formulae = formulae, nfolds = nfolds, clusterID = clusterID, strataID = strataID, N = N, method = method, 
+  cv.svy(Data = .data, formulae = formulae, nfolds = nfolds, clusterID = clusterID, strataID = strataID, N = N, method = method,
             weights = weights, nest = nest)
-  
+
 }
 

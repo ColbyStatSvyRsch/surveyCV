@@ -4,7 +4,7 @@
 #' stratified, clustered, or clustered-and-stratified sampling design.
 #'
 #' @param Data Dataframe of dataset to be tested
-#' @param formulae Vector of formulas for the GLMs to be compared in
+#' @param formulae Vector of formulas (as strings) for the GLMs to be compared in
 #'   cross validation
 #' @param nfolds Number of folds to be used during cross validation, defaults to
 #'   5
@@ -30,6 +30,7 @@
 #' @export
 
 
+# TODO: Rename to cvsvy_function.R or similar
 
 # TODO: Allow N to be unspecified or NULL
 

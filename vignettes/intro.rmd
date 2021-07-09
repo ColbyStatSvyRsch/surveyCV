@@ -35,22 +35,20 @@ data("NSFG_data")
 plot_list <- surveyCV:::plot_generation()
 plot_list2 <- surveyCV:::plot_generation2()
 plot_list3 <- surveyCV:::plot_generation3()
-save("plot_list", "plot_list2", "plot_list3",
-     file = "data/plotgen.rda")
+usethis::use_data(plot_list, plot_list2, plot_list3, internal = TRUE)
 ```
 
 ```{r plotprocess}
-data("plotgen")
-sim.clusvsrs.sd.n100 <- plot_list$sim.clusvsrs.sd.n100
-sim.clusvsrs.bp.n100 <- plot_list$sim.clusvsrs.bp.n100
-sim.stratvsrs.bp.n100 <- plot_list$sim.stratvsrs.bp.n100
+sim.clusvsrs.sd.n100 <- surveyCV:::plot_list$sim.clusvsrs.sd.n100
+sim.clusvsrs.bp.n100 <- surveyCV:::plot_list$sim.clusvsrs.bp.n100
+sim.stratvsrs.bp.n100 <- surveyCV:::plot_list$sim.stratvsrs.bp.n100
 
-Main.weights.plot <- plot_list2$Main.weights.plot
-quad.sample.graph <- plot_list2$quad.sample.graph
+Main.weights.plot <- surveyCV:::plot_list2$Main.weights.plot
+quad.sample.graph <- surveyCV:::plot_list2$quad.sample.graph
 
-NSFG.plot <- plot_list3$NSFG.plot
-NSFG.cluster.plot <- plot_list3$NSFG.cluster.plot
-NSFG.strata.plot <- plot_list3$NSFG.strata.plot
+NSFG.plot <- surveyCV:::plot_list3$NSFG.plot
+NSFG.cluster.plot <- surveyCV:::plot_list3$NSFG.cluster.plot
+NSFG.strata.plot <- surveyCV:::plot_list3$NSFG.strata.plot
 ```
 
 # Approach

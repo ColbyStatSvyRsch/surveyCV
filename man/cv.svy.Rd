@@ -20,7 +20,7 @@ cv.svy(
 \arguments{
 \item{Data}{Dataframe of dataset to be tested}
 
-\item{formulae}{Vector of formulas for the GLMs to be compared in
+\item{formulae}{Vector of formulas (as strings) for the GLMs to be compared in
 cross validation}
 
 \item{nfolds}{Number of folds to be used during cross validation, defaults to

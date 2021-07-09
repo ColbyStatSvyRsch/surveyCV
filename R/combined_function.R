@@ -1,8 +1,8 @@
 #' CV Survey GLM function
 #'
-#' This function combines the other cross validation functions in this package
-#' into a single function that is able to interpret datasets and also
-#' survey design objects and survey glms
+#' Wrapper function which takes a `svyglm` object
+#' (which itself contains a `svydesign` object)
+#' and passes it through `cv.svydesign()` to `cv.svy()`.
 #'
 #' @param nfolds Number of folds to be used during cross validation, defaults to
 #'   5
@@ -16,37 +16,49 @@
 #' @param method string, must be either linear or logistic, determines type of
 #'   model fit during cross validation, defaults to linear
 #' @param weights Variable in data set that contains PPS weights
-#'   @examples
-#' #MSEs generated for different tests of first and second degree polynomial
-#' # fits predicting mpg from horsepower in the Auto Dataset. Clustering and
-#' Stratification was done along the "year" variable.
-#' #Using a survey glm to generate MSEs.
-#' data("Auto")
+#' @examples
+#' # MSEs generated for different tests of first and second degree polynomial
+#' # fits predicting mpg from horsepower in the Auto dataset. Clustering and
+#' # Stratification was done along the "year" variable.
+#' # Using a survey glm to generate MSEs.
+#' data("Auto", package = "ISLR")
+#' library(survey)
 #' auto.srs.svy <- svydesign(ids = ~0,
 #'                          strata = NULL,
 #'                          fpc = rep(1000, 392),
 #'                          data = Auto)
-#' srs.model <- svyglm(mpg~horsepower+I(horsepower^2)+I(horsepower^3), design = auto.srs.svy)
+#' srs.model <- svyglm(mpg~horsepower+I(horsepower^2)+I(horsepower^3),
+#'                     design = auto.srs.svy)
 #' auto.clus.svy <- svydesign(ids = ~year,
 #'                           strata = NULL,
 #'                           fpc = rep(1000, 392),
 #'                           data = Auto)
-#' clus.model <- svyglm(mpg~horsepower+I(horsepower^2)+I(horsepower^3), design = auto.clus.svy)
+#' clus.model <- svyglm(mpg~horsepower+I(horsepower^2)+I(horsepower^3),
+#'                      design = auto.clus.svy)
 #' auto.strat.svy <- svydesign(ids = ~0,
 #'                            strata = ~year,
 #'                            fpc = rep(1000, 392),
 #'                            data = Auto)
-#' strat.model <- svyglm(mpg~horsepower+I(horsepower^2)+I(horsepower^3), design = auto.strat.svy)
+#' strat.model <- svyglm(mpg~horsepower+I(horsepower^2)+I(horsepower^3),
+#'                       design = auto.strat.svy)
 #' cv.svyglm(glm = srs.model, nfolds = 10, N = 1000)
 #' cv.svyglm(glm = clus.model, nfolds = 10, N = 1000)
 #' cv.svyglm(glm = strat.model, nfolds = 10, N = 1000)
 #' @export
 
+# TODO: Write formal unit tests
 
+# TODO: Make the documentation and fn args consistent with cv.svy and cv.svyglm
+
+# TODO: Remove strataID, clusterID, and other things you can extract
+#       from a svydesign -- the whole point of this fn is to pass in a svydesign
+#       so you don't have to specify those things again
+
+# TODO: Rename to svyglm_function.R or similar
 
 cv.svyglm <- function(nfolds=5, N, clusterID = NULL, strataID = NULL, method = "linear", weights = NULL, glm = NULL) {
   # When a glm object is specified, then the function can pull pieces of information needed from the glm.
-  # This takes the formula from the model and reformats it so that it can be made into a string 
+  # This takes the formula from the model and reformats it so that it can be made into a string
   # so it can be used in our general cv.svy() function.
   # Any reformating done is because the glm objects are weird with formulas that contain parenthases.
   # In this, `b` is what makes up the left side of our formula, and `c` makes up the right side of the formula.
@@ -61,8 +73,8 @@ cv.svyglm <- function(nfolds=5, N, clusterID = NULL, strataID = NULL, method = "
       b1 <- b[1]
       b2 <- b[2]
       ys <- paste0(b1, "(", b2, ")")
-      # `c` is a list, and if `c` has a length of 3, then that is because the formula includes 
-      # something like the natural splines function or the poly() function with  additional arguments, 
+      # `c` is a list, and if `c` has a length of 3, then that is because the formula includes
+      # something like the natural splines function or the poly() function with  additional arguments,
       # so we must split `c` to find out which one.
       if (length(c) == 3) {
         c1 <- c[1]
@@ -75,7 +87,7 @@ cv.svyglm <- function(nfolds=5, N, clusterID = NULL, strataID = NULL, method = "
         } else if (c1 == "poly") {
           xs <- paste0(c1, "(", c2, ",raw=", c3, ")")
         } else {xs <- paste0(c2, c1, c3)}
-        # `c` is a list, and if `c` has a length of 2, then that is because the formula includes 
+        # `c` is a list, and if `c` has a length of 2, then that is because the formula includes
         # something like the ns() or poly() or log() functions without additional arguments.
         # This is how we format the right side of the formula for this scenario.
       } else if (length(c) == 2) {
@@ -92,8 +104,8 @@ cv.svyglm <- function(nfolds=5, N, clusterID = NULL, strataID = NULL, method = "
       formulae = paste0(ys, "~", xs)
       # `b` is a list, and if `b` has a length of 1, we have to do the same process as above.
     } else if (length(b) == 1) {
-      # `c` is a list, and if `c` has a length of 3, then that is because the formula includes 
-      # something like the natural splines function or the poly() function with  additional arguments, 
+      # `c` is a list, and if `c` has a length of 3, then that is because the formula includes
+      # something like the natural splines function or the poly() function with  additional arguments,
       # so we must split `c` to find out which one.
       if (length(c) == 3) {
         c1 <- c[1]
@@ -106,7 +118,7 @@ cv.svyglm <- function(nfolds=5, N, clusterID = NULL, strataID = NULL, method = "
         } else if (c1 == "poly") {
           xs <- paste0(c1, "(", c2, ",raw=", c3, ")")
         } else {xs <- paste0(c2, c1, c3)}
-        # `c` is a list, and if `c` has a length of 2, then that is because the formula includes 
+        # `c` is a list, and if `c` has a length of 2, then that is because the formula includes
         # something like the ns() or poly() or log() functions without additional arguments.
         # This is how we format the right side of the formula for this scenario.
       } else if (length(c) == 2) {
