@@ -122,3 +122,18 @@ set.seed(seed)
 cv.svyglm(glm = srs.model, nfolds = 10, N = 1000)
 ```
 
+
+
+## Tests that we expect should fail
+
+```{r}
+# Should stop early because method isn't linear or logistic
+try(cv.svy(Auto, "mpg~horsepower+I(horsepower^2)+I(horsepower^3)",
+           nfolds = 10, N = 1000,
+           method = "abcde"))
+
+# Should try to run but crash because response variable isn't 0/1
+try(cv.svy(Auto, "mpg~horsepower+I(horsepower^2)+I(horsepower^3)",
+           nfolds = 10, N = 1000,
+           method = "logistic"))
+```

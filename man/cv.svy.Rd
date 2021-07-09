@@ -12,9 +12,9 @@ cv.svy(
   clusterID = NULL,
   nest = FALSE,
   N,
-  method = "linear",
+  method = c("linear", "logistic"),
   weights = NULL,
-  afolds = TRUE
+  useSvyForFolds = TRUE
 )
 }
 \arguments{
@@ -41,7 +41,7 @@ model fit during cross validation, defaults to linear}
 
 \item{weights}{String of the variable name in the dataset that contains sampling weights}
 
-\item{afolds}{Specify afolds = TRUE (default) to take svydesign into account when making folds;
+\item{useSvyForFolds}{Specify useSvyForFolds = TRUE (default) to take svydesign into account when making folds;
 should not be set FALSE except for running simulations to understand the properties of surveyCV}
 }
 \description{
