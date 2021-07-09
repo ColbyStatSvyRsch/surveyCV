@@ -1,29 +1,32 @@
 #' General CV function
 #'
-#' this is a cross validation function designed for survey samples taken using a SRS,
-#' stratified, Clustered, or Clustered and Stratified sampling design
+#' This is a cross validation function designed for survey samples taken using a SRS,
+#' stratified, clustered, or clustered-and-stratified sampling design.
 #'
-#' @param Data CSV of dataset to be tested
-#' @param formulae Vector of formulas containing the variables to be compared in
+#' @param Data Dataframe of dataset to be tested
+#' @param formulae Vector of formulas for the GLMs to be compared in
 #'   cross validation
 #' @param nfolds Number of folds to be used during cross validation, defaults to
 #'   5
-#' @param strataID String of the variable used to Stratify during sampling, must
+#' @param strataID String of the variable name used to stratify during sampling, must
 #'   be the same as in the dataset used
-#' @param clusterID String of the variable used to cluster during sampling, must
+#' @param clusterID String of the variable name used to cluster during sampling, must
 #'   be the same as in the dataset used
-#' @param N Number equal to the total population size
-#' @param method string, must be either linear or logistic, determines type of
+#' @param N Total finite population size
+#' @param method String, must be either "linear" or "logistic", determines type of
 #'   model fit during cross validation, defaults to linear
-#' @param weights Variable in data set that contains PPS weights
-#' @param nest Specify if nest = TRUE if clusters are nested within strata
-#' @param afolds specify if we take into account svydesign when making folds
-#'  @examples
-#' #MSEs generated for a stratified test of a first and second degree polynomial
-#' # fit predicting mpg from horsepower in the Auto Dataset, Stratified on the
+#' @param weights String of the variable name in the dataset that contains sampling weights
+#' @param nest Specify nest = TRUE if clusters are nested within strata, defaults to FALSE
+#' @param afolds Specify afolds = TRUE (default) to take svydesign into account when making folds;
+#'   should not be set FALSE except for running simulations to understand the properties of surveyCV
+#' @examples
+#' # MSEs generated for a stratified test of a first and second degree polynomial
+#' # fit predicting mpg from horsepower in the Auto dataset, stratified on the
 #' # "year" variable
-#' data("Auto")
-#' cv.svy(Auto, c("mpg~poly(horsepower,1, raw = TRUE)", "mpg~poly(horsepower,2, raw = TRUE)"), nfolds = 10, strataID = "year", N = 400)
+#' data("Auto", package = "ISLR")
+#' cv.svy(Auto, c("mpg~poly(horsepower,1, raw = TRUE)",
+#'                "mpg~poly(horsepower,2, raw = TRUE)"),
+#'        nfolds = 10, strataID = "year", N = 400)
 #' @export
 
 
@@ -48,7 +51,7 @@ cv.svy <- function(Data, formulae, nfolds=5, strataID = NULL, clusterID = NULL ,
   } else  {
     Data <- appendfolds(Data = Data, nfolds = nfolds)
   }
- 
+
   # Makes a matrix that the test errors squared will be pumped back into inside the for loop
   .test_errors_sq <- matrix(NA, nrow=nrow(Data), ncol=length(formulae))
   # This loops through each fold to create a training dataset and holdout (test) dataset for that
@@ -96,7 +99,7 @@ cv.svy <- function(Data, formulae, nfolds=5, strataID = NULL, clusterID = NULL ,
                          weights = if(is.null(weights)) NULL else formula(paste0("~", weights)),
                          nest = nest,
                          data = Data)
-  
+
   # Makes an empty matrix that we can pump the means and SE into for each formula by row
   means <- matrix(NA, nrow=length(formulae), ncol=2)
   # Sets i for the loop to start at the first column in the dataset that contains test errors sq

@@ -18,38 +18,42 @@ cv.svy(
 )
 }
 \arguments{
-\item{Data}{CSV of dataset to be tested}
+\item{Data}{Dataframe of dataset to be tested}
 
-\item{formulae}{Vector of formulas containing the variables to be compared in
+\item{formulae}{Vector of formulas for the GLMs to be compared in
 cross validation}
 
 \item{nfolds}{Number of folds to be used during cross validation, defaults to
 5}
 
-\item{strataID}{String of the variable used to Stratify during sampling, must
+\item{strataID}{String of the variable name used to stratify during sampling, must
 be the same as in the dataset used}
 
-\item{clusterID}{String of the variable used to cluster during sampling, must
+\item{clusterID}{String of the variable name used to cluster during sampling, must
 be the same as in the dataset used}
 
-\item{nest}{Specify if nest = TRUE if clusters are nested within strata}
+\item{nest}{Specify nest = TRUE if clusters are nested within strata, defaults to FALSE}
 
-\item{N}{Number equal to the total population size}
+\item{N}{Total finite population size}
 
-\item{method}{string, must be either linear or logistic, determines type of
+\item{method}{String, must be either "linear" or "logistic", determines type of
 model fit during cross validation, defaults to linear}
 
-\item{weights}{Variable in data set that contains PPS weights}
+\item{weights}{String of the variable name in the dataset that contains sampling weights}
 
-\item{afolds}{specify if we take into account svydesign when making folds
- @examples
-#MSEs generated for a stratified test of a first and second degree polynomial
-# fit predicting mpg from horsepower in the Auto Dataset, Stratified on the
-# "year" variable
-data("Auto")
-cv.svy(Auto, c("mpg~poly(horsepower,1, raw = TRUE)", "mpg~poly(horsepower,2, raw = TRUE)"), nfolds = 10, strataID = "year", N = 400)}
+\item{afolds}{Specify afolds = TRUE (default) to take svydesign into account when making folds;
+should not be set FALSE except for running simulations to understand the properties of surveyCV}
 }
 \description{
-this is a cross validation function designed for survey samples taken using a SRS,
-stratified, Clustered, or Clustered and Stratified sampling design
+This is a cross validation function designed for survey samples taken using a SRS,
+stratified, clustered, or clustered-and-stratified sampling design.
+}
+\examples{
+# MSEs generated for a stratified test of a first and second degree polynomial
+# fit predicting mpg from horsepower in the Auto dataset, stratified on the
+# "year" variable
+data("Auto", package = "ISLR")
+cv.svy(Auto, c("mpg~poly(horsepower,1, raw = TRUE)",
+               "mpg~poly(horsepower,2, raw = TRUE)"),
+       nfolds = 10, strataID = "year", N = 400)
 }
