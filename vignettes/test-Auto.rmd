@@ -39,6 +39,10 @@ with(Auto, plot(horsepower, mpg, pch = '.'))
 
 ```{r}
 # Test the general cv.svy() function
+
+# The first line's results are usually around:
+# linear lm:      mean=24.3, se=1.45
+# quadratic lm:   mean=19.3, se=1.38
 cv.svy(Auto, c("mpg~poly(horsepower,1, raw = TRUE)",
                "mpg~poly(horsepower,2, raw = TRUE)"),
        nfolds = 10, N = 1000)
