@@ -1,3 +1,5 @@
+library(stats)
+
 plot_generation <- function() {
 
   set.seed(47)
@@ -1134,7 +1136,7 @@ plot_generation2 <- function() {
       # Take a sample of size n, using the sampling probabilities instead of SRS
       # (using 1/samp_wt as the samp_prob)
       stopifnot(all.equal(sum(1/spline.df3[[weights]]), 1))
-      in.sample <- UPtille(n / spline.df3[[weights]])
+      in.sample <- sampling::UPtille(n / spline.df3[[weights]])
       spline.df3.sample <- spline.df3[in.sample > 0, ]
       # Collecting MSE outputs when using SRS folds, SRS models, and SRS design for error calculations
       AllWdat <- cv.srs.lm1(spline.df3.sample, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
@@ -1225,7 +1227,7 @@ plot_generation2 <- function() {
   # for samp_wt_quad, we'd expect most of the sampled points
   #   to fall near the quadratic-fit line,
   #   even if doesn't match the general trend of full dataset.
-  in.sample.tmp <- UPtille(100 / spline.df3[["samp_wt_quad"]])
+  in.sample.tmp <- sampling::UPtille(100 / spline.df3[["samp_wt_quad"]])
   sum(in.sample.tmp > 0)
   spline.df3.sample.tmp <- spline.df3[in.sample.tmp > 0, ]
   ggplot(spline.df3.sample.tmp, aes(x = Predictor, y = Response, size = samp_prob_quad, alpha = samp_prob_quad)) +
@@ -1257,7 +1259,7 @@ plot_generation3 <- function(){
       ignore.ds2 <- data.frame(df = 1:6, MSE = ignore.data[,1])
       ignore.ds <- rbind(ignore.ds, ignore.ds2)
       fold.data <- cv.svy(NSFG_data, c("income~ns(YrEdu, df = 1)","income~ns(YrEdu, df = 2)","income~ns(YrEdu, df = 3)","income~ns(YrEdu, df = 4)","income~ns(YrEdu, df = 5)","income~ns(YrEdu, df = 6)"), nfolds = 4, strataID = "strata",
-                            clusterID = "SECU", nest = TRUE, weights = "wgt", N = 5100, afolds = FALSE)
+                            clusterID = "SECU", nest = TRUE, weights = "wgt", N = 5100, useSvyForFolds = FALSE)
       fold.ds2 <- data.frame(df = 1:6, MSE = fold.data[,1])
       fold.ds <- rbind(fold.ds, fold.ds2)
       }
