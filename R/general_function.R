@@ -30,6 +30,27 @@
 #' @export
 
 
+
+# TODO: Allow N to be unspecified or NULL
+
+# TODO: Improve the API / interface: be consistent with `survey`, with tidyverse,
+#       and with other packages that do cross-validation (or at least SOME of these)
+
+# TODO: Allow other svydesign features besides clusters, strata, weights, and nest
+
+# TODO: Write formal unit tests
+
+# TODO: Add other GLMs (eg Poisson) and other models built in to `survey`;
+#       or is there a better way to write our code so it "just works" no matter what model,
+#       so users don't have to specify linear, logistic, etc.?
+
+# TODO: Condense the ways we create train.svydes and full.svydes to avoid code copies?
+
+# TODO: Condense the ways we calculate test errors / losses for linear vs logistic, to avoid code copies?
+
+
+
+
 # General Cross Validation
 cv.svy <- function(Data, formulae, nfolds=5, strataID = NULL, clusterID = NULL , nest = FALSE, N,
                    method = c("linear", "logistic"), weights = NULL, useSvyForFolds = TRUE) {
@@ -44,6 +65,7 @@ cv.svy <- function(Data, formulae, nfolds=5, strataID = NULL, clusterID = NULL ,
 
   # Turns the strings of formulas into a list of formulas
   formulae <- sapply(formulae, as.formula)
+  nformulae <- length(formulae)
   # Creates an observation ID variable for the dataset
   Data$.ID <- 1:nrow(Data)
   # Runs our fold generation function seen in utils
@@ -54,7 +76,8 @@ cv.svy <- function(Data, formulae, nfolds=5, strataID = NULL, clusterID = NULL ,
   }
 
   # Makes a matrix that the test losses will be pumped back into inside the for loop
-  .test_loss <- matrix(NA, nrow=nrow(Data), ncol=length(formulae))
+  .test_loss <- matrix(NA, nrow=nrow(Data), ncol=nformulae)
+  colnames(.test_loss) <- paste0(".Model_", 1:nformulae)
   # This loops through each fold to create a training dataset and holdout (test) dataset for that
   # k-fold, while also making the svydesign for that fold based on the training dataset
   for (fold in 1:nfolds) {
@@ -72,7 +95,7 @@ cv.svy <- function(Data, formulae, nfolds=5, strataID = NULL, clusterID = NULL ,
     # for those formulas applied to each survey design made from each fold and plugs
     # those test losses back into the matrix we made earlier
     if (method == "linear") {
-      for (form in 1:length(formulae)) {
+      for (form in 1:nformulae) {
         current.model <- svyglm(formula=formulae[[form]], design=train.svydes)
         predictions <- predict(current.model, newdata=test)
         test.responses <- eval(formulae[[form]][[2]], envir=test)
@@ -80,7 +103,7 @@ cv.svy <- function(Data, formulae, nfolds=5, strataID = NULL, clusterID = NULL ,
         .test_loss[test$.ID, form] <- test.errors^2
       }
     } else if (method == "logistic") {
-      for (form in 1:length(formulae)) {
+      for (form in 1:nformulae) {
         current.model <- svyglm(formula=formulae[[form]], design=train.svydes, family = quasibinomial())
         predictions <- predict(current.model, newdata=test, type="response")
         test.responses <- eval(formulae[[form]][[2]], envir=test)
@@ -88,12 +111,12 @@ cv.svy <- function(Data, formulae, nfolds=5, strataID = NULL, clusterID = NULL ,
       }
     }
   }
+
   # This converts our matrix into a data frame so it can more easily manipulated
   test_loss.df <- as.data.frame(.test_loss)
-  # Attaches our test losses back onto the original dataset:
-  # append right into data$test_loss
+  # Attaches our test losses back onto the original dataset
   Data <- cbind(Data, test_loss.df)
-  # Makes a survey design for based off of the whole dataset so we can calculate a mean
+  # Makes a survey design based off of the whole dataset so we can calculate a mean
   full.svydes <- svydesign(ids = if(is.null(clusterID)) formula(~0) else formula(paste0("~", clusterID)),
                            strata = if(is.null(strataID)) NULL else formula(paste0("~", strataID)),
                            fpc = rep(N, nrow(Data)),
@@ -101,22 +124,12 @@ cv.svy <- function(Data, formulae, nfolds=5, strataID = NULL, clusterID = NULL ,
                            nest = nest,
                            data = Data)
 
-  # Makes an empty matrix that we can pump the means and SE into for each formula by row
-  means <- matrix(NA, nrow=length(formulae), ncol=2)
-  # Sets i for the loop to start at the first column in the dataset that contains test losses
-  i = ncol(Data) - length(formulae) + 1
-  # Sets the loop to start on column one of the matrix
-  y = 1
-  # Makes a data frame of the output from the svymean function and then plugs the Mean output
-  # into the first column of the matrix and the SE output into the second column of the matrix
-  while (i <= ncol(Data)) {
-    meansd <- data.frame(svymean(Data[,i], full.svydes))
-    means[y,1] <- meansd$mean
-    means[y,2] <- meansd$SE
-    i = i+1
-    y = y+1
-  }
-  # Returns the resulting matrix to the console
-  return(means)
+  # Get the names of the last nformulae columns of Data:
+  # each of these columns is the .test_loss values for one of the formulae
+  whichvars <- names(Data)[ncol(Data) - nformulae + (1:nformulae)]
+  # Use make.formula() to tell svymean() to estimate their means and SEs
+  CVmeans <- svymean(make.formula(whichvars), full.svydes)
+  # Return the resulting svystat object
+  return(CVmeans)
 }
 

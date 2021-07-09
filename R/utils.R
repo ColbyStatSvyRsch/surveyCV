@@ -24,6 +24,18 @@
 #   but makefolds() returns ONLY .foldID, in case that's ever needed alone?
 #   Perhaps may be useful for speeding up work with very large datasets?
 
+# TODO: The way we generate folds for stratified samples seems OK,
+#   but is there a better way?
+#   Something to ensure table(strat|fold) is least variable?
+#   (Would we even want that, if we could?)
+#   Should we check Kuhn et al's rsample::vfold_cv(strata = ...) ???
+#   https://rsample.tidymodels.org/reference/vfold_cv.html
+#   https://github.com/tidymodels/rsample/blob/master/R/vfold.R
+#   ...oh cool, they use enquo() and vars_select() to work with var names
+#   directly instead of expecting them as strings...
+#   maybe we should do this too, for specifying stratum / cluster variables etc?
+#   https://tidyeval.tidyverse.org/dplyr.html
+#   https://tidyselect.r-lib.org/reference/eval_select.html
 
 
 
