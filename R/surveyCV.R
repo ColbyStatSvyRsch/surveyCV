@@ -20,3 +20,13 @@
 #' @docType package
 #' @name surveyCV
 NULL
+
+
+## Quiets concerns of R CMD check re: variables in plot_generation.R
+## (as recommended at https://stackoverflow.com/a/12429344/1843885
+##  although some of these may be better changed to rlang::.data
+##  as suggested here: https://stackoverflow.com/a/57496617/1843885)
+utils::globalVariables(c("Predictor", "Response",
+                         "Cluster", "Stratum", "ID",
+                         "income", "YrEdu", "MSE",
+                         "df", "samp_prob_quad"))

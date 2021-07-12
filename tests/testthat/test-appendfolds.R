@@ -1,5 +1,3 @@
-library(magrittr)
-
 n <- 100
 nstrat <- 4
 nclus <- 8

@@ -1,13 +1,11 @@
-library(stats)
-
 plot_generation <- function() {
 
   set.seed(47)
-  x1 = runif(1:500, min = 26, max = 38)
+  x1 = stats::runif(1:500, min = 26, max = 38)
   y1 = (x1-29)^3 - 13*(x1-29)^2 + 0*(x1-29) + 900
 
   set.seed(47)
-  x2 = runif(1:500, min = 38, max = 50)
+  x2 = stats::runif(1:500, min = 38, max = 50)
   y2 = (x2-36)^3 - 10*(x2-36)^2 + 2*(x2-36) + 600
 
   set.seed(47)
@@ -23,14 +21,14 @@ plot_generation <- function() {
   b <- data.frame(ID = c(1:1000))
   spline.df2 <- cbind(b, ds)
   spline.df2 <- spline.df2 %>%
-    arrange(Predictor) %>%
-    mutate(Stratum = row_number(),
-           Cluster = row_number())
+    dplyr::arrange(Predictor) %>%
+    dplyr::mutate(Stratum = dplyr::row_number(),
+                  Cluster = dplyr::row_number())
   spline.df2$Stratum <- cut(spline.df2$Stratum,5, 1:5)
   spline.df2$Cluster <- cut(spline.df2$Cluster,100, 1:100)
   spline.df2 <- spline.df2 %>%
-    arrange(ID) %>%
-    select(ID, Response, Predictor, Cluster, Stratum)
+    dplyr::arrange(ID) %>%
+    dplyr::select(ID, Response, Predictor, Cluster, Stratum)
 
   # Cross Val for SRS and Strat/Cluster
   cv.srs.mixed.lm <- function(Data, formulae, nfolds=5, N, scID, method = "linear", model = "SRS", error_calc = "SRS"){
@@ -429,7 +427,7 @@ plot_generation <- function() {
     # Making as many simple random samples as we specify for 'loops'
     for (i in 1:loops) {
       set.seed(i)
-      sim.srs <- sample_n(spline.df2, n)
+      sim.srs <- dplyr::sample_n(spline.df2, n)
       # Using our SRS function on SRS samples to get MSE outputs from cross validation using 5 folds
       srs.data <- cv.svy(sim.srs, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
                                        "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
@@ -475,27 +473,27 @@ plot_generation <- function() {
     clusclusds$df <- as.factor(clusclusds$df)
     clussrsds$df <- as.factor(clussrsds$df)
     # Making a ggplot object for the MSEs where the SRS function was used on SRS samples
-    plot1 <- ggplot(data = srssrsds, mapping = aes(x = df, y = MSE)) +
-      geom_boxplot() +
-      ggtitle("SRS folds with SRS sample") +
-      ylim(20000, 250000)
+    plot1 <- ggplot2::ggplot(data = srssrsds, mapping = ggplot2::aes(x = df, y = MSE)) +
+      ggplot2::geom_boxplot() +
+      ggplot2::ggtitle("SRS folds with SRS sample") +
+      ggplot2::ylim(20000, 250000)
     # Making a ggplot object for the MSEs where the Cluster function was used on SRS samples
-    plot2 <- ggplot(data = srsclusds, mapping = aes(x = df, y = MSE)) +
-      geom_boxplot() +
-      ggtitle("Cluster folds with SRS sample") +
-      ylim(20000, 250000)
+    plot2 <- ggplot2::ggplot(data = srsclusds, mapping = ggplot2::aes(x = df, y = MSE)) +
+      ggplot2::geom_boxplot() +
+      ggplot2::ggtitle("Cluster folds with SRS sample") +
+      ggplot2::ylim(20000, 250000)
     # Making a ggplot object for the MSEs where the Cluster function was used on Cluster samples
-    plot3 <- ggplot(data = clusclusds, mapping = aes(x = df, y = MSE)) +
-      geom_boxplot() +
-      ggtitle("Cluster folds with Cluster sample") +
-      ylim(20000, 250000)
+    plot3 <- ggplot2::ggplot(data = clusclusds, mapping = ggplot2::aes(x = df, y = MSE)) +
+      ggplot2::geom_boxplot() +
+      ggplot2::ggtitle("Cluster folds with Cluster sample") +
+      ggplot2::ylim(20000, 250000)
     # Making a ggplot object for the MSEs where the SRS function was used on Cluster samples
-    plot4 <- ggplot(data = clussrsds, mapping = aes(x = df, y = MSE)) +
-      geom_boxplot() +
-      ggtitle("SRS folds with Cluster sample") +
-      ylim(20000, 250000)
+    plot4 <- ggplot2::ggplot(data = clussrsds, mapping = ggplot2::aes(x = df, y = MSE)) +
+      ggplot2::geom_boxplot() +
+      ggplot2::ggtitle("SRS folds with Cluster sample") +
+      ggplot2::ylim(20000, 250000)
     # Making a grid display of the four plot objects above
-    grid.arrange(plot1,plot2,plot4,plot3, ncol = 2,
+    gridExtra::grid.arrange(plot1,plot2,plot4,plot3, ncol = 2,
                  top = paste0("Simulated Spline Data (Sample Size = ", n, ", Clusters = ", n/10, ", Loops = ", loops, ")"))
   }
 
@@ -587,47 +585,47 @@ plot_generation <- function() {
     srssrsclus$sample <- as.factor(srssrsclus$sample)
     srsclusclus$sample <- as.factor(srsclusclus$sample)
     # Making a ggplot object for the MSEs collected when using SRS folds, SRS models, and SRS error calculations
-    p1 <- ggplot(data = srssrssrs, mapping = aes(x = df, y = MSE)) +
-      ggtitle("S:Cluster, F:SRS, M:SRS, MSE:SRS") +
-      ylim(20000, 250000)
+    p1 <- ggplot2::ggplot(data = srssrssrs, mapping = ggplot2::aes(x = df, y = MSE)) +
+      ggplot2::ggtitle("S:Cluster, F:SRS, M:SRS, MSE:SRS") +
+      ggplot2::ylim(20000, 250000)
     # Making a ggplot object for the MSEs collected when using SRS folds, Clus models, and SRS error calculations
-    p2 <- ggplot(data = srsclussrs, mapping = aes(x = df, y = MSE)) +
-      ggtitle("S:Cluster, F:SRS, M:Clus, MSE:SRS") +
-      ylim(20000, 250000)
+    p2 <- ggplot2::ggplot(data = srsclussrs, mapping = ggplot2::aes(x = df, y = MSE)) +
+      ggplot2::ggtitle("S:Cluster, F:SRS, M:Clus, MSE:SRS") +
+      ggplot2::ylim(20000, 250000)
     # Making a ggplot object for the MSEs collected when using Clus folds, Clus models, and Clus error calculations
-    p3 <- ggplot(data = clusclusclus, mapping = aes(x = df, y = MSE)) +
-      ggtitle("S:Cluster, F:Clus, M:Clus, MSE:Clus") +
-      ylim(20000, 250000)
+    p3 <- ggplot2::ggplot(data = clusclusclus, mapping = ggplot2::aes(x = df, y = MSE)) +
+      ggplot2::ggtitle("S:Cluster, F:Clus, M:Clus, MSE:Clus") +
+      ggplot2::ylim(20000, 250000)
     # Making a ggplot object for the MSEs collected when using Clus folds, SRS models, and Clus error calculations
-    p4 <- ggplot(data = clussrsclus, mapping = aes(x = df, y = MSE)) +
-      ggtitle("S:Cluster, F:Clus, M:SRS, MSE:Clus") +
-      ylim(20000, 250000)
+    p4 <- ggplot2::ggplot(data = clussrsclus, mapping = ggplot2::aes(x = df, y = MSE)) +
+      ggplot2::ggtitle("S:Cluster, F:Clus, M:SRS, MSE:Clus") +
+      ggplot2::ylim(20000, 250000)
     # Making a ggplot object for the MSEs collected when using SRS folds, SRS models, and Clus error calculations
-    p5 <- ggplot(data = srssrsclus, mapping = aes(x = df, y = MSE)) +
-      ggtitle("S:Cluster, F:SRS, M:SRS, MSE:Clus") +
-      ylim(20000, 250000)
+    p5 <- ggplot2::ggplot(data = srssrsclus, mapping = ggplot2::aes(x = df, y = MSE)) +
+      ggplot2::ggtitle("S:Cluster, F:SRS, M:SRS, MSE:Clus") +
+      ggplot2::ylim(20000, 250000)
     # Making a ggplot object for the MSEs collected when using SRS folds, Clus models, and Clus error calculations
-    p6 <- ggplot(data = srsclusclus, mapping = aes(x = df, y = MSE)) +
-      ggtitle("S:Cluster, F:SRS, M:Clus, MSE:Clus") +
-      ylim(20000, 250000)
+    p6 <- ggplot2::ggplot(data = srsclusclus, mapping = ggplot2::aes(x = df, y = MSE)) +
+      ggplot2::ggtitle("S:Cluster, F:SRS, M:Clus, MSE:Clus") +
+      ggplot2::ylim(20000, 250000)
     # Either turning our ggplot objects into boxplots or spaghetti plots (as objects still)
     if (plot == "box") {
-      plot1 <- p1 + geom_boxplot()
-      plot2 <- p2 + geom_boxplot()
-      plot3 <- p3 + geom_boxplot()
-      plot4 <- p4 + geom_boxplot()
-      plot5 <- p5 + geom_boxplot()
-      plot6 <- p6 + geom_boxplot()
+      plot1 <- p1 + ggplot2::geom_boxplot()
+      plot2 <- p2 + ggplot2::geom_boxplot()
+      plot3 <- p3 + ggplot2::geom_boxplot()
+      plot4 <- p4 + ggplot2::geom_boxplot()
+      plot5 <- p5 + ggplot2::geom_boxplot()
+      plot6 <- p6 + ggplot2::geom_boxplot()
     } else if (plot == "line") {
-      plot1 <- p1 + geom_line(aes(group = sample, colour = sample)) + theme(legend.position = "none")
-      plot2 <- p2 + geom_line(aes(group = sample, colour = sample)) + theme(legend.position = "none")
-      plot3 <- p3 + geom_line(aes(group = sample, colour = sample)) + theme(legend.position = "none")
-      plot4 <- p4 + geom_line(aes(group = sample, colour = sample)) + theme(legend.position = "none")
-      plot5 <- p5 + geom_line(aes(group = sample, colour = sample)) + theme(legend.position = "none")
-      plot6 <- p6 + geom_line(aes(group = sample, colour = sample)) + theme(legend.position = "none")
+      plot1 <- p1 + ggplot2::geom_line(ggplot2::aes(group = sample, colour = sample)) + ggplot2::theme(legend.position = "none")
+      plot2 <- p2 + ggplot2::geom_line(ggplot2::aes(group = sample, colour = sample)) + ggplot2::theme(legend.position = "none")
+      plot3 <- p3 + ggplot2::geom_line(ggplot2::aes(group = sample, colour = sample)) + ggplot2::theme(legend.position = "none")
+      plot4 <- p4 + ggplot2::geom_line(ggplot2::aes(group = sample, colour = sample)) + ggplot2::theme(legend.position = "none")
+      plot5 <- p5 + ggplot2::geom_line(ggplot2::aes(group = sample, colour = sample)) + ggplot2::theme(legend.position = "none")
+      plot6 <- p6 + ggplot2::geom_line(ggplot2::aes(group = sample, colour = sample)) + ggplot2::theme(legend.position = "none")
     }
     # Making a grid display of the six plot objects above
-    grid.arrange(plot1,plot2,plot5,plot6,plot4,plot3, ncol = 2,
+    gridExtra::grid.arrange(plot1,plot2,plot5,plot6,plot4,plot3, ncol = 2,
                  top = paste0("Simulated Spline Data (Sample Size = ", n, ", Clusters = ", n/10,
                               ", Loops = ", loops, ")"))
   }
@@ -648,7 +646,7 @@ plot_generation <- function() {
     # Making as many Stratification samples as we specify for 'loops'
     for (i in 1:loops) {
       set.seed(i)
-      s <- stratsample(spline.df2$Stratum, c("1" = n/5, "2" = n/5, "3" = n/5, "4" = n/5, "5" = n/5))
+      s <- survey::stratsample(spline.df2$Stratum, c("1" = n/5, "2" = n/5, "3" = n/5, "4" = n/5, "5" = n/5))
       sim.strat <- spline.df2[s,]
       # Collecting MSE outputs when using SRS folds, SRS models, and SRS design for error calculations
       srs.data <- cv.srs.mixed.lm(sim.strat, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
@@ -720,47 +718,47 @@ plot_generation <- function() {
     srssrsstrat$sample <- as.factor(srssrsstrat$sample)
     srsstratstrat$sample <- as.factor(srsstratstrat$sample)
     # Making a ggplot object for the MSEs collected when using SRS folds, SRS models, and SRS error calculations
-    p1 <- ggplot(data = srssrssrs, mapping = aes(x = df, y = MSE)) +
-      ggtitle("S:Strat, F:SRS, M:SRS, MSE:SRS") +
-      ylim(20000, 110000)
+    p1 <- ggplot2::ggplot(data = srssrssrs, mapping = ggplot2::aes(x = df, y = MSE)) +
+      ggplot2::ggtitle("S:Strat, F:SRS, M:SRS, MSE:SRS") +
+      ggplot2::ylim(20000, 110000)
     # Making a ggplot object for the MSEs collected when using SRS folds, Strat models, and SRS error calculations
-    p2 <- ggplot(data = srsstratsrs, mapping = aes(x = df, y = MSE)) +
-      ggtitle("S:Strat, F:SRS, M:Strat, MSE:SRS") +
-      ylim(20000, 110000)
+    p2 <- ggplot2::ggplot(data = srsstratsrs, mapping = ggplot2::aes(x = df, y = MSE)) +
+      ggplot2::ggtitle("S:Strat, F:SRS, M:Strat, MSE:SRS") +
+      ggplot2::ylim(20000, 110000)
     # Making a ggplot object for the MSEs collected when using Strat folds, Strat models, and Strat error calculations
-    p3 <- ggplot(data = stratstratstrat, mapping = aes(x = df, y = MSE)) +
-      ggtitle("S:Strat, F:Strat, M:Strat, MSE:Strat") +
-      ylim(20000, 110000)
+    p3 <- ggplot2::ggplot(data = stratstratstrat, mapping = ggplot2::aes(x = df, y = MSE)) +
+      ggplot2::ggtitle("S:Strat, F:Strat, M:Strat, MSE:Strat") +
+      ggplot2::ylim(20000, 110000)
     # Making a ggplot object for the MSEs collected when using Strat folds, SRS models, and Strat error calculations
-    p4 <- ggplot(data = stratsrsstrat, mapping = aes(x = df, y = MSE)) +
-      ggtitle("S:Strat, F:Strat, M:SRS, MSE:Strat") +
-      ylim(20000, 110000)
+    p4 <- ggplot2::ggplot(data = stratsrsstrat, mapping = ggplot2::aes(x = df, y = MSE)) +
+      ggplot2::ggtitle("S:Strat, F:Strat, M:SRS, MSE:Strat") +
+      ggplot2::ylim(20000, 110000)
     # Making a ggplot object for the MSEs collected when using SRS folds, SRS models, and Strat error calculations
-    p5 <- ggplot(data = srssrsstrat, mapping = aes(x = df, y = MSE)) +
-      ggtitle("S:Strat, F:SRS, M:SRS, MSE:Strat") +
-      ylim(20000, 110000)
+    p5 <- ggplot2::ggplot(data = srssrsstrat, mapping = ggplot2::aes(x = df, y = MSE)) +
+      ggplot2::ggtitle("S:Strat, F:SRS, M:SRS, MSE:Strat") +
+      ggplot2::ylim(20000, 110000)
     # Making a ggplot object for the MSEs collected when using SRS folds, Strat models, and Strat error calculations
-    p6 <- ggplot(data = srsstratstrat, mapping = aes(x = df, y = MSE)) +
-      ggtitle("S:Strat, F:SRS, M:Strat, MSE:Strat") +
-      ylim(20000, 110000)
+    p6 <- ggplot2::ggplot(data = srsstratstrat, mapping = ggplot2::aes(x = df, y = MSE)) +
+      ggplot2::ggtitle("S:Strat, F:SRS, M:Strat, MSE:Strat") +
+      ggplot2::ylim(20000, 110000)
     # Either turning our ggplot objects into boxplots or spaghetti plots (as objects still)
     if (plot == "box") {
-      plot1 <- p1 + geom_boxplot()
-      plot2 <- p2 + geom_boxplot()
-      plot3 <- p3 + geom_boxplot()
-      plot4 <- p4 + geom_boxplot()
-      plot5 <- p5 + geom_boxplot()
-      plot6 <- p6 + geom_boxplot()
+      plot1 <- p1 + ggplot2::geom_boxplot()
+      plot2 <- p2 + ggplot2::geom_boxplot()
+      plot3 <- p3 + ggplot2::geom_boxplot()
+      plot4 <- p4 + ggplot2::geom_boxplot()
+      plot5 <- p5 + ggplot2::geom_boxplot()
+      plot6 <- p6 + ggplot2::geom_boxplot()
     } else if (plot == "line") {
-      plot1 <- p1 + geom_line(aes(group = sample, colour = sample)) + theme(legend.position = "none")
-      plot2 <- p2 + geom_line(aes(group = sample, colour = sample)) + theme(legend.position = "none")
-      plot3 <- p3 + geom_line(aes(group = sample, colour = sample)) + theme(legend.position = "none")
-      plot4 <- p4 + geom_line(aes(group = sample, colour = sample)) + theme(legend.position = "none")
-      plot5 <- p5 + geom_line(aes(group = sample, colour = sample)) + theme(legend.position = "none")
-      plot6 <- p6 + geom_line(aes(group = sample, colour = sample)) + theme(legend.position = "none")
+      plot1 <- p1 + ggplot2::geom_line(ggplot2::aes(group = sample, colour = sample)) + ggplot2::theme(legend.position = "none")
+      plot2 <- p2 + ggplot2::geom_line(ggplot2::aes(group = sample, colour = sample)) + ggplot2::theme(legend.position = "none")
+      plot3 <- p3 + ggplot2::geom_line(ggplot2::aes(group = sample, colour = sample)) + ggplot2::theme(legend.position = "none")
+      plot4 <- p4 + ggplot2::geom_line(ggplot2::aes(group = sample, colour = sample)) + ggplot2::theme(legend.position = "none")
+      plot5 <- p5 + ggplot2::geom_line(ggplot2::aes(group = sample, colour = sample)) + ggplot2::theme(legend.position = "none")
+      plot6 <- p6 + ggplot2::geom_line(ggplot2::aes(group = sample, colour = sample)) + ggplot2::theme(legend.position = "none")
     }
     # Making a grid display of the six plot objects above
-    grid.arrange(plot1,plot2,plot5,plot6,plot4,plot3, ncol = 2,
+    gridExtra::grid.arrange(plot1,plot2,plot5,plot6,plot4,plot3, ncol = 2,
                  top = paste0("Simulated Spline Data (Sample Size = ", n,
                               ", Strata = 5, Loops = ", loops, ")"))
   }
@@ -779,22 +777,22 @@ plot_generation2 <- function() {
   # Simulating Splined data
 
   set.seed(47)
-  x1 = runif(1:500, min = 2, max = 14)
+  x1 = stats::runif(1:500, min = 2, max = 14)
   y1 = x1^3 - 17*x1^2 + 10*x1 + 1000
 
 
   set.seed(47)
-  x2 = runif(1:500, min = 14, max = 26)
+  x2 = stats::runif(1:500, min = 14, max = 26)
   y2 = -1*(x2-12)^3 + 14*(x2-12)^2 + 15*(x2-12) + 500
   plot(y2~x2)
 
   set.seed(47)
-  x3 = runif(1:500, min = 26, max = 38)
+  x3 = stats::runif(1:500, min = 26, max = 38)
   y3 = (x3-29)^3 - 13*(x3-29)^2 + 0*(x3-29) + 900
 
 
   set.seed(47)
-  x4 = runif(1:500, min = 38, max = 50)
+  x4 = stats::runif(1:500, min = 38, max = 50)
   y4 = (x4-36)^3 - 10*(x4-36)^2 + 2*(x4-36) + 600
 
 
@@ -816,14 +814,14 @@ plot_generation2 <- function() {
   b <- data.frame(ID = c(1:1000))
   spline.df2 <- cbind(b, ds)
   spline.df2 <- spline.df2 %>%
-    arrange(Predictor) %>%
-    mutate(Stratum = row_number(),
-           Cluster = row_number())
+    dplyr::arrange(Predictor) %>%
+    dplyr::mutate(Stratum = dplyr::row_number(),
+                  Cluster = dplyr::row_number())
   spline.df2$Stratum <- cut(spline.df2$Stratum,5, 1:5)
   spline.df2$Cluster <- cut(spline.df2$Cluster,100, 1:100)
   spline.df2 <- spline.df2 %>%
-    arrange(ID) %>%
-    select(ID, Response, Predictor, Cluster, Stratum)
+    dplyr::arrange(ID) %>%
+    dplyr::select(ID, Response, Predictor, Cluster, Stratum)
 
   # Adding weights
 
@@ -832,7 +830,7 @@ plot_generation2 <- function() {
   ysum = sum(log(spline.df2$Response))
 
   spline.df3 <- spline.df2 %>%
-    mutate(samp_prob = log(Response)/sum(log(spline.df2$Response)))
+    dplyr::mutate(samp_prob = log(Response)/sum(log(spline.df2$Response)))
 
 
 
@@ -861,15 +859,15 @@ plot_generation2 <- function() {
   # ...then oversample points NEAR THIS LINE,
   # so that unweighted fit should be close to this quadratic,
   # while weighted fit should be closer to correct high-df spline.
-  lm_quad <- lm(Response ~ Predictor + I(Predictor^2), data = spline.df3)
+  lm_quad <- stats::lm(Response ~ Predictor + I(Predictor^2), data = spline.df3)
   spline.df3$samp_prob_quad <- (1/(abs(lm_quad$residuals))) / sum(1/(abs(lm_quad$residuals)))
 
-  quad.sample.graph <- ggplot(spline.df3, aes(x = Predictor, y = Response, size = samp_prob_quad)) +
-    geom_point(alpha = 0.2) +
-    stat_smooth(method = "lm", formula = y ~ x + I(x^2))
+  quad.sample.graph <- ggplot2::ggplot(spline.df3, ggplot2::aes(x = Predictor, y = Response, size = samp_prob_quad)) +
+    ggplot2::geom_point(alpha = 0.2) +
+    ggplot2::stat_smooth(method = "lm", formula = y ~ x + I(x^2))
 
   # Try the same thing but with a linear fit -- even simpler
-  lm_lin <- lm(Response ~ Predictor, data = spline.df3)
+  lm_lin <- stats::lm(Response ~ Predictor, data = spline.df3)
   spline.df3$samp_prob_lin <- (1/(abs(lm_lin$residuals))) / sum(1/(abs(lm_lin$residuals)))
 
 
@@ -1180,36 +1178,36 @@ plot_generation2 <- function() {
     ymin <- min(min(AllW$MSE), min(NoW$MSE), min(MSEW$MSE), min(ModW$MSE))
     ymax <- max(max(AllW$MSE), max(NoW$MSE), max(MSEW$MSE), max(ModW$MSE))
     # Making a ggplot object for the MSEs collected when using SRS folds, SRS models, and SRS error calculations
-    p1 <- ggplot(data = AllW, mapping = aes(x = df, y = MSE)) +
-      ggtitle("Weights for both") +
-      ylim(ymin, ymax)
+    p1 <- ggplot2::ggplot(data = AllW, mapping = ggplot2::aes(x = df, y = MSE)) +
+      ggplot2::ggtitle("Weights for both") +
+      ggplot2::ylim(ymin, ymax)
     # Making a ggplot object for the MSEs collected when using SRS folds, Clus models, and SRS error calculations
-    p2 <- ggplot(data = NoW, mapping = aes(x = df, y = MSE)) +
-      ggtitle("No Weights") +
-      ylim(ymin, ymax)
+    p2 <- ggplot2::ggplot(data = NoW, mapping = ggplot2::aes(x = df, y = MSE)) +
+      ggplot2::ggtitle("No Weights") +
+      ggplot2::ylim(ymin, ymax)
     # Making a ggplot object for the MSEs collected when using Clus folds, Clus models, and Clus error calculations
-    p3 <- ggplot(data = ModW, mapping = aes(x = df, y = MSE)) +
-      ggtitle("Weights when modeling") +
-      ylim(ymin, ymax)
+    p3 <- ggplot2::ggplot(data = ModW, mapping = ggplot2::aes(x = df, y = MSE)) +
+      ggplot2::ggtitle("Weights when modeling") +
+      ggplot2::ylim(ymin, ymax)
     # Making a ggplot object for the MSEs collected when using Clus folds, SRS models, and Clus error calculations
-    p4 <- ggplot(data = MSEW, mapping = aes(x = df, y = MSE)) +
-      ggtitle("Weights when MSE gen") +
-      ylim(ymin, ymax)
+    p4 <- ggplot2::ggplot(data = MSEW, mapping = ggplot2::aes(x = df, y = MSE)) +
+      ggplot2::ggtitle("Weights when MSE gen") +
+      ggplot2::ylim(ymin, ymax)
 
     # Either turning our ggplot objects into boxplots or spaghetti plots (as objects still)
     if (plot == "box") {
-      plot1 <- p1 + geom_boxplot()
-      plot2 <- p2 + geom_boxplot()
-      plot3 <- p3 + geom_boxplot()
-      plot4 <- p4 + geom_boxplot()
+      plot1 <- p1 + ggplot2::geom_boxplot()
+      plot2 <- p2 + ggplot2::geom_boxplot()
+      plot3 <- p3 + ggplot2::geom_boxplot()
+      plot4 <- p4 + ggplot2::geom_boxplot()
     } else if (plot == "line") {
-      plot1 <- p1 + geom_line(aes(group = sample, colour = sample)) + theme(legend.position = "none")
-      plot2 <- p2 + geom_line(aes(group = sample, colour = sample)) + theme(legend.position = "none")
-      plot3 <- p3 + geom_line(aes(group = sample, colour = sample)) + theme(legend.position = "none")
-      plot4 <- p4 + geom_line(aes(group = sample, colour = sample)) + theme(legend.position = "none")
+      plot1 <- p1 + ggplot2::geom_line(ggplot2::aes(group = sample, colour = sample)) + ggplot2::theme(legend.position = "none")
+      plot2 <- p2 + ggplot2::geom_line(ggplot2::aes(group = sample, colour = sample)) + ggplot2::theme(legend.position = "none")
+      plot3 <- p3 + ggplot2::geom_line(ggplot2::aes(group = sample, colour = sample)) + ggplot2::theme(legend.position = "none")
+      plot4 <- p4 + ggplot2::geom_line(ggplot2::aes(group = sample, colour = sample)) + ggplot2::theme(legend.position = "none")
     }
     # Making a grid display of the six plot objects above
-    grid.arrange(plot1,plot2,plot3,plot4, ncol = 2,
+    gridExtra::grid.arrange(plot1,plot2,plot3,plot4, ncol = 2,
                  top = paste0("Simulated Spline Data (Sample Size = ", n,
                               ", Loops = ", loops, ", Weights = ", weights, ")"))
   }
@@ -1230,15 +1228,16 @@ plot_generation2 <- function() {
   in.sample.tmp <- sampling::UPtille(100 / spline.df3[["samp_wt_quad"]])
   sum(in.sample.tmp > 0)
   spline.df3.sample.tmp <- spline.df3[in.sample.tmp > 0, ]
-  ggplot(spline.df3.sample.tmp, aes(x = Predictor, y = Response, size = samp_prob_quad, alpha = samp_prob_quad)) +
-    geom_point()
-  ggplot(spline.df3, aes(x = Predictor, y = Response, size = samp_prob_quad, alpha = samp_prob_quad)) +
-    geom_point()
+  ggplot2::ggplot(spline.df3.sample.tmp, ggplot2::aes(x = Predictor, y = Response, size = samp_prob_quad, alpha = samp_prob_quad)) +
+    ggplot2::geom_point()
+  ggplot2::ggplot(spline.df3, ggplot2::aes(x = Predictor, y = Response, size = samp_prob_quad, alpha = samp_prob_quad)) +
+    ggplot2::geom_point()
 
   return(list(Main.weights.plot = Main.weights.plot, quad.sample.graph = quad.sample.graph))
 }
 
 plot_generation3 <- function(){
+
   NSFG_data$strata <- as.factor(NSFG_data$strata)
   NSFG_data$SECU <- as.factor(NSFG_data$SECU)
 
@@ -1267,37 +1266,37 @@ plot_generation3 <- function(){
     method.ds$df <- as.factor(method.ds$df)
     fold.ds$df <- as.factor(fold.ds$df)
     # Making a ggplot object for the MSE spread comparison
-    plot1 <- ggplot(data = ignore.ds, mapping = aes(x = df, y = MSE)) +
-      geom_boxplot() +
-      ggtitle("Ignoring Design") +
-      ylim(18000, 19000)
-    plot2 <- ggplot(data = fold.ds, mapping = aes(x = df, y = MSE)) +
-      geom_boxplot() +
-      ggtitle("Ignoring Design for Folds") +
-      ylim(18000, 19000)
-    plot3 <- ggplot(data = method.ds, mapping = aes(x = df, y = MSE)) +
-      geom_boxplot() +
-      ggtitle("Accounting for Design") +
-      ylim(18000, 19000)
+    plot1 <- ggplot2::ggplot(data = ignore.ds, mapping = ggplot2::aes(x = df, y = MSE)) +
+      ggplot2::geom_boxplot() +
+      ggplot2::ggtitle("Ignoring Design") +
+      ggplot2::ylim(18000, 19000)
+    plot2 <- ggplot2::ggplot(data = fold.ds, mapping = ggplot2::aes(x = df, y = MSE)) +
+      ggplot2::geom_boxplot() +
+      ggplot2::ggtitle("Ignoring Design for Folds") +
+      ggplot2::ylim(18000, 19000)
+    plot3 <- ggplot2::ggplot(data = method.ds, mapping = ggplot2::aes(x = df, y = MSE)) +
+      ggplot2::geom_boxplot() +
+      ggplot2::ggtitle("Accounting for Design") +
+      ggplot2::ylim(18000, 19000)
 
     # Making a grid display of the two plot objects above
-    grid.arrange(plot1,plot2,plot3, ncol = 3)
+    gridExtra::grid.arrange(plot1,plot2,plot3, ncol = 3)
   }
 
   NSFG.plot <- income.year_edu.plot(100)
 
-  NSFG.cluster.plot <- ggplot(NSFG_data, aes(x = YrEdu, y = income)) +
-    geom_jitter(pch='.') +
-    geom_smooth(method = "loess", se = TRUE) +
-    facet_grid(strata~SECU) +  ## SECUs are nested within strata
-    labs(x = "Years Educated", y = "Income (Expressed as % of Poverty Level)",
+  NSFG.cluster.plot <- ggplot2::ggplot(NSFG_data, ggplot2::aes(x = YrEdu, y = income)) +
+    ggplot2::geom_jitter(pch='.') +
+    ggplot2::geom_smooth(method = "loess", se = TRUE) +
+    ggplot2::facet_grid(strata~SECU) +  ## SECUs are nested within strata
+    ggplot2::labs(x = "Years Educated", y = "Income (Expressed as % of Poverty Level)",
          title = "Relationship Separated by Cluster")
 
-  NSFG.strata.plot <- ggplot(NSFG_data, aes(x = YrEdu, y = income)) +
-    geom_jitter() +
-    geom_smooth(method = "loess", se = TRUE) +
-    facet_wrap(strata~., ncol = 6) +
-    labs(x = "Years Educated", y = "Income (Expressed as % of Poverty Level)",
+  NSFG.strata.plot <- ggplot2::ggplot(NSFG_data, ggplot2::aes(x = YrEdu, y = income)) +
+    ggplot2::geom_jitter() +
+    ggplot2::geom_smooth(method = "loess", se = TRUE) +
+    ggplot2::facet_wrap(strata~., ncol = 6) +
+    ggplot2::labs(x = "Years Educated", y = "Income (Expressed as % of Poverty Level)",
          title = "Relationship Separated by Stratum")
 
   return(list(NSFG.plot = NSFG.plot, NSFG.cluster.plot = NSFG.cluster.plot, NSFG.strata.plot = NSFG.strata.plot))
