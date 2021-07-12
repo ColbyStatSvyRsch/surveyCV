@@ -11,9 +11,9 @@ cv.svy(
   strataID = NULL,
   clusterID = NULL,
   nest = FALSE,
-  N,
+  fpcID = NULL,
   method = c("linear", "logistic"),
-  weights = NULL,
+  weightsID = NULL,
   useSvyForFolds = TRUE
 )
 }
@@ -34,12 +34,13 @@ be the same as in the dataset used}
 
 \item{nest}{Specify nest = TRUE if clusters are nested within strata, defaults to FALSE}
 
-\item{N}{Total finite population size}
+\item{fpcID}{String of the variable name used for finite population corrections, must
+be the same as in the dataset used, see `?svydesign` for details}
 
 \item{method}{String, must be either "linear" or "logistic", determines type of
 model fit during cross validation, defaults to linear}
 
-\item{weights}{String of the variable name in the dataset that contains sampling weights}
+\item{weightsID}{String of the variable name in the dataset that contains sampling weights}
 
 \item{useSvyForFolds}{Specify useSvyForFolds = TRUE (default) to take svydesign into account when making folds;
 should not be set FALSE except for running simulations to understand the properties of surveyCV}
@@ -55,5 +56,5 @@ stratified, clustered, or clustered-and-stratified sampling design.
 data("Auto", package = "ISLR")
 cv.svy(Auto, c("mpg~poly(horsepower,1, raw = TRUE)",
                "mpg~poly(horsepower,2, raw = TRUE)"),
-       nfolds = 10, strataID = "year", N = 400)
+       nfolds = 10, strataID = "year")
 }

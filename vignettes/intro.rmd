@@ -196,7 +196,9 @@ MSEs generated for a SRS test of a first and second degree polynomial fit predic
 
 ```{r}
 data("Auto")
-cv.svy(Auto, c("mpg~poly(horsepower,1, raw = TRUE)", "mpg~poly(horsepower,2, raw = TRUE)"), nfolds = 10, N = 400)
+cv.svy(Auto, c("mpg~poly(horsepower,1, raw = TRUE)",
+               "mpg~poly(horsepower,2, raw = TRUE)"),
+       nfolds = 10)
 ```
 
 
@@ -204,7 +206,9 @@ MSEs generated for a clustered test of a first and second degree polynomial fit 
 
 ```{r}
 data("Auto")
-cv.svy(Auto, c("mpg~poly(horsepower,1,raw=TRUE)", "mpg~poly(horsepower,2,raw=TRUE)"), nfolds = 10, clusterID = "year", N= 400)
+cv.svy(Auto, c("mpg~poly(horsepower,1,raw=TRUE)",
+               "mpg~poly(horsepower,2,raw=TRUE)"),
+       nfolds = 10, clusterID = "year")
 ```
 
 
@@ -212,7 +216,9 @@ MSEs generated for a stratified test of a first and second degree polynomial fit
 
 ```{r}
 data("Auto")
-cv.svy(Auto, c("mpg~poly(horsepower,1, raw = TRUE)", "mpg~poly(horsepower,2, raw = TRUE)"), nfolds = 10, strataID = "year", N = 400)
+cv.svy(Auto, c("mpg~poly(horsepower,1, raw = TRUE)",
+               "mpg~poly(horsepower,2, raw = TRUE)"),
+       nfolds = 10, strataID = "year")
 ```
 
 ## cv.svyglm() and cv.svydesign()
@@ -224,28 +230,32 @@ Using either a survey design object or survey glm to generate MSEs. `cv.svyglm` 
 #Rework this once we have the new survey design function
 data("Auto")
 auto.srs.svy <- svydesign(ids = ~0,
-                          strata = NULL,
-                          fpc = rep(1000, 392),
                           data = Auto)
-srs.model <- svyglm(mpg~horsepower+I(horsepower^2)+I(horsepower^3), design = auto.srs.svy)
+srs.model <- svyglm(mpg~horsepower+I(horsepower^2)+I(horsepower^3), 
+                    design = auto.srs.svy)
 auto.clus.svy <- svydesign(ids = ~year,
-                           strata = NULL,
-                           fpc = rep(1000, 392),
                            data = Auto)
-clus.model <- svyglm(mpg~horsepower+I(horsepower^2)+I(horsepower^3), design = auto.clus.svy)
+clus.model <- svyglm(mpg~horsepower+I(horsepower^2)+I(horsepower^3), 
+                     design = auto.clus.svy)
 auto.strat.svy <- svydesign(ids = ~0,
                             strata = ~year,
-                            fpc = rep(1000, 392),
                             data = Auto)
-strat.model <- svyglm(mpg~horsepower+I(horsepower^2)+I(horsepower^3), design = auto.strat.svy)
-cv.svydesign(formulae = c("mpg~poly(horsepower,1, raw = TRUE)", "mpg~poly(horsepower,2, raw = TRUE)",
-                        "mpg~poly(horsepower,3, raw = TRUE)"), design_object = auto.srs.svy, nfolds = 10, N = 1000)
-cv.svydesign(formulae = c("mpg~poly(horsepower,1, raw = TRUE)", "mpg~poly(horsepower,2, raw = TRUE)",
-                        "mpg~poly(horsepower,3, raw = TRUE)"), design_object = auto.clus.svy, nfolds = 10, N = 1000)
-cv.svydesign(formulae = c("mpg~poly(horsepower,1, raw = TRUE)", "mpg~poly(horsepower,2, raw = TRUE)",
-                        "mpg~poly(horsepower,3, raw = TRUE)"), design_object = auto.strat.svy, nfolds = 10, N = 1000)
-cv.svyglm(glm = srs.model, nfolds = 10, N = 1000)
-cv.svyglm(glm = clus.model, nfolds = 10, N = 1000)
-cv.svyglm(glm = strat.model, nfolds = 10, N = 1000)
+strat.model <- svyglm(mpg~horsepower+I(horsepower^2)+I(horsepower^3), 
+                      design = auto.strat.svy)
+cv.svydesign(formulae = c("mpg~poly(horsepower,1, raw = TRUE)", 
+                          "mpg~poly(horsepower,2, raw = TRUE)",
+                          "mpg~poly(horsepower,3, raw = TRUE)"), 
+             design_object = auto.srs.svy, nfolds = 10)
+cv.svydesign(formulae = c("mpg~poly(horsepower,1, raw = TRUE)", 
+                          "mpg~poly(horsepower,2, raw = TRUE)",
+                          "mpg~poly(horsepower,3, raw = TRUE)"), 
+             design_object = auto.clus.svy, nfolds = 10)
+cv.svydesign(formulae = c("mpg~poly(horsepower,1, raw = TRUE)", 
+                          "mpg~poly(horsepower,2, raw = TRUE)",
+                          "mpg~poly(horsepower,3, raw = TRUE)"), 
+             design_object = auto.strat.svy, nfolds = 10)
+cv.svyglm(glm = srs.model, nfolds = 10)
+cv.svyglm(glm = clus.model, nfolds = 10)
+cv.svyglm(glm = strat.model, nfolds = 10)
 ```
 

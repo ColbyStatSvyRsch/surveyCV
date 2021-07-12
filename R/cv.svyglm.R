@@ -4,18 +4,11 @@
 #' (which itself contains a `svydesign` object)
 #' and passes it through `cv.svydesign()` to `cv.svy()`.
 #'
+#' @param glm_object Name of a `svyglm` object created from the `survey` package
 #' @param nfolds Number of folds to be used during cross validation, defaults to
 #'   5
-#' @param clusterID String of the variable used to cluster during sampling, must
-#'   be the same as in the dataset used, ignore if clustering was not used
-#' @param strataID String of the variable used to stratify during sampling, must
-#'   be the same as in the dataset used, ignore if stratification was not used
-#' @param glm Name of a Survey GLM created from the survey package if one is
-#'   to be used, defaults to NULL
-#' @param N Number equal to the total population size
-#' @param method string, must be either linear or logistic, determines type of
+#' @param method String, must be either "linear" or "logistic", determines type of
 #'   model fit during cross validation, defaults to linear
-#' @param weights Variable in data set that contains PPS weights
 #' @examples
 #' # MSEs generated for different tests of first and second degree polynomial
 #' # fits predicting mpg from horsepower in the Auto dataset. Clustering and
@@ -24,46 +17,39 @@
 #' data("Auto", package = "ISLR")
 #' library(survey)
 #' auto.srs.svy <- svydesign(ids = ~0,
-#'                          strata = NULL,
-#'                          fpc = rep(1000, 392),
 #'                          data = Auto)
 #' srs.model <- svyglm(mpg~horsepower+I(horsepower^2)+I(horsepower^3),
 #'                     design = auto.srs.svy)
 #' auto.clus.svy <- svydesign(ids = ~year,
-#'                           strata = NULL,
-#'                           fpc = rep(1000, 392),
 #'                           data = Auto)
 #' clus.model <- svyglm(mpg~horsepower+I(horsepower^2)+I(horsepower^3),
 #'                      design = auto.clus.svy)
 #' auto.strat.svy <- svydesign(ids = ~0,
 #'                            strata = ~year,
-#'                            fpc = rep(1000, 392),
 #'                            data = Auto)
 #' strat.model <- svyglm(mpg~horsepower+I(horsepower^2)+I(horsepower^3),
 #'                       design = auto.strat.svy)
-#' cv.svyglm(glm = srs.model, nfolds = 10, N = 1000)
-#' cv.svyglm(glm = clus.model, nfolds = 10, N = 1000)
-#' cv.svyglm(glm = strat.model, nfolds = 10, N = 1000)
+#' cv.svyglm(glm_object = srs.model, nfolds = 10)
+#' cv.svyglm(glm_object = clus.model, nfolds = 10)
+#' cv.svyglm(glm_object = strat.model, nfolds = 10)
 #' @export
 
 # TODO: Write formal unit tests
 
-# TODO: Make the documentation and fn args consistent with cv.svy and cv.svyglm
+# TODO: Can we replace most of this with just the following?
+#       formulae <- deparse1(glm_object[["formula"]])
 
-# TODO: Remove strataID, clusterID, and other things you can extract
-#       from a svydesign -- the whole point of this fn is to pass in a svydesign
-#       so you don't have to specify those things again
+cv.svyglm <- function(glm_object, nfolds = 5, method = c("linear", "logistic")) {
 
-# TODO: Rename to svyglm_function.R or similar
+  method <- match.arg(method)
 
-cv.svyglm <- function(nfolds=5, N, clusterID = NULL, strataID = NULL, method = "linear", weights = NULL, glm = NULL) {
   # When a glm object is specified, then the function can pull pieces of information needed from the glm.
   # This takes the formula from the model and reformats it so that it can be made into a string
   # so it can be used in our general cv.svy() function.
-  # Any reformating done is because the glm objects are weird with formulas that contain parenthases.
+  # Any reformatting done is because the glm objects are weird with formulas that contain parentheses.
   # In this, `b` is what makes up the left side of our formula, and `c` makes up the right side of the formula.
-  if (is.null(glm) == FALSE) {
-    model = glm
+  if (is.null(glm_object) == FALSE) {
+    model <- glm_object
     b <- paste0(model[["formula"]][[2]])
     c <- paste0(model[["formula"]][[3]])
     # `b` is a list, and if `b` has a length of 2, then the left side of the formula includes something like the log() function.
@@ -132,16 +118,16 @@ cv.svyglm <- function(nfolds=5, N, clusterID = NULL, strataID = NULL, method = "
         xs <- c
       }
       # Formats our formula into the string it needs to be so our cv.svy() function can use it.
-      formulae = paste0(model[["formula"]][[2]], "~", xs)
+      formulae <- paste0(model[["formula"]][[2]], "~", xs)
 
     }
     # Specifies the design object from the gilm object
-    design_object = model[["survey.design"]]
+    design_object <- model[["survey.design"]]
 
   }
   # Runs our cv.svydesign() function using the pieces pulled from the glm object,
   # which will later push all of this information into our general cv.svy() function.
-  cv.svydesign(formulae = formulae, nfolds = nfolds, method = method, N = N, design_object = design_object)
+  cv.svydesign(design_object = design_object, formulae = formulae, nfolds = nfolds, method = method)
 
-  }
+}
 

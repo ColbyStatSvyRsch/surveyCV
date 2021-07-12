@@ -12,11 +12,12 @@
 #'   be the same as in the dataset used
 #' @param clusterID String of the variable name used to cluster during sampling, must
 #'   be the same as in the dataset used
-#' @param N Total finite population size
+#' @param nest Specify nest = TRUE if clusters are nested within strata, defaults to FALSE
+#' @param fpcID String of the variable name used for finite population corrections, must
+#'   be the same as in the dataset used, see `?svydesign` for details
 #' @param method String, must be either "linear" or "logistic", determines type of
 #'   model fit during cross validation, defaults to linear
-#' @param weights String of the variable name in the dataset that contains sampling weights
-#' @param nest Specify nest = TRUE if clusters are nested within strata, defaults to FALSE
+#' @param weightsID String of the variable name in the dataset that contains sampling weights
 #' @param useSvyForFolds Specify useSvyForFolds = TRUE (default) to take svydesign into account when making folds;
 #'   should not be set FALSE except for running simulations to understand the properties of surveyCV
 #' @examples
@@ -26,18 +27,15 @@
 #' data("Auto", package = "ISLR")
 #' cv.svy(Auto, c("mpg~poly(horsepower,1, raw = TRUE)",
 #'                "mpg~poly(horsepower,2, raw = TRUE)"),
-#'        nfolds = 10, strataID = "year", N = 400)
+#'        nfolds = 10, strataID = "year")
 #' @export
 
-
-# TODO: Rename to cvsvy_function.R or similar
-
-# TODO: Allow N to be unspecified or NULL
 
 # TODO: Improve the API / interface: be consistent with `survey`, with tidyverse,
 #       and with other packages that do cross-validation (or at least SOME of these)
 
-# TODO: Allow other svydesign features besides clusters, strata, weights, and nest
+# TODO: Allow other svydesign features besides clusters, strata, weights, and nest,
+#       such as pps options, or the option to specify probs instead of weights
 
 # TODO: Write formal unit tests
 
@@ -53,16 +51,15 @@
 
 
 # General Cross Validation
-cv.svy <- function(Data, formulae, nfolds=5, strataID = NULL, clusterID = NULL , nest = FALSE, N,
-                   method = c("linear", "logistic"), weights = NULL, useSvyForFolds = TRUE) {
+cv.svy <- function(Data, formulae, nfolds=5, strataID = NULL, clusterID = NULL, nest = FALSE, fpcID = NULL,
+                   method = c("linear", "logistic"), weightsID = NULL, useSvyForFolds = TRUE) {
 
   # Use stop-logic to check the dataset & arguments specified
   if(nfolds < 1) {print ("nfolds is less that 1")}
-  if(N<nrow(Data)) {print("N is less than observations in the defined dataset")}
   if(nfolds >= nrow(Data)) {print ("Number of folds exceeds observations")}
   method <- match.arg(method)
 
-  stopifnot(nfolds > 0, N >= nrow(Data), nfolds <= nrow(Data))
+  stopifnot(nfolds > 0, nfolds <= nrow(Data))
 
   # Turns the strings of formulas into a list of formulas
   formulae <- sapply(formulae, as.formula)
@@ -88,8 +85,8 @@ cv.svy <- function(Data, formulae, nfolds=5, strataID = NULL, clusterID = NULL ,
     n <- nrow(train)
     train.svydes <- svydesign(ids = if(is.null(clusterID)) formula(~0) else formula(paste0("~", clusterID)),
                               strata = if(is.null(strataID)) NULL else formula(paste0("~", strataID)),
-                              fpc = rep(N, nrow(train)),
-                              weights = if(is.null(weights)) NULL else formula(paste0("~", weights)),
+                              fpc = if(is.null(fpcID)) NULL else formula(paste0("~", fpcID)),
+                              weights = if(is.null(weightsID)) NULL else formula(paste0("~", weightsID)),
                               nest = nest,
                               data = train)
     # This loops through the formulas in our list of formulas and calculates the test losses
@@ -120,8 +117,8 @@ cv.svy <- function(Data, formulae, nfolds=5, strataID = NULL, clusterID = NULL ,
   # Makes a survey design based off of the whole dataset so we can calculate a mean
   full.svydes <- svydesign(ids = if(is.null(clusterID)) formula(~0) else formula(paste0("~", clusterID)),
                            strata = if(is.null(strataID)) NULL else formula(paste0("~", strataID)),
-                           fpc = rep(N, nrow(Data)),
-                           weights = if(is.null(weights)) NULL else formula(paste0("~", weights)),
+                           fpc = if(is.null(fpcID)) NULL else formula(paste0("~", fpcID)),
+                           weights = if(is.null(weightsID)) NULL else formula(paste0("~", weightsID)),
                            nest = nest,
                            data = Data)
 

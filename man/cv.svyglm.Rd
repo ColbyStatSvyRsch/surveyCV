@@ -4,35 +4,16 @@
 \alias{cv.svyglm}
 \title{CV for `svyglm` objects}
 \usage{
-cv.svyglm(
-  nfolds = 5,
-  N,
-  clusterID = NULL,
-  strataID = NULL,
-  method = "linear",
-  weights = NULL,
-  glm = NULL
-)
+cv.svyglm(glm_object, nfolds = 5, method = c("linear", "logistic"))
 }
 \arguments{
+\item{glm_object}{Name of a `svyglm` object created from the `survey` package}
+
 \item{nfolds}{Number of folds to be used during cross validation, defaults to
 5}
 
-\item{N}{Number equal to the total population size}
-
-\item{clusterID}{String of the variable used to cluster during sampling, must
-be the same as in the dataset used, ignore if clustering was not used}
-
-\item{strataID}{String of the variable used to stratify during sampling, must
-be the same as in the dataset used, ignore if stratification was not used}
-
-\item{method}{string, must be either linear or logistic, determines type of
+\item{method}{String, must be either "linear" or "logistic", determines type of
 model fit during cross validation, defaults to linear}
-
-\item{weights}{Variable in data set that contains PPS weights}
-
-\item{glm}{Name of a Survey GLM created from the survey package if one is
-to be used, defaults to NULL}
 }
 \description{
 Wrapper function which takes a `svyglm` object
@@ -47,24 +28,19 @@ and passes it through `cv.svydesign()` to `cv.svy()`.
 data("Auto", package = "ISLR")
 library(survey)
 auto.srs.svy <- svydesign(ids = ~0,
-                         strata = NULL,
-                         fpc = rep(1000, 392),
                          data = Auto)
 srs.model <- svyglm(mpg~horsepower+I(horsepower^2)+I(horsepower^3),
                     design = auto.srs.svy)
 auto.clus.svy <- svydesign(ids = ~year,
-                          strata = NULL,
-                          fpc = rep(1000, 392),
                           data = Auto)
 clus.model <- svyglm(mpg~horsepower+I(horsepower^2)+I(horsepower^3),
                      design = auto.clus.svy)
 auto.strat.svy <- svydesign(ids = ~0,
                            strata = ~year,
-                           fpc = rep(1000, 392),
                            data = Auto)
 strat.model <- svyglm(mpg~horsepower+I(horsepower^2)+I(horsepower^3),
                       design = auto.strat.svy)
-cv.svyglm(glm = srs.model, nfolds = 10, N = 1000)
-cv.svyglm(glm = clus.model, nfolds = 10, N = 1000)
-cv.svyglm(glm = strat.model, nfolds = 10, N = 1000)
+cv.svyglm(glm_object = srs.model, nfolds = 10)
+cv.svyglm(glm_object = clus.model, nfolds = 10)
+cv.svyglm(glm_object = strat.model, nfolds = 10)
 }

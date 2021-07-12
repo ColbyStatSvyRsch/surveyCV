@@ -445,22 +445,28 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <h2>cv.svy()</h2>
 <p>MSEs generated for a SRS test of a first and second degree polynomial fit predicting mpg from horsepower in the Auto data set.</p>
 <div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a><span class="kw">data</span>(<span class="st">&quot;Auto&quot;</span>)</span>
-<span id="cb13-2"><a href="#cb13-2"></a><span class="kw">cv.svy</span>(Auto, <span class="kw">c</span>(<span class="st">&quot;mpg~poly(horsepower,1, raw = TRUE)&quot;</span>, <span class="st">&quot;mpg~poly(horsepower,2, raw = TRUE)&quot;</span>), <span class="dt">nfolds =</span> <span class="dv">10</span>, <span class="dt">N =</span> <span class="dv">400</span>)</span>
-<span id="cb13-3"><a href="#cb13-3"></a><span class="co">#&gt;            mean     SE</span></span>
-<span id="cb13-4"><a href="#cb13-4"></a><span class="co">#&gt; .Model_1 24.244 0.2622</span></span>
-<span id="cb13-5"><a href="#cb13-5"></a><span class="co">#&gt; .Model_2 19.336 0.2519</span></span></code></pre></div>
+<span id="cb13-2"><a href="#cb13-2"></a><span class="kw">cv.svy</span>(Auto, <span class="kw">c</span>(<span class="st">&quot;mpg~poly(horsepower,1, raw = TRUE)&quot;</span>,</span>
+<span id="cb13-3"><a href="#cb13-3"></a>               <span class="st">&quot;mpg~poly(horsepower,2, raw = TRUE)&quot;</span>),</span>
+<span id="cb13-4"><a href="#cb13-4"></a>       <span class="dt">nfolds =</span> <span class="dv">10</span>)</span>
+<span id="cb13-5"><a href="#cb13-5"></a><span class="co">#&gt;            mean     SE</span></span>
+<span id="cb13-6"><a href="#cb13-6"></a><span class="co">#&gt; .Model_1 24.244 1.8541</span></span>
+<span id="cb13-7"><a href="#cb13-7"></a><span class="co">#&gt; .Model_2 19.336 1.7813</span></span></code></pre></div>
 <p>MSEs generated for a clustered test of a first and second degree polynomial fit predicting mpg from horsepower in the Auto data set, clustering using the “year” variable.</p>
 <div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a><span class="kw">data</span>(<span class="st">&quot;Auto&quot;</span>)</span>
-<span id="cb14-2"><a href="#cb14-2"></a><span class="kw">cv.svy</span>(Auto, <span class="kw">c</span>(<span class="st">&quot;mpg~poly(horsepower,1,raw=TRUE)&quot;</span>, <span class="st">&quot;mpg~poly(horsepower,2,raw=TRUE)&quot;</span>), <span class="dt">nfolds =</span> <span class="dv">10</span>, <span class="dt">clusterID =</span> <span class="st">&quot;year&quot;</span>, <span class="dt">N=</span> <span class="dv">400</span>)</span>
-<span id="cb14-3"><a href="#cb14-3"></a><span class="co">#&gt;            mean     SE</span></span>
-<span id="cb14-4"><a href="#cb14-4"></a><span class="co">#&gt; .Model_1 27.076 4.5479</span></span>
-<span id="cb14-5"><a href="#cb14-5"></a><span class="co">#&gt; .Model_2 21.077 3.8090</span></span></code></pre></div>
+<span id="cb14-2"><a href="#cb14-2"></a><span class="kw">cv.svy</span>(Auto, <span class="kw">c</span>(<span class="st">&quot;mpg~poly(horsepower,1,raw=TRUE)&quot;</span>,</span>
+<span id="cb14-3"><a href="#cb14-3"></a>               <span class="st">&quot;mpg~poly(horsepower,2,raw=TRUE)&quot;</span>),</span>
+<span id="cb14-4"><a href="#cb14-4"></a>       <span class="dt">nfolds =</span> <span class="dv">10</span>, <span class="dt">clusterID =</span> <span class="st">&quot;year&quot;</span>)</span>
+<span id="cb14-5"><a href="#cb14-5"></a><span class="co">#&gt;            mean     SE</span></span>
+<span id="cb14-6"><a href="#cb14-6"></a><span class="co">#&gt; .Model_1 27.076 4.6236</span></span>
+<span id="cb14-7"><a href="#cb14-7"></a><span class="co">#&gt; .Model_2 21.077 3.8725</span></span></code></pre></div>
 <p>MSEs generated for a stratified test of a first and second degree polynomial fit predicting mpg from horsepower in the Auto data set, Stratified on the “year” variable.</p>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a><span class="kw">data</span>(<span class="st">&quot;Auto&quot;</span>)</span>
-<span id="cb15-2"><a href="#cb15-2"></a><span class="kw">cv.svy</span>(Auto, <span class="kw">c</span>(<span class="st">&quot;mpg~poly(horsepower,1, raw = TRUE)&quot;</span>, <span class="st">&quot;mpg~poly(horsepower,2, raw = TRUE)&quot;</span>), <span class="dt">nfolds =</span> <span class="dv">10</span>, <span class="dt">strataID =</span> <span class="st">&quot;year&quot;</span>, <span class="dt">N =</span> <span class="dv">400</span>)</span>
-<span id="cb15-3"><a href="#cb15-3"></a><span class="co">#&gt;            mean     SE</span></span>
-<span id="cb15-4"><a href="#cb15-4"></a><span class="co">#&gt; .Model_1 24.328 1.7183</span></span>
-<span id="cb15-5"><a href="#cb15-5"></a><span class="co">#&gt; .Model_2 19.465 1.6841</span></span></code></pre></div>
+<span id="cb15-2"><a href="#cb15-2"></a><span class="kw">cv.svy</span>(Auto, <span class="kw">c</span>(<span class="st">&quot;mpg~poly(horsepower,1, raw = TRUE)&quot;</span>,</span>
+<span id="cb15-3"><a href="#cb15-3"></a>               <span class="st">&quot;mpg~poly(horsepower,2, raw = TRUE)&quot;</span>),</span>
+<span id="cb15-4"><a href="#cb15-4"></a>       <span class="dt">nfolds =</span> <span class="dv">10</span>, <span class="dt">strataID =</span> <span class="st">&quot;year&quot;</span>)</span>
+<span id="cb15-5"><a href="#cb15-5"></a><span class="co">#&gt;            mean     SE</span></span>
+<span id="cb15-6"><a href="#cb15-6"></a><span class="co">#&gt; .Model_1 24.082 1.7332</span></span>
+<span id="cb15-7"><a href="#cb15-7"></a><span class="co">#&gt; .Model_2 19.173 1.6830</span></span></code></pre></div>
 </div>
 <div id="cv.svyglm-and-cv.svydesign" class="section level2">
 <h2>cv.svyglm() and cv.svydesign()</h2>
@@ -468,47 +474,57 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a><span class="co">#Rework this once we have the new survey design function</span></span>
 <span id="cb16-2"><a href="#cb16-2"></a><span class="kw">data</span>(<span class="st">&quot;Auto&quot;</span>)</span>
 <span id="cb16-3"><a href="#cb16-3"></a>auto.srs.svy &lt;-<span class="st"> </span><span class="kw">svydesign</span>(<span class="dt">ids =</span> <span class="op">~</span><span class="dv">0</span>,</span>
-<span id="cb16-4"><a href="#cb16-4"></a>                          <span class="dt">strata =</span> <span class="ot">NULL</span>,</span>
-<span id="cb16-5"><a href="#cb16-5"></a>                          <span class="dt">fpc =</span> <span class="kw">rep</span>(<span class="dv">1000</span>, <span class="dv">392</span>),</span>
-<span id="cb16-6"><a href="#cb16-6"></a>                          <span class="dt">data =</span> Auto)</span>
-<span id="cb16-7"><a href="#cb16-7"></a>srs.model &lt;-<span class="st"> </span><span class="kw">svyglm</span>(mpg<span class="op">~</span>horsepower<span class="op">+</span><span class="kw">I</span>(horsepower<span class="op">^</span><span class="dv">2</span>)<span class="op">+</span><span class="kw">I</span>(horsepower<span class="op">^</span><span class="dv">3</span>), <span class="dt">design =</span> auto.srs.svy)</span>
-<span id="cb16-8"><a href="#cb16-8"></a>auto.clus.svy &lt;-<span class="st"> </span><span class="kw">svydesign</span>(<span class="dt">ids =</span> <span class="op">~</span>year,</span>
-<span id="cb16-9"><a href="#cb16-9"></a>                           <span class="dt">strata =</span> <span class="ot">NULL</span>,</span>
-<span id="cb16-10"><a href="#cb16-10"></a>                           <span class="dt">fpc =</span> <span class="kw">rep</span>(<span class="dv">1000</span>, <span class="dv">392</span>),</span>
-<span id="cb16-11"><a href="#cb16-11"></a>                           <span class="dt">data =</span> Auto)</span>
-<span id="cb16-12"><a href="#cb16-12"></a>clus.model &lt;-<span class="st"> </span><span class="kw">svyglm</span>(mpg<span class="op">~</span>horsepower<span class="op">+</span><span class="kw">I</span>(horsepower<span class="op">^</span><span class="dv">2</span>)<span class="op">+</span><span class="kw">I</span>(horsepower<span class="op">^</span><span class="dv">3</span>), <span class="dt">design =</span> auto.clus.svy)</span>
-<span id="cb16-13"><a href="#cb16-13"></a>auto.strat.svy &lt;-<span class="st"> </span><span class="kw">svydesign</span>(<span class="dt">ids =</span> <span class="op">~</span><span class="dv">0</span>,</span>
-<span id="cb16-14"><a href="#cb16-14"></a>                            <span class="dt">strata =</span> <span class="op">~</span>year,</span>
-<span id="cb16-15"><a href="#cb16-15"></a>                            <span class="dt">fpc =</span> <span class="kw">rep</span>(<span class="dv">1000</span>, <span class="dv">392</span>),</span>
-<span id="cb16-16"><a href="#cb16-16"></a>                            <span class="dt">data =</span> Auto)</span>
-<span id="cb16-17"><a href="#cb16-17"></a>strat.model &lt;-<span class="st"> </span><span class="kw">svyglm</span>(mpg<span class="op">~</span>horsepower<span class="op">+</span><span class="kw">I</span>(horsepower<span class="op">^</span><span class="dv">2</span>)<span class="op">+</span><span class="kw">I</span>(horsepower<span class="op">^</span><span class="dv">3</span>), <span class="dt">design =</span> auto.strat.svy)</span>
-<span id="cb16-18"><a href="#cb16-18"></a><span class="kw">cv.svydesign</span>(<span class="dt">formulae =</span> <span class="kw">c</span>(<span class="st">&quot;mpg~poly(horsepower,1, raw = TRUE)&quot;</span>, <span class="st">&quot;mpg~poly(horsepower,2, raw = TRUE)&quot;</span>,</span>
-<span id="cb16-19"><a href="#cb16-19"></a>                        <span class="st">&quot;mpg~poly(horsepower,3, raw = TRUE)&quot;</span>), <span class="dt">design_object =</span> auto.srs.svy, <span class="dt">nfolds =</span> <span class="dv">10</span>, <span class="dt">N =</span> <span class="dv">1000</span>)</span>
-<span id="cb16-20"><a href="#cb16-20"></a><span class="co">#&gt;            mean     SE</span></span>
-<span id="cb16-21"><a href="#cb16-21"></a><span class="co">#&gt; .Model_1 24.110 1.4409</span></span>
-<span id="cb16-22"><a href="#cb16-22"></a><span class="co">#&gt; .Model_2 19.123 1.3727</span></span>
-<span id="cb16-23"><a href="#cb16-23"></a><span class="co">#&gt; .Model_3 19.219 1.3977</span></span>
-<span id="cb16-24"><a href="#cb16-24"></a><span class="kw">cv.svydesign</span>(<span class="dt">formulae =</span> <span class="kw">c</span>(<span class="st">&quot;mpg~poly(horsepower,1, raw = TRUE)&quot;</span>, <span class="st">&quot;mpg~poly(horsepower,2, raw = TRUE)&quot;</span>,</span>
-<span id="cb16-25"><a href="#cb16-25"></a>                        <span class="st">&quot;mpg~poly(horsepower,3, raw = TRUE)&quot;</span>), <span class="dt">design_object =</span> auto.clus.svy, <span class="dt">nfolds =</span> <span class="dv">10</span>, <span class="dt">N =</span> <span class="dv">1000</span>)</span>
+<span id="cb16-4"><a href="#cb16-4"></a>                          <span class="dt">data =</span> Auto)</span>
+<span id="cb16-5"><a href="#cb16-5"></a><span class="co">#&gt; Warning in svydesign.default(ids = ~0, data = Auto): No weights or probabilities</span></span>
+<span id="cb16-6"><a href="#cb16-6"></a><span class="co">#&gt; supplied, assuming equal probability</span></span>
+<span id="cb16-7"><a href="#cb16-7"></a>srs.model &lt;-<span class="st"> </span><span class="kw">svyglm</span>(mpg<span class="op">~</span>horsepower<span class="op">+</span><span class="kw">I</span>(horsepower<span class="op">^</span><span class="dv">2</span>)<span class="op">+</span><span class="kw">I</span>(horsepower<span class="op">^</span><span class="dv">3</span>), </span>
+<span id="cb16-8"><a href="#cb16-8"></a>                    <span class="dt">design =</span> auto.srs.svy)</span>
+<span id="cb16-9"><a href="#cb16-9"></a>auto.clus.svy &lt;-<span class="st"> </span><span class="kw">svydesign</span>(<span class="dt">ids =</span> <span class="op">~</span>year,</span>
+<span id="cb16-10"><a href="#cb16-10"></a>                           <span class="dt">data =</span> Auto)</span>
+<span id="cb16-11"><a href="#cb16-11"></a><span class="co">#&gt; Warning in svydesign.default(ids = ~year, data = Auto): No weights or</span></span>
+<span id="cb16-12"><a href="#cb16-12"></a><span class="co">#&gt; probabilities supplied, assuming equal probability</span></span>
+<span id="cb16-13"><a href="#cb16-13"></a>clus.model &lt;-<span class="st"> </span><span class="kw">svyglm</span>(mpg<span class="op">~</span>horsepower<span class="op">+</span><span class="kw">I</span>(horsepower<span class="op">^</span><span class="dv">2</span>)<span class="op">+</span><span class="kw">I</span>(horsepower<span class="op">^</span><span class="dv">3</span>), </span>
+<span id="cb16-14"><a href="#cb16-14"></a>                     <span class="dt">design =</span> auto.clus.svy)</span>
+<span id="cb16-15"><a href="#cb16-15"></a>auto.strat.svy &lt;-<span class="st"> </span><span class="kw">svydesign</span>(<span class="dt">ids =</span> <span class="op">~</span><span class="dv">0</span>,</span>
+<span id="cb16-16"><a href="#cb16-16"></a>                            <span class="dt">strata =</span> <span class="op">~</span>year,</span>
+<span id="cb16-17"><a href="#cb16-17"></a>                            <span class="dt">data =</span> Auto)</span>
+<span id="cb16-18"><a href="#cb16-18"></a><span class="co">#&gt; Warning in svydesign.default(ids = ~0, strata = ~year, data = Auto): No weights</span></span>
+<span id="cb16-19"><a href="#cb16-19"></a><span class="co">#&gt; or probabilities supplied, assuming equal probability</span></span>
+<span id="cb16-20"><a href="#cb16-20"></a>strat.model &lt;-<span class="st"> </span><span class="kw">svyglm</span>(mpg<span class="op">~</span>horsepower<span class="op">+</span><span class="kw">I</span>(horsepower<span class="op">^</span><span class="dv">2</span>)<span class="op">+</span><span class="kw">I</span>(horsepower<span class="op">^</span><span class="dv">3</span>), </span>
+<span id="cb16-21"><a href="#cb16-21"></a>                      <span class="dt">design =</span> auto.strat.svy)</span>
+<span id="cb16-22"><a href="#cb16-22"></a><span class="kw">cv.svydesign</span>(<span class="dt">formulae =</span> <span class="kw">c</span>(<span class="st">&quot;mpg~poly(horsepower,1, raw = TRUE)&quot;</span>, </span>
+<span id="cb16-23"><a href="#cb16-23"></a>                          <span class="st">&quot;mpg~poly(horsepower,2, raw = TRUE)&quot;</span>,</span>
+<span id="cb16-24"><a href="#cb16-24"></a>                          <span class="st">&quot;mpg~poly(horsepower,3, raw = TRUE)&quot;</span>), </span>
+<span id="cb16-25"><a href="#cb16-25"></a>             <span class="dt">design_object =</span> auto.srs.svy, <span class="dt">nfolds =</span> <span class="dv">10</span>)</span>
 <span id="cb16-26"><a href="#cb16-26"></a><span class="co">#&gt;            mean     SE</span></span>
-<span id="cb16-27"><a href="#cb16-27"></a><span class="co">#&gt; .Model_1 26.305 4.5742</span></span>
-<span id="cb16-28"><a href="#cb16-28"></a><span class="co">#&gt; .Model_2 20.215 3.8051</span></span>
-<span id="cb16-29"><a href="#cb16-29"></a><span class="co">#&gt; .Model_3 20.288 3.8101</span></span>
-<span id="cb16-30"><a href="#cb16-30"></a><span class="kw">cv.svydesign</span>(<span class="dt">formulae =</span> <span class="kw">c</span>(<span class="st">&quot;mpg~poly(horsepower,1, raw = TRUE)&quot;</span>, <span class="st">&quot;mpg~poly(horsepower,2, raw = TRUE)&quot;</span>,</span>
-<span id="cb16-31"><a href="#cb16-31"></a>                        <span class="st">&quot;mpg~poly(horsepower,3, raw = TRUE)&quot;</span>), <span class="dt">design_object =</span> auto.strat.svy, <span class="dt">nfolds =</span> <span class="dv">10</span>, <span class="dt">N =</span> <span class="dv">1000</span>)</span>
-<span id="cb16-32"><a href="#cb16-32"></a><span class="co">#&gt;            mean     SE</span></span>
-<span id="cb16-33"><a href="#cb16-33"></a><span class="co">#&gt; .Model_1 24.040 1.7048</span></span>
-<span id="cb16-34"><a href="#cb16-34"></a><span class="co">#&gt; .Model_2 19.182 1.6618</span></span>
-<span id="cb16-35"><a href="#cb16-35"></a><span class="co">#&gt; .Model_3 19.281 1.7011</span></span>
-<span id="cb16-36"><a href="#cb16-36"></a><span class="kw">cv.svyglm</span>(<span class="dt">glm =</span> srs.model, <span class="dt">nfolds =</span> <span class="dv">10</span>, <span class="dt">N =</span> <span class="dv">1000</span>)</span>
-<span id="cb16-37"><a href="#cb16-37"></a><span class="co">#&gt;            mean     SE</span></span>
-<span id="cb16-38"><a href="#cb16-38"></a><span class="co">#&gt; .Model_1 19.222 1.4047</span></span>
-<span id="cb16-39"><a href="#cb16-39"></a><span class="kw">cv.svyglm</span>(<span class="dt">glm =</span> clus.model, <span class="dt">nfolds =</span> <span class="dv">10</span>, <span class="dt">N =</span> <span class="dv">1000</span>)</span>
-<span id="cb16-40"><a href="#cb16-40"></a><span class="co">#&gt;            mean     SE</span></span>
-<span id="cb16-41"><a href="#cb16-41"></a><span class="co">#&gt; .Model_1 21.142 3.8194</span></span>
-<span id="cb16-42"><a href="#cb16-42"></a><span class="kw">cv.svyglm</span>(<span class="dt">glm =</span> strat.model, <span class="dt">nfolds =</span> <span class="dv">10</span>, <span class="dt">N =</span> <span class="dv">1000</span>)</span>
-<span id="cb16-43"><a href="#cb16-43"></a><span class="co">#&gt;            mean    SE</span></span>
-<span id="cb16-44"><a href="#cb16-44"></a><span class="co">#&gt; .Model_1 19.324 1.721</span></span></code></pre></div>
+<span id="cb16-27"><a href="#cb16-27"></a><span class="co">#&gt; .Model_1 24.110 1.8479</span></span>
+<span id="cb16-28"><a href="#cb16-28"></a><span class="co">#&gt; .Model_2 19.123 1.7604</span></span>
+<span id="cb16-29"><a href="#cb16-29"></a><span class="co">#&gt; .Model_3 19.219 1.7925</span></span>
+<span id="cb16-30"><a href="#cb16-30"></a><span class="kw">cv.svydesign</span>(<span class="dt">formulae =</span> <span class="kw">c</span>(<span class="st">&quot;mpg~poly(horsepower,1, raw = TRUE)&quot;</span>, </span>
+<span id="cb16-31"><a href="#cb16-31"></a>                          <span class="st">&quot;mpg~poly(horsepower,2, raw = TRUE)&quot;</span>,</span>
+<span id="cb16-32"><a href="#cb16-32"></a>                          <span class="st">&quot;mpg~poly(horsepower,3, raw = TRUE)&quot;</span>), </span>
+<span id="cb16-33"><a href="#cb16-33"></a>             <span class="dt">design_object =</span> auto.clus.svy, <span class="dt">nfolds =</span> <span class="dv">10</span>)</span>
+<span id="cb16-34"><a href="#cb16-34"></a><span class="co">#&gt;            mean     SE</span></span>
+<span id="cb16-35"><a href="#cb16-35"></a><span class="co">#&gt; .Model_1 26.305 4.6042</span></span>
+<span id="cb16-36"><a href="#cb16-36"></a><span class="co">#&gt; .Model_2 20.215 3.8300</span></span>
+<span id="cb16-37"><a href="#cb16-37"></a><span class="co">#&gt; .Model_3 20.288 3.8351</span></span>
+<span id="cb16-38"><a href="#cb16-38"></a><span class="kw">cv.svydesign</span>(<span class="dt">formulae =</span> <span class="kw">c</span>(<span class="st">&quot;mpg~poly(horsepower,1, raw = TRUE)&quot;</span>, </span>
+<span id="cb16-39"><a href="#cb16-39"></a>                          <span class="st">&quot;mpg~poly(horsepower,2, raw = TRUE)&quot;</span>,</span>
+<span id="cb16-40"><a href="#cb16-40"></a>                          <span class="st">&quot;mpg~poly(horsepower,3, raw = TRUE)&quot;</span>), </span>
+<span id="cb16-41"><a href="#cb16-41"></a>             <span class="dt">design_object =</span> auto.strat.svy, <span class="dt">nfolds =</span> <span class="dv">10</span>)</span>
+<span id="cb16-42"><a href="#cb16-42"></a><span class="co">#&gt;            mean     SE</span></span>
+<span id="cb16-43"><a href="#cb16-43"></a><span class="co">#&gt; .Model_1 24.040 1.7308</span></span>
+<span id="cb16-44"><a href="#cb16-44"></a><span class="co">#&gt; .Model_2 19.182 1.6871</span></span>
+<span id="cb16-45"><a href="#cb16-45"></a><span class="co">#&gt; .Model_3 19.281 1.7271</span></span>
+<span id="cb16-46"><a href="#cb16-46"></a><span class="kw">cv.svyglm</span>(<span class="dt">glm =</span> srs.model, <span class="dt">nfolds =</span> <span class="dv">10</span>)</span>
+<span id="cb16-47"><a href="#cb16-47"></a><span class="co">#&gt;            mean     SE</span></span>
+<span id="cb16-48"><a href="#cb16-48"></a><span class="co">#&gt; .Model_1 19.222 1.8014</span></span>
+<span id="cb16-49"><a href="#cb16-49"></a><span class="kw">cv.svyglm</span>(<span class="dt">glm =</span> clus.model, <span class="dt">nfolds =</span> <span class="dv">10</span>)</span>
+<span id="cb16-50"><a href="#cb16-50"></a><span class="co">#&gt;            mean     SE</span></span>
+<span id="cb16-51"><a href="#cb16-51"></a><span class="co">#&gt; .Model_1 21.142 3.8444</span></span>
+<span id="cb16-52"><a href="#cb16-52"></a><span class="kw">cv.svyglm</span>(<span class="dt">glm =</span> strat.model, <span class="dt">nfolds =</span> <span class="dv">10</span>)</span>
+<span id="cb16-53"><a href="#cb16-53"></a><span class="co">#&gt;            mean     SE</span></span>
+<span id="cb16-54"><a href="#cb16-54"></a><span class="co">#&gt; .Model_1 19.324 1.7473</span></span></code></pre></div>
 </div>
 </div>
 

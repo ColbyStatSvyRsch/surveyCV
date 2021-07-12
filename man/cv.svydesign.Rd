@@ -5,38 +5,26 @@
 \title{CV for `svydesign` objects}
 \usage{
 cv.svydesign(
+  design_object,
   formulae,
   nfolds = 5,
-  N,
-  clusterID = NULL,
-  strataID = NULL,
-  method = "linear",
-  weights = NULL,
-  design_object = NULL
+  method = c("linear", "logistic")
 )
 }
 \arguments{
+\item{design_object}{Name of a `svydesign` object created using the `survey`
+package. The argument `ids` (also `strata`, `fpc`, and/or `weights` if used)
+must be specified as formulas, e.g. `svydesign(ids = ~MyPSUs, ...)`.
+We do not yet support use of `probs` or `pps`.}
+
 \item{formulae}{Vector of formulas (as strings) for the GLMs to be compared in
 cross validation}
 
 \item{nfolds}{Number of folds to be used during cross validation, defaults to
 5}
 
-\item{N}{Number equal to the total population size}
-
-\item{clusterID}{String of the variable used to cluster during sampling, must
-be the same as in the dataset used, ignore if clustering was not used}
-
-\item{strataID}{String of the variable used to stratify during sampling, must
-be the same as in the dataset used, ignore if stratification was not used}
-
-\item{method}{string, must be either linear or logistic, determines type of
+\item{method}{String, must be either "linear" or "logistic", determines type of
 model fit during cross validation, defaults to linear}
-
-\item{weights}{Variable in data set that contains PPS weights}
-
-\item{design_object}{Name of a Survey Design Object created using the Survey
-package if one is being used, defaults to NULL}
 }
 \description{
 Wrapper function which takes a `svydesign` object
@@ -51,27 +39,22 @@ and passes it into `cv.svy()`.
 data("Auto", package = "ISLR")
 library(survey)
 auto.srs.svy <- svydesign(ids = ~0,
-                         strata = NULL,
-                         fpc = rep(1000, 392),
                          data = Auto)
 auto.clus.svy <- svydesign(ids = ~year,
-                          strata = NULL,
-                          fpc = rep(1000, 392),
                           data = Auto)
 auto.strat.svy <- svydesign(ids = ~0,
                            strata = ~year,
-                           fpc = rep(1000, 392),
                            data = Auto)
 cv.svydesign(formulae = c("mpg~poly(horsepower,1, raw = TRUE)",
                           "mpg~poly(horsepower,2, raw = TRUE)",
                           "mpg~poly(horsepower,3, raw = TRUE)"),
-             design_object = auto.srs.svy, nfolds = 10, N = 1000)
+             design_object = auto.srs.svy, nfolds = 10)
 cv.svydesign(formulae = c("mpg~poly(horsepower,1, raw = TRUE)",
                           "mpg~poly(horsepower,2, raw = TRUE)",
                           "mpg~poly(horsepower,3, raw = TRUE)"),
-             design_object = auto.clus.svy, nfolds = 10, N = 1000)
+             design_object = auto.clus.svy, nfolds = 10)
 cv.svydesign(formulae = c("mpg~poly(horsepower,1, raw = TRUE)",
                           "mpg~poly(horsepower,2, raw = TRUE)",
                           "mpg~poly(horsepower,3, raw = TRUE)"),
-             design_object = auto.strat.svy, nfolds = 10, N = 1000)
+             design_object = auto.strat.svy, nfolds = 10)
 }

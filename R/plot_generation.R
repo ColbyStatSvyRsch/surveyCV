@@ -432,12 +432,12 @@ plot_generation <- function() {
       srs.data <- cv.svy(sim.srs, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
                                        "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
                                        "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"),
-                            nfolds = 5, N = 1000) %>% print()
+                            nfolds = 5) %>% print()
       # Using our Cluster function on SRS samples to get MSE outputs from cross validation using 5 folds
       clus.data <- cv.svy(sim.srs, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
                                             "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
                                             "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"),
-                                 clusterID = "Cluster", nfolds = 5, N = 1000) %>% print()
+                                 clusterID = "Cluster", nfolds = 5) %>% print()
       # Taking the outputs from using the SRS function on SRS samples and compiling them into one data frame
       srssrsds2 <- data.frame(df = 1:6, MSE = srs.data[,1])
       srssrsds <- rbind(srssrsds, srssrsds2)
@@ -454,12 +454,12 @@ plot_generation <- function() {
       clus.data <- cv.svy(sim.clus, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
                                              "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
                                              "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"),
-                                 clusterID = "Cluster", nfolds = 5, N = 1000) %>% print()
+                                 clusterID = "Cluster", nfolds = 5) %>% print()
       # Using our SRS function on Cluster samples to get MSE outputs from cross validation using 5 folds
       srs.data <- cv.svy(sim.clus, c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
                                         "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
                                         "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"),
-                            nfolds = 5, N = 1000) %>% print()
+                            nfolds = 5) %>% print()
       # Taking the outputs from using the Cluster function on Cluster samples and compiling them into one data frame
       clusclusds2 <- data.frame(df = 1:6, MSE = clus.data[,1])
       clusclusds <- rbind(clusclusds, clusclusds2)
@@ -1250,15 +1250,18 @@ plot_generation3 <- function(){
     # looping and generating MSEs
     for (i in 1:loops) {
       set.seed(i)
-      method.data <- cv.svy(NSFG_data, c("income~ns(YrEdu, df = 1)","income~ns(YrEdu, df = 2)","income~ns(YrEdu, df = 3)","income~ns(YrEdu, df = 4)","income~ns(YrEdu, df = 5)","income~ns(YrEdu, df = 6)"), nfolds = 4, strataID = "strata",
-                            clusterID = "SECU", nest = TRUE, weights = "wgt", N = 5100) %>% print()
+      method.data <- cv.svy(NSFG_data, c("income~ns(YrEdu, df = 1)","income~ns(YrEdu, df = 2)","income~ns(YrEdu, df = 3)","income~ns(YrEdu, df = 4)","income~ns(YrEdu, df = 5)","income~ns(YrEdu, df = 6)"),
+                            nfolds = 4, strataID = "strata",
+                            clusterID = "SECU", nest = TRUE, weightsID = "wgt") %>% print()
       method.ds2 <- data.frame(df = 1:6, MSE = method.data[,1])
       method.ds <- rbind(method.ds, method.ds2)
-      ignore.data <- cv.svy(NSFG_data, c("income~ns(YrEdu, df = 1)","income~ns(YrEdu, df = 2)","income~ns(YrEdu, df = 3)","income~ns(YrEdu, df = 4)","income~ns(YrEdu, df = 5)","income~ns(YrEdu, df = 6)"), nfolds = 4, N = 5100) %>% print()
+      ignore.data <- cv.svy(NSFG_data, c("income~ns(YrEdu, df = 1)","income~ns(YrEdu, df = 2)","income~ns(YrEdu, df = 3)","income~ns(YrEdu, df = 4)","income~ns(YrEdu, df = 5)","income~ns(YrEdu, df = 6)"),
+                            nfolds = 4) %>% print()
       ignore.ds2 <- data.frame(df = 1:6, MSE = ignore.data[,1])
       ignore.ds <- rbind(ignore.ds, ignore.ds2)
-      fold.data <- cv.svy(NSFG_data, c("income~ns(YrEdu, df = 1)","income~ns(YrEdu, df = 2)","income~ns(YrEdu, df = 3)","income~ns(YrEdu, df = 4)","income~ns(YrEdu, df = 5)","income~ns(YrEdu, df = 6)"), nfolds = 4, strataID = "strata",
-                            clusterID = "SECU", nest = TRUE, weights = "wgt", N = 5100, useSvyForFolds = FALSE) %>% print()
+      fold.data <- cv.svy(NSFG_data, c("income~ns(YrEdu, df = 1)","income~ns(YrEdu, df = 2)","income~ns(YrEdu, df = 3)","income~ns(YrEdu, df = 4)","income~ns(YrEdu, df = 5)","income~ns(YrEdu, df = 6)"),
+                          nfolds = 4, strataID = "strata",
+                          clusterID = "SECU", nest = TRUE, weightsID = "wgt", useSvyForFolds = FALSE) %>% print()
       fold.ds2 <- data.frame(df = 1:6, MSE = fold.data[,1])
       fold.ds <- rbind(fold.ds, fold.ds2)
       }
