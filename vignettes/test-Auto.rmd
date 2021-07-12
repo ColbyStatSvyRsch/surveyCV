@@ -121,6 +121,17 @@ cv.svyglm(glm = srs.model, nfolds = 10)
 ```
 
 
+## Test of logistic regression
+
+```{r}
+Auto$isAmerican <- Auto$origin == 1
+with(Auto, plot(horsepower, isAmerican))
+cv.svy(Auto, c("isAmerican~horsepower",
+               "isAmerican~horsepower+I(horsepower^2)",
+               "isAmerican~horsepower+I(horsepower^2)+I(horsepower^3)"),
+       nfolds = 10, method = "logistic")
+```
+
 
 ## Tests that we expect should fail
 

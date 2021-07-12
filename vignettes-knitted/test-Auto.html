@@ -348,20 +348,20 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <span id="cb3-7"><a href="#cb3-7"></a>               <span class="st">&quot;mpg~poly(horsepower,2, raw = TRUE)&quot;</span>),</span>
 <span id="cb3-8"><a href="#cb3-8"></a>       <span class="dt">nfolds =</span> <span class="dv">10</span>)</span></code></pre></div>
 <pre><code>##            mean     SE
-## .Model_1 24.141 1.8491
-## .Model_2 19.177 1.7570</code></pre>
+## .Model_1 24.105 1.8476
+## .Model_2 19.147 1.7593</code></pre>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="kw">cv.svy</span>(Auto, <span class="kw">c</span>(<span class="st">&quot;mpg~poly(horsepower,1,raw=TRUE)&quot;</span>,</span>
 <span id="cb5-2"><a href="#cb5-2"></a>               <span class="st">&quot;mpg~poly(horsepower,2,raw=TRUE)&quot;</span>),</span>
 <span id="cb5-3"><a href="#cb5-3"></a>       <span class="dt">nfolds =</span> <span class="dv">10</span>, <span class="dt">clusterID =</span> <span class="st">&quot;year&quot;</span>)</span></code></pre></div>
 <pre><code>##            mean     SE
-## .Model_1 27.070 4.6837
-## .Model_2 21.004 3.9240</code></pre>
+## .Model_1 28.184 4.7615
+## .Model_2 21.176 3.7629</code></pre>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a><span class="kw">cv.svy</span>(Auto, <span class="kw">c</span>(<span class="st">&quot;mpg~poly(horsepower,1, raw = TRUE)&quot;</span>,</span>
 <span id="cb7-2"><a href="#cb7-2"></a>               <span class="st">&quot;mpg~poly(horsepower,2, raw = TRUE)&quot;</span>),</span>
 <span id="cb7-3"><a href="#cb7-3"></a>       <span class="dt">nfolds =</span> <span class="dv">10</span>, <span class="dt">strataID =</span> <span class="st">&quot;year&quot;</span>)</span></code></pre></div>
 <pre><code>##            mean     SE
-## .Model_1 24.108 1.7377
-## .Model_2 19.108 1.6796</code></pre>
+## .Model_1 24.112 1.7361
+## .Model_2 19.173 1.6804</code></pre>
 </div>
 <div id="cv.svydesign" class="section level2">
 <h2><code>cv.svydesign()</code></h2>
@@ -384,25 +384,25 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <span id="cb15-3"><a href="#cb15-3"></a>                          <span class="st">&quot;mpg~poly(horsepower,3, raw = TRUE)&quot;</span>),</span>
 <span id="cb15-4"><a href="#cb15-4"></a>             <span class="dt">design_object =</span> auto.srs.svy, <span class="dt">nfolds =</span> <span class="dv">10</span>)</span></code></pre></div>
 <pre><code>##            mean     SE
-## .Model_1 24.141 1.8475
-## .Model_2 19.157 1.7584
-## .Model_3 19.184 1.7989</code></pre>
+## .Model_1 24.121 1.8557
+## .Model_2 19.305 1.7820
+## .Model_3 19.581 1.8455</code></pre>
 <div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a><span class="kw">cv.svydesign</span>(<span class="dt">formulae =</span> <span class="kw">c</span>(<span class="st">&quot;mpg~poly(horsepower,1, raw = TRUE)&quot;</span>,</span>
 <span id="cb17-2"><a href="#cb17-2"></a>                          <span class="st">&quot;mpg~poly(horsepower,2, raw = TRUE)&quot;</span>,</span>
 <span id="cb17-3"><a href="#cb17-3"></a>                          <span class="st">&quot;mpg~poly(horsepower,3, raw = TRUE)&quot;</span>),</span>
 <span id="cb17-4"><a href="#cb17-4"></a>             <span class="dt">design_object =</span> auto.clus.svy, <span class="dt">nfolds =</span> <span class="dv">10</span>)</span></code></pre></div>
 <pre><code>##            mean     SE
-## .Model_1 27.098 4.5918
-## .Model_2 21.132 3.8519
-## .Model_3 21.270 3.8560</code></pre>
+## .Model_1 25.890 4.4972
+## .Model_2 20.156 3.7657
+## .Model_3 20.186 3.7638</code></pre>
 <div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1"></a><span class="kw">cv.svydesign</span>(<span class="dt">formulae =</span> <span class="kw">c</span>(<span class="st">&quot;mpg~poly(horsepower,1, raw = TRUE)&quot;</span>, </span>
 <span id="cb19-2"><a href="#cb19-2"></a>                          <span class="st">&quot;mpg~poly(horsepower,2, raw = TRUE)&quot;</span>,</span>
 <span id="cb19-3"><a href="#cb19-3"></a>                          <span class="st">&quot;mpg~poly(horsepower,3, raw = TRUE)&quot;</span>), </span>
 <span id="cb19-4"><a href="#cb19-4"></a>             <span class="dt">design_object =</span> auto.strat.svy, <span class="dt">nfolds =</span> <span class="dv">10</span>)</span></code></pre></div>
 <pre><code>##            mean     SE
-## .Model_1 24.184 1.7402
-## .Model_2 19.214 1.6831
-## .Model_3 19.330 1.7322</code></pre>
+## .Model_1 24.234 1.7512
+## .Model_2 19.253 1.6930
+## .Model_3 19.441 1.7515</code></pre>
 </div>
 <div id="cv.svyglm" class="section level2">
 <h2><code>cv.svyglm()</code></h2>
@@ -413,13 +413,13 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <span id="cb21-5"><a href="#cb21-5"></a></span>
 <span id="cb21-6"><a href="#cb21-6"></a><span class="kw">cv.svyglm</span>(<span class="dt">glm =</span> srs.model, <span class="dt">nfolds =</span> <span class="dv">10</span>)</span></code></pre></div>
 <pre><code>##            mean     SE
-## .Model_1 19.391 1.8192</code></pre>
+## .Model_1 19.308 1.8106</code></pre>
 <div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1"></a><span class="kw">cv.svyglm</span>(<span class="dt">glm =</span> clus.model, <span class="dt">nfolds =</span> <span class="dv">10</span>)</span></code></pre></div>
-<pre><code>##            mean     SE
-## .Model_1 20.371 3.6678</code></pre>
-<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1"></a><span class="kw">cv.svyglm</span>(<span class="dt">glm =</span> strat.model, <span class="dt">nfolds =</span> <span class="dv">10</span>)</span></code></pre></div>
 <pre><code>##           mean     SE
-## .Model_1 19.24 1.7215</code></pre>
+## .Model_1 21.24 3.9734</code></pre>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1"></a><span class="kw">cv.svyglm</span>(<span class="dt">glm =</span> strat.model, <span class="dt">nfolds =</span> <span class="dv">10</span>)</span></code></pre></div>
+<pre><code>##            mean     SE
+## .Model_1 19.215 1.7219</code></pre>
 </div>
 <div id="test-for-equivalence-of-the-3-functions-at-same-random-seed" class="section level2">
 <h2>Test for equivalence of the 3 functions at same random seed</h2>
@@ -441,17 +441,31 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <pre><code>##            mean     SE
 ## .Model_1 19.466 1.8254</code></pre>
 </div>
+<div id="test-of-logistic-regression" class="section level2">
+<h2>Test of logistic regression</h2>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1"></a>Auto<span class="op">$</span>isAmerican &lt;-<span class="st"> </span>Auto<span class="op">$</span>origin <span class="op">==</span><span class="st"> </span><span class="dv">1</span></span>
+<span id="cb33-2"><a href="#cb33-2"></a><span class="kw">with</span>(Auto, <span class="kw">plot</span>(horsepower, isAmerican))</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1"></a><span class="kw">cv.svy</span>(Auto, <span class="kw">c</span>(<span class="st">&quot;isAmerican~horsepower&quot;</span>,</span>
+<span id="cb34-2"><a href="#cb34-2"></a>               <span class="st">&quot;isAmerican~horsepower+I(horsepower^2)&quot;</span>,</span>
+<span id="cb34-3"><a href="#cb34-3"></a>               <span class="st">&quot;isAmerican~horsepower+I(horsepower^2)+I(horsepower^3)&quot;</span>),</span>
+<span id="cb34-4"><a href="#cb34-4"></a>       <span class="dt">nfolds =</span> <span class="dv">10</span>, <span class="dt">method =</span> <span class="st">&quot;logistic&quot;</span>)</span></code></pre></div>
+<pre><code>##             mean     SE
+## .Model_1 0.50118 0.0231
+## .Model_2 0.50184 0.0233
+## .Model_3 0.49620 0.0245</code></pre>
+</div>
 <div id="tests-that-we-expect-should-fail" class="section level2">
 <h2>Tests that we expect should fail</h2>
-<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1"></a><span class="co"># Should stop early because method isn&#39;t linear or logistic</span></span>
-<span id="cb33-2"><a href="#cb33-2"></a><span class="kw">try</span>(<span class="kw">cv.svy</span>(Auto, <span class="st">&quot;mpg~horsepower+I(horsepower^2)+I(horsepower^3)&quot;</span>,</span>
-<span id="cb33-3"><a href="#cb33-3"></a>           <span class="dt">nfolds =</span> <span class="dv">10</span>,</span>
-<span id="cb33-4"><a href="#cb33-4"></a>           <span class="dt">method =</span> <span class="st">&quot;abcde&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1"></a><span class="co"># Should stop early because method isn&#39;t linear or logistic</span></span>
+<span id="cb36-2"><a href="#cb36-2"></a><span class="kw">try</span>(<span class="kw">cv.svy</span>(Auto, <span class="st">&quot;mpg~horsepower+I(horsepower^2)+I(horsepower^3)&quot;</span>,</span>
+<span id="cb36-3"><a href="#cb36-3"></a>           <span class="dt">nfolds =</span> <span class="dv">10</span>,</span>
+<span id="cb36-4"><a href="#cb36-4"></a>           <span class="dt">method =</span> <span class="st">&quot;abcde&quot;</span>))</span></code></pre></div>
 <pre><code>## Error in match.arg(method) : &#39;arg&#39; should be one of &quot;linear&quot;, &quot;logistic&quot;</code></pre>
-<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1"></a><span class="co"># Should try to run but crash because response variable isn&#39;t 0/1</span></span>
-<span id="cb35-2"><a href="#cb35-2"></a><span class="kw">try</span>(<span class="kw">cv.svy</span>(Auto, <span class="st">&quot;mpg~horsepower+I(horsepower^2)+I(horsepower^3)&quot;</span>,</span>
-<span id="cb35-3"><a href="#cb35-3"></a>           <span class="dt">nfolds =</span> <span class="dv">10</span>,</span>
-<span id="cb35-4"><a href="#cb35-4"></a>           <span class="dt">method =</span> <span class="st">&quot;logistic&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1"></a><span class="co"># Should try to run but crash because response variable isn&#39;t 0/1</span></span>
+<span id="cb38-2"><a href="#cb38-2"></a><span class="kw">try</span>(<span class="kw">cv.svy</span>(Auto, <span class="st">&quot;mpg~horsepower+I(horsepower^2)+I(horsepower^3)&quot;</span>,</span>
+<span id="cb38-3"><a href="#cb38-3"></a>           <span class="dt">nfolds =</span> <span class="dv">10</span>,</span>
+<span id="cb38-4"><a href="#cb38-4"></a>           <span class="dt">method =</span> <span class="st">&quot;logistic&quot;</span>))</span></code></pre></div>
 <pre><code>## Error in eval(family$initialize) : y values must be 0 &lt;= y &lt;= 1</code></pre>
 </div>
 
