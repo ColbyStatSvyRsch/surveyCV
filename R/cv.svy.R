@@ -1,4 +1,4 @@
-#' General CV function
+#' CV for survey data
 #'
 #' This is a cross validation function designed for survey samples taken using a SRS,
 #' stratified, clustered, or clustered-and-stratified sampling design.

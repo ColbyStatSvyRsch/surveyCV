@@ -1,4 +1,4 @@
-#' CV Survey Design function
+#' CV for `svydesign` objects
 #'
 #' Wrapper function which takes a `svydesign` object
 #' and a vector of model formulas (as strings),

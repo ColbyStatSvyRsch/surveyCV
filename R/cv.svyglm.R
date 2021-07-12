@@ -1,4 +1,4 @@
-#' CV Survey GLM function
+#' CV for `svyglm` objects
 #'
 #' Wrapper function which takes a `svyglm` object
 #' (which itself contains a `svydesign` object)
