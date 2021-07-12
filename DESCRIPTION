@@ -26,9 +26,8 @@ Suggests:
     gridExtra (>= 2.3),
     grid (>= 4.02),
     ggplot2 (>= 3.3.1),
-    lattice (>= 0.20-41),
     knitr (>= 1.29),
     rmarkdown (>= 2.2),
     testthat
 VignetteBuilder: knitr
-RoxygenNote: 7.1.1.9000
+RoxygenNote: 7.1.1
