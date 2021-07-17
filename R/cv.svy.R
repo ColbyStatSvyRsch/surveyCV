@@ -20,6 +20,10 @@
 #' @param weightsID String of the variable name in the dataset that contains sampling weights
 #' @param useSvyForFolds Specify useSvyForFolds = TRUE (default) to take svydesign into account when making folds;
 #'   should not be set FALSE except for running simulations to understand the properties of surveyCV
+#' @param useSvyForFits Specify useSvyForFits = TRUE (default) to take svydesign into account when fitting models on training sets;
+#'   should not be set FALSE except for running simulations to understand the properties of surveyCV
+#' @param useSvyForLoss Specify useSvyForLoss = TRUE (default) to take svydesign into account when calculating loss over test sets;
+#'   should not be set FALSE except for running simulations to understand the properties of surveyCV
 #' @examples
 #' # MSEs generated for a stratified test of a first and second degree polynomial
 #' # fit predicting mpg from horsepower in the Auto dataset, stratified on the
@@ -52,7 +56,8 @@
 
 # General Cross Validation
 cv.svy <- function(Data, formulae, nfolds=5, strataID = NULL, clusterID = NULL, nest = FALSE, fpcID = NULL,
-                   method = c("linear", "logistic"), weightsID = NULL, useSvyForFolds = TRUE) {
+                   method = c("linear", "logistic"), weightsID = NULL,
+                   useSvyForFolds = TRUE, useSvyForFits = TRUE, useSvyForLoss = TRUE) {
 
   # Use stop-logic to check the dataset & arguments specified
   if(nfolds < 1) {print ("nfolds is less that 1")}
@@ -83,12 +88,13 @@ cv.svy <- function(Data, formulae, nfolds=5, strataID = NULL, clusterID = NULL, 
     train <- Data[-test.rows,]
     test <- Data[test.rows,]
     n <- nrow(train)
-    train.svydes <- svydesign(ids = if(is.null(clusterID)) formula(~0) else formula(paste0("~", clusterID)),
-                              strata = if(is.null(strataID)) NULL else formula(paste0("~", strataID)),
-                              fpc = if(is.null(fpcID)) NULL else formula(paste0("~", fpcID)),
-                              weights = if(is.null(weightsID)) NULL else formula(paste0("~", weightsID)),
-                              nest = nest,
-                              data = train)
+    train.svydes <- svydesign(
+      ids = if(is.null(clusterID) | !useSvyForFits) formula(~0) else formula(paste0("~", clusterID)),
+      strata = if(is.null(strataID) | !useSvyForFits) NULL else formula(paste0("~", strataID)),
+      fpc = if(is.null(fpcID) | !useSvyForFits) NULL else formula(paste0("~", fpcID)),
+      weights = if(is.null(weightsID) | !useSvyForFits) NULL else formula(paste0("~", weightsID)),
+      nest = nest,
+      data = train)
     # This loops through the formulas in our list of formulas and calculates the test losses
     # for those formulas applied to each survey design made from each fold and plugs
     # those test losses back into the matrix we made earlier
@@ -115,12 +121,13 @@ cv.svy <- function(Data, formulae, nfolds=5, strataID = NULL, clusterID = NULL, 
   # Attaches our test losses back onto the original dataset
   Data <- cbind(Data, test_loss.df)
   # Makes a survey design based off of the whole dataset so we can calculate a mean
-  full.svydes <- svydesign(ids = if(is.null(clusterID)) formula(~0) else formula(paste0("~", clusterID)),
-                           strata = if(is.null(strataID)) NULL else formula(paste0("~", strataID)),
-                           fpc = if(is.null(fpcID)) NULL else formula(paste0("~", fpcID)),
-                           weights = if(is.null(weightsID)) NULL else formula(paste0("~", weightsID)),
-                           nest = nest,
-                           data = Data)
+  full.svydes <- svydesign(
+    ids = if(is.null(clusterID) | !useSvyForLoss) formula(~0) else formula(paste0("~", clusterID)),
+    strata = if(is.null(strataID) | !useSvyForLoss) NULL else formula(paste0("~", strataID)),
+    fpc = if(is.null(fpcID) | !useSvyForLoss) NULL else formula(paste0("~", fpcID)),
+    weights = if(is.null(weightsID) | !useSvyForLoss) NULL else formula(paste0("~", weightsID)),
+    nest = nest,
+    data = Data)
 
   # Get the names of the last nformulae columns of Data:
   # each of these columns is the .test_loss values for one of the formulae

@@ -1,0 +1,188 @@
+---
+title: "Plots for our `surveyCV` *Stat* paper based on SDSS presentation"
+author: "Cole Guerin, Thomas McMahon, Jerzy Wieczorek"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{plots-for-Stat-paper}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+Writing cleaner code for **only** the simulations needed for our submission to *Stat* (the special issue for SDSS 2021 talks).
+
+Currently based on the sims in `plot_generation.R` -- but instead of having similar functions repeatedly defined separately in that file, use our actual functions from the package such as `cv.svy()`.
+
+```{r, message=FALSE}
+library(survey)
+library(ggplot2)
+library(splines)
+library(magrittr)
+```
+```{r}
+library(surveyCV)
+```
+
+## Generate the artificial population
+
+```{r}
+set.seed(47)
+x1 = stats::runif(1:500, min = 26, max = 38)
+y1 = (x1-29)^3 - 13*(x1-29)^2 + 0*(x1-29) + 900
+
+set.seed(47)
+x2 = stats::runif(1:500, min = 38, max = 50)
+y2 = (x2-36)^3 - 10*(x2-36)^2 + 2*(x2-36) + 600
+
+set.seed(47)
+# duplicates, so remove these 1st few lines eventually --
+# but would mess up the random seed, so don't remove yet
+# until we've tested and can replicate old plots first
+z1 = jitter(y1, 15000)
+z1 = jitter(y1, 15000)
+z1 = jitter(y1, 15000)
+z1 = jitter(y1, 15000)
+z2 = jitter(y2, 15000)
+
+ds1 <- data.frame(Response = z1, Predictor = x1)
+ds2 <- data.frame(Response = z2, Predictor = x2)
+
+ds <- rbind(ds1, ds2)
+
+b <- data.frame(ID = c(1:1000))
+spline.df2 <- cbind(b, ds)
+spline.df2 <- spline.df2 %>%
+  dplyr::arrange(Predictor) %>%
+  dplyr::mutate(Stratum = dplyr::row_number(),
+                Cluster = dplyr::row_number())
+spline.df2$Stratum <- cut(spline.df2$Stratum,5, 1:5)
+spline.df2$Cluster <- cut(spline.df2$Cluster,100, 1:100)
+spline.df2 <- spline.df2 %>%
+  dplyr::arrange(ID) %>%
+  dplyr::select(ID, Response, Predictor, Cluster, Stratum)
+
+  lm_quad <- stats::lm(Response ~ Predictor + I(Predictor^2),
+                       data = spline.df2)
+spline.df2$samp_prob_quad <-
+  (1/(abs(lm_quad$residuals))) / sum(1/(abs(lm_quad$residuals)))
+spline.df2$samp_wt_quad <- 1/spline.df2$samp_prob_quad
+
+quad.sample.graph <- ggplot(spline.df2,
+  aes(x = Predictor, y = Response)) +
+  geom_point(aes(size = samp_prob_quad), alpha = 0.2) +
+  stat_smooth(method = "lm", formula = y ~ x + I(x^2), se = FALSE)
+```
+
+```{r, fig.width=7, fig.height=7}
+quad.sample.graph
+```
+
+
+## Sims: Use of sampling weights (in training model-fits vs in test loss-estimates)
+
+
+```{r}
+#CV1 uses weights for both MSE and model generation, CV2 uses  it when modeling but not during MSE generation and CV3 uses it only during MSE generation
+
+spline.df3 <- spline.df2
+
+SRS.Weight.plot <- function(n, loops, plot, weights) {
+  # Making an empty data set for output when we make SRS folds, use SRS models, and calculate MSEs using SRS design
+  AllW <- data.frame(df = c(), MSE = c())
+  # Making an empty data set for output when we make SRS folds, use Clus models, and calculate MSEs using SRS design
+  NoW <- data.frame(df = c(), MSE = c())
+  # Making an empty data set for output when we make Clus folds, use Clus models, and calculate MSEs using Clus design
+  ModW <- data.frame(df = c(), MSE = c())
+  # Making an empty data set for output when we make Clus folds, use SRS models, and calculate MSEs using Clus design
+  MSEW <- data.frame(df = c(), MSE = c())
+  for (i in 1:loops) {
+    # Take a sample of size n, using the sampling probabilities instead of SRS
+    # (using 1/samp_wt as the samp_prob)
+    stopifnot(all.equal(sum(1/spline.df3[[weights]]), 1))
+    in.sample <- sampling::UPtille(n / spline.df3[[weights]])
+    spline.df3.sample <- spline.df3[in.sample > 0, ]
+    # Collecting MSE outputs when using SRS folds, SRS models, and SRS design for error calculations
+    AllWdat <- cv.svy(spline.df3.sample,
+                      c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
+                        "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
+                        "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"),
+                      nfolds = 5, weightsID = weights) %>% print()
+    NoWdat <- cv.svy(spline.df3.sample,
+                     c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
+                       "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
+                       "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"),
+                     nfolds = 5) %>% print()
+    ModWdat <- cv.svy(spline.df3.sample,
+                      c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
+                        "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
+                        "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"),
+                      nfolds = 5, weightsID = weights, useSvyForLoss = FALSE) %>% print()
+    MSEWdat <- cv.svy(spline.df3.sample,
+                      c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
+                        "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
+                        "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)"),
+                      nfolds = 5, weightsID = weights, useSvyForFits = FALSE) %>% print()
+
+    # compiling one data frame
+    AllW2 <- data.frame(df = 1:6, MSE = AllWdat[,1], sample = rep(i, length.out = 6))
+    AllW <- rbind(AllW, AllW2)
+    NoW2 <- data.frame(df = 1:6, MSE = NoWdat[,1], sample = rep(i, length.out = 6))
+    NoW <- rbind(NoW, NoW2)
+    ModW2 <- data.frame(df = 1:6, MSE = ModWdat[,1], sample = rep(i, length.out = 6))
+    ModW <- rbind(ModW, ModW2)
+    MSEW2 <- data.frame(df = 1:6, MSE = MSEWdat[,1], sample = rep(i, length.out = 6))
+    MSEW <- rbind(MSEW, MSEW2)
+  }
+  # Making the degrees of freedom variable a factor variable for the six different data frames
+  AllW$df <- as.factor(AllW$df)
+  NoW$df <- as.factor(NoW$df)
+  MSEW$df <- as.factor(MSEW$df)
+  ModW$df <- as.factor(ModW$df)
+  # Making the sample variable a factor variable for the six different data frames
+  AllW$sample <- as.factor(AllW$sample)
+  NoW$sample <- as.factor(NoW$sample)
+  MSEW$sample <- as.factor(MSEW$sample)
+  ModW$sample <- as.factor(ModW$sample)
+  # Find the y-range of MSEs
+  ymin <- min(min(AllW$MSE), min(NoW$MSE), min(MSEW$MSE), min(ModW$MSE))
+  ymax <- max(max(AllW$MSE), max(NoW$MSE), max(MSEW$MSE), max(ModW$MSE))
+  # Making a ggplot object for the MSEs collected when using SRS folds, SRS models, and SRS error calculations
+  p1 <- ggplot2::ggplot(data = AllW, mapping = ggplot2::aes(x = df, y = MSE)) +
+    ggplot2::ggtitle("Weights for both") +
+    ggplot2::ylim(ymin, ymax)
+  # Making a ggplot object for the MSEs collected when using SRS folds, Clus models, and SRS error calculations
+  p2 <- ggplot2::ggplot(data = NoW, mapping = ggplot2::aes(x = df, y = MSE)) +
+    ggplot2::ggtitle("No Weights") +
+    ggplot2::ylim(ymin, ymax)
+  # Making a ggplot object for the MSEs collected when using Clus folds, Clus models, and Clus error calculations
+  p3 <- ggplot2::ggplot(data = ModW, mapping = ggplot2::aes(x = df, y = MSE)) +
+    ggplot2::ggtitle("Weights when modeling") +
+    ggplot2::ylim(ymin, ymax)
+  # Making a ggplot object for the MSEs collected when using Clus folds, SRS models, and Clus error calculations
+  p4 <- ggplot2::ggplot(data = MSEW, mapping = ggplot2::aes(x = df, y = MSE)) +
+    ggplot2::ggtitle("Weights when MSE gen") +
+    ggplot2::ylim(ymin, ymax)
+
+  # Either turning our ggplot objects into boxplots or spaghetti plots (as objects still)
+  if (plot == "box") {
+    plot1 <- p1 + ggplot2::geom_boxplot()
+    plot2 <- p2 + ggplot2::geom_boxplot()
+    plot3 <- p3 + ggplot2::geom_boxplot()
+    plot4 <- p4 + ggplot2::geom_boxplot()
+  } else if (plot == "line") {
+    plot1 <- p1 + ggplot2::geom_line(ggplot2::aes(group = sample, colour = sample)) + ggplot2::theme(legend.position = "none")
+    plot2 <- p2 + ggplot2::geom_line(ggplot2::aes(group = sample, colour = sample)) + ggplot2::theme(legend.position = "none")
+    plot3 <- p3 + ggplot2::geom_line(ggplot2::aes(group = sample, colour = sample)) + ggplot2::theme(legend.position = "none")
+    plot4 <- p4 + ggplot2::geom_line(ggplot2::aes(group = sample, colour = sample)) + ggplot2::theme(legend.position = "none")
+  }
+  # Making a grid display of the six plot objects above
+  gridExtra::grid.arrange(plot1,plot2,plot3,plot4, ncol = 2,
+               top = paste0("Simulated Spline Data (Sample Size = ", n,
+                            ", Loops = ", loops, ", Weights = ", weights, ")"))
+}
+
+```
+
+```{r, results = FALSE, fig.width=7, fig.height=7}
+Main.weights.plot <- SRS.Weight.plot(200,10,"box","samp_wt_quad")
+```
+
