@@ -263,7 +263,6 @@ clusVsrsVstrat.cross.cv.spline.plot <- function(n, loops) {
 
     srssrsds2 <- data.frame(df = 1:6, MSE = srs.data[,1])
     srssrsds <- rbind(srssrsds, srssrsds2)
-    
     # NOTE: removed srsclusds, since we don't need it for the paper
   }
   
@@ -319,28 +318,34 @@ clusVsrsVstrat.cross.cv.spline.plot <- function(n, loops) {
   stratstratds$df <- as.factor(stratstratds$df)
   stratsrsds$df <- as.factor(stratsrsds$df)
   
+  # Find the y-range of MSEs
+  ymin <- min(min(srssrsds$MSE), min(clusclusds$MSE), min(clussrsds$MSE),
+              min(stratstratds$MSE), min(stratsrsds$MSE))
+  ymax <- max(max(srssrsds$MSE), max(clusclusds$MSE), max(clussrsds$MSE),
+              max(stratstratds$MSE), max(stratsrsds$MSE))
+
   # Making ggplot objects for the MSEs
   plot1 <- ggplot2::ggplot(data = srssrsds, mapping = ggplot2::aes(x = df, y = MSE)) +
     ggplot2::geom_boxplot() +
     ggplot2::ggtitle("SRS folds with SRS sample") +
-    ggplot2::ylim(20000, 250000)
+    scale_y_log10(limits = c(ymin, ymax))
   plot2 <- rectGrob(width = 0, height = 0) # empty spot here -- no corresponding sim
   plot3 <- ggplot2::ggplot(data = clusclusds, mapping = ggplot2::aes(x = df, y = MSE)) +
     ggplot2::geom_boxplot() +
     ggplot2::ggtitle("Cluster folds with Cluster sample") +
-    ggplot2::ylim(20000, 250000)
+    scale_y_log10(limits = c(ymin, ymax))
   plot4 <- ggplot2::ggplot(data = clussrsds, mapping = ggplot2::aes(x = df, y = MSE)) +
     ggplot2::geom_boxplot() +
     ggplot2::ggtitle("SRS folds with Cluster sample") +
-    ggplot2::ylim(20000, 250000)
+    scale_y_log10(limits = c(ymin, ymax))
   plot5 <- ggplot2::ggplot(data = stratstratds, mapping = ggplot2::aes(x = df, y = MSE)) +
     ggplot2::geom_boxplot() +
     ggplot2::ggtitle("Strat folds with Strat sample") +
-    ggplot2::ylim(20000, 110000)
+    scale_y_log10(limits = c(ymin, ymax))
   plot6 <- ggplot2::ggplot(data = stratsrsds, mapping = ggplot2::aes(x = df, y = MSE)) +
     ggplot2::geom_boxplot() +
     ggplot2::ggtitle("SRS folds with Strat sample") +
-    ggplot2::ylim(20000, 110000)
+    scale_y_log10(limits = c(ymin, ymax))
 
   
   # Making a grid display of the six plot objects above
