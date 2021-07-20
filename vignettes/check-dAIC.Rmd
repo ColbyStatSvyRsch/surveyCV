@@ -1,0 +1,214 @@
+---
+title: "Checking dAIC calculations in `survey::AIC.svyglm()`"
+author: "Cole Guerin, Thomas McMahon, Jerzy Wieczorek"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{check-dAIC}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+```{r Packages, message=FALSE}
+library(survey)
+library(ggplot2)
+library(splines)
+library(magrittr)
+```
+```{r LoadSurveyCV}
+library(surveyCV)
+```
+
+
+## Generate the artificial population
+
+```{r ArtifPop}
+set.seed(47)
+x1 = stats::runif(1:500, min = 26, max = 38)
+y1 = (x1-29)^3 - 13*(x1-29)^2 + 0*(x1-29) + 900
+
+set.seed(47)
+x2 = stats::runif(1:500, min = 38, max = 50)
+y2 = (x2-36)^3 - 10*(x2-36)^2 + 2*(x2-36) + 600
+
+set.seed(47)
+# TODO: remove these 1st few duplicate lines eventually --
+# but would mess up the random seed, so don't remove yet
+# until we've tested and can replicate old plots first...
+# THEN when we are happy with ability to replicate old result,
+# revise so that both sets of sims (eval folds AND eval weights)
+# are using the SAME simulated dataset.
+z1 = jitter(y1, 15000)
+z1 = jitter(y1, 15000)
+z2 = jitter(y2, 15000)
+z3 = jitter(y1, 15000)
+z4 = jitter(y2, 15000)
+
+ds1 <- data.frame(Response = z1, Predictor = x1)
+ds2 <- data.frame(Response = z2, Predictor = x2)
+ds12 <- rbind(ds1, ds2)
+
+ds3 <- data.frame(Response = z3, Predictor = x1)
+ds4 <- data.frame(Response = z4, Predictor = x2)
+ds34 <- rbind(ds3, ds4)
+
+b12 <- data.frame(ID = c(1:1000))
+spline.df2 <- cbind(b12, ds12)
+spline.df2 <- spline.df2 %>%
+  dplyr::arrange(Predictor) %>%
+  dplyr::mutate(Stratum = dplyr::row_number(),
+                Cluster = dplyr::row_number())
+spline.df2$Stratum <- cut(spline.df2$Stratum, 5, 1:5)
+spline.df2$Cluster <- cut(spline.df2$Cluster, 100, 1:100)
+spline.df2 <- spline.df2 %>%
+  dplyr::arrange(ID) %>%
+  dplyr::select(ID, Response, Predictor, Cluster, Stratum)
+```
+
+# TODO: Is something wrong with dAIC calc?
+
+TODO: Check on whether `survey::AIC()` is implemented correctly.
+
+I am getting reasonably well-matched SHAPE of the AICs to the CV MSEs plotted,
+and I don't know what the scale of the AICs "should" be...
+
+BUT the `eff.p` and `deltabar` values returned by `AIC.svyglm()` seem ridiculously high.
+I would have expected `deltabar` around 1 when using SRS, but it was in the 10000s.
+
+When I change the way I do `fpc`, or `weights`, or how I specify `ids`, it doesn't matter.
+
+But when I change the scale of the `Response` variable, that DOES matter.
+Is that how AIC is supposed to work?
+Don't we want to be able to interpret `deltabar` as an average deff, regardless of the scale of y-variable?
+
+```{r}
+modelsToFit <- c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
+                     "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
+                     "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)")
+
+n = 100
+set.seed(10)
+sim.srs <- dplyr::sample_n(spline.df2, n)
+srs.des <- svydesign(ids = 1:n, data = sim.srs, fpc = rep(n/1000, n))
+AIC(svyglm(modelsToFit[1], srs.des))
+
+srs.des <- svydesign(ids = 1:n, data = sim.srs, fpc = rep(1000, n))
+AIC(svyglm(modelsToFit[1], srs.des))
+
+srs.des <- svydesign(ids = 1:n, data = sim.srs, weights = rep(1000/n, n), fpc = rep(1000, n))
+AIC(svyglm(modelsToFit[1], srs.des))
+
+srs.des <- svydesign(ids = ~1, data = sim.srs, fpc = rep(1000, n))
+AIC(svyglm(modelsToFit[1], srs.des))
+
+srs.des <- svydesign(ids = ~0, data = sim.srs, fpc = rep(1000, n))
+AIC(svyglm(modelsToFit[1], srs.des))
+
+srs.des <- svydesign(ids = ~1, data = sim.srs)
+AIC(svyglm(modelsToFit[1], srs.des))
+srs.des <- svydesign(ids = 1:n, data = sim.srs, weights = rep(1000/n, n))
+AIC(svyglm(modelsToFit[1], srs.des))
+
+# So rescaling the pop size doesn't matter EXCEPT through fpc, not through weights;
+# and the way we specify `ids` doesn't matter.
+# BUT the scale of the y-variable DOES matter:
+
+sim.srs$Response <- sim.srs$Response/100
+srs.des <- svydesign(ids = 1:n, data = sim.srs, fpc = rep(n/1000, n))
+AIC(svyglm(modelsToFit[1], srs.des))
+```
+
+
+
+
+Maybe it isn't wrong. But if this **is** wrong, it might have to do with comparing
+what appears to be `svyglm()`'s equiv of `cov.scaled` with 
+vanilla `summary(glm())`'s computed `cov.unscaled`,
+instead of comparing two `cov.scaled` to each other.
+
+See [survey.R](https://rdrr.io/rforge/survey/src/R/survey.R) and [regTerm.R](https://rdrr.io/rforge/survey/src/R/regtest.R) for code.
+
+`AIC.svyglm` relies on `regTermTest` where the internal variable `misspec` becomes the returned variable `lambda` that `AIC.svyglm` uses to `deltabar`... And this `misspec` is `eigen(solve(V0)%*%V)$values` where `V0` is `svyglm$naive.cov` while `V` is `vcov(svyglm)`?
+
+`svyglm.survey.design()` returns an object with the element `naive.cov` which is `summary.glm()$cov.unscaled`.
+But it also returns its own element called `cov.unscaled` which is made by `svy.varcoef()` and `svyCprod()` but appears to be comparable to `cov.scaled` returned by `summary(glm())`.
+
+And indeed if we fit a `svydesign` with no `fpc`,
+then `svyglm$naive.cov` is EXACTLY `glm$cov.unscaled`...
+while `svyglm$cov.unscaled` is CLOSE TO BUT NOT EXACTLY `glm$cov.scaled`.
+So (1) why are they close but NOT exact in 2nd case, for SRS design vs for iid glm?
+Shouldn't we get the same thing in 2nd case too?
+And (2) why aren't the names chosen to match up sensibly,
+so that cov.scaled and cov.unscaled mean the same thing for both svyglm and glm?
+
+```{r}
+n = 100
+set.seed(10)
+sim.srs <- dplyr::sample_n(spline.df2, n)
+srs.des <- svydesign(ids = 1:n, data = sim.srs)
+
+svyglm(modelsToFit[1], srs.des)$naive.cov
+svyglm(modelsToFit[1], srs.des)$cov.unscaled
+vcov(svyglm(modelsToFit[1], srs.des))
+
+summary(glm(modelsToFit[1], data = sim.srs))$cov.unscaled
+summary(glm(modelsToFit[1], data = sim.srs))$cov.scaled
+vcov(glm(modelsToFit[1], data = sim.srs))
+```
+
+
+Which one is "correct" anyway?
+
+```{r}
+# This is the one we want indeed, NOT the glm$cov.unscaled or svyglm$naive.cov
+var(sim.srs$Response)/100
+vcov(svymean(~Response, srs.des))
+vcov(svyglm("Response ~ 1", srs.des))
+svyglm("Response ~ 1", srs.des)$cov.unscaled
+vcov(glm("Response ~ 1", data = sim.srs))
+summary(glm("Response ~ 1", data = sim.srs))$cov.scaled
+
+# This is NOT the one we want, not directly anyway
+svyglm("Response ~ 1", srs.des)$naive.cov
+summary(glm("Response ~ 1", data = sim.srs))$cov.unscaled
+```
+
+Final thing to check:
+We confirmed above that changing scale of Y for AIC.svyglm does change the AICs.
+What about for regular glm?
+
+```{r}
+n = 100
+set.seed(10)
+sim.srs <- dplyr::sample_n(spline.df2, n)
+srs.des <- svydesign(ids = 1:n, data = sim.srs)
+AIC(svyglm(modelsToFit[1], srs.des))
+AIC(glm(modelsToFit[1], data=sim.srs))
+
+sim.srs$Response <- sim.srs$Response/100
+srs.des <- svydesign(ids = 1:n, data = sim.srs)
+AIC(svyglm(modelsToFit[1], srs.des))
+AIC(glm(modelsToFit[1], data=sim.srs))
+```
+
+It DOES change the scale of AIC for regular glm too. WHY IS THAT? Doesn't that screw up AIC comparisons, if scale of Y changes some things but not the `+2p` term? I guess we should ALSO check if changing the scale changes the raw differences...
+
+
+
+```{r}
+n = 100
+set.seed(10)
+sim.srs <- dplyr::sample_n(spline.df2, n)
+srs.des <- svydesign(ids = 1:n, data = sim.srs)
+-diff(AIC(svyglm(modelsToFit[1], srs.des), svyglm(modelsToFit[2], srs.des))[,"AIC"])
+-diff(AIC(glm(modelsToFit[1], data=sim.srs), glm(modelsToFit[2], data=sim.srs))[,"AIC"])
+
+sim.srs$Response <- sim.srs$Response/100
+srs.des <- svydesign(ids = 1:n, data = sim.srs)
+-diff(AIC(svyglm(modelsToFit[1], srs.des), svyglm(modelsToFit[2], srs.des))[,"AIC"])
+-diff(AIC(glm(modelsToFit[1], data=sim.srs), glm(modelsToFit[2], data=sim.srs))[,"AIC"])
+```
+
+So rescaling Y by 1000 rescaled the differences by 1000 as well for svyglm.
+But it made no change at all in the diffs for glm.
+OK, so maybe this is all fine and working as it should...???

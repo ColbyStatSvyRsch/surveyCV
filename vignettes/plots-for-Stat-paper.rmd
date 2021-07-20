@@ -362,3 +362,54 @@ sim.clusVsrsVstrat.sd.n100 <-
   clusVsrsVstrat.cross.cv.spline.plot(n=100, loops=100)
 ```
 
+
+
+
+## Sims: Attempt to use dAIC with SRS, clustered, or stratified samples and compare to surveyCV
+
+```{r, fig.width=7, fig.height=7}
+n <- 100
+loops <- 10
+
+# Use SRS samples and make SRS folds
+srssrsds <- data.frame(df = c(), MSE = c())
+# Use SRS samples and use dAIC
+srsdAICds <- data.frame(df = c(), dAIC = c())
+
+modelsToFit <- c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
+                 "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
+                 "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)")
+
+# Making as many simple random samples as we specify for 'loops'
+for (i in 1:loops) {
+  set.seed(i)
+  sim.srs <- dplyr::sample_n(spline.df2, n)
+  # Using our SRS function on SRS samples
+  srs.CV.data <- cv.svy(sim.srs, modelsToFit,
+                        nfolds = 5) %>% print()
+  srs.des <- svydesign(ids = 1:n, data = sim.srs, fpc = rep(n/1000, n))
+  srs.dAIC.data <- sapply(1:6, function(ii) AIC(svyglm(modelsToFit[ii], srs.des))["AIC"])
+
+  srssrsds2 <- data.frame(df = 1:6, MSE = srs.CV.data[,1])
+  srssrsds <- rbind(srssrsds, srssrsds2)
+  srsdAICds2 <- data.frame(df = 1:6, dAIC = srs.dAIC.data)
+  srsdAICds <- rbind(srsdAICds, srsdAICds2)
+}
+
+srssrsds$df <- as.factor(srssrsds$df)
+srsdAICds$df <- as.factor(srsdAICds$df)
+
+plot1 <- ggplot(srssrsds, aes(x = df, y = MSE)) + geom_boxplot() +
+    ggplot2::ggtitle("SRS folds with SRS sample")
+plot2 <- ggplot(srsdAICds, aes(x = df, y = dAIC)) + geom_boxplot() +
+    ggplot2::ggtitle("dAIC with SRS sample")
+
+gridExtra::grid.arrange(plot1,plot2,
+             ncol = 2,
+             top = paste0("Simulated Spline Data (Sample Sizes = ", n,
+                          ", Clusters = ", n/10,
+                          " or Strata = 5, Loops = ", loops, ")"))
+```
+
+TODO: go back and add these dAIC sims to `clusVsrsVstrat.cross.cv.spline.plot()`,
+showing them as a 3rd column of plots (one each for SRS, strat, and clus).
