@@ -212,3 +212,41 @@ srs.des <- svydesign(ids = 1:n, data = sim.srs)
 So rescaling Y by 1000 rescaled the differences by 1000 as well for svyglm.
 But it made no change at all in the diffs for glm.
 OK, so maybe this is all fine and working as it should...???
+
+
+
+One last thing to try:
+`svyglm` can return a `deff` attribute -- does this line up with `deltabar` above, or with the usual way we think about deff?
+
+```{r}
+n = 100
+set.seed(10)
+sim.srs <- dplyr::sample_n(spline.df2, n)
+srs.des <- svydesign(ids = 1:n, data = sim.srs)
+attr(svyglm(modelsToFit[1], srs.des, deff = TRUE), "deff")
+attr(svyglm(modelsToFit[2], srs.des, deff = TRUE), "deff")
+attr(svyglm(modelsToFit[3], srs.des, deff = TRUE), "deff")
+```
+
+Oh boy. (1) None of these deffs are close to 1 (like I would expect since this IS a SRS and we TOLD R that it's a SRS...)
+But (2) they ALSO are not close to the 10,000 scale of deltabar above.
+
+So, clearly the way I'm thinking about deffs is very different from how the `survey` package implements them. But why? What is `survey` striving to do that I'm misunderstanding?
+
+
+## Check / debug use of AIC inside a function
+
+When I originally tried using AIC.svyglm inside a for-loop, it was fine.
+But when I put that for-loop inside a function, in plots-for-Stat-paper.Rmd, it was trying to evaluate the svydesign object in the wrong parent.frame() and couldn't find it???
+Then when I moved all that outside a function and just ran it as a series of loops, it was fine again.
+
+Try to replicate this, and report to Lumley if replicable:
+`AIC.svyglm()` fails to find the svydesign object from svyglm's `design` argument when it's used inside a function (and the svydesign is also defined inside that function), but no problems when outside a function...?
+
+```{r}
+# TODO: debug -- why is this not working in Rmd but it works "manually"?
+# ??? Is it because it's inside a function, for some reason?
+#     because it seems to work in the final code-chunk of this Rmd doc,
+#     where it's inside a loop but NOT inside a function...
+```
+
