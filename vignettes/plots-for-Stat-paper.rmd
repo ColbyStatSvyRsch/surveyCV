@@ -13,7 +13,6 @@ Writing cleaner code for **only** the simulations needed for our submission to *
 Currently based on the sims in `plot_generation.R` -- but instead of having similar functions repeatedly defined separately in that file, use our actual functions from the package such as `cv.svy()`.
 
 * TODO: Rewrite `Sims.Weight.plot` to save the sim results, and make the plots separately
-* TODO: Save the actual results of the CV-folds sims, so we can knit vignette quickly without `cache=TRUE` which isn't working for some reason
 
 ```{r Packages, message=FALSE}
 library(survey)
@@ -48,12 +47,14 @@ splinepop.df <- cbind(b12, ds12)
 splinepop.df <- splinepop.df %>%
   dplyr::arrange(Predictor) %>%
   dplyr::mutate(Stratum = dplyr::row_number(),
-                Cluster = dplyr::row_number())
-splinepop.df$Stratum <- cut(splinepop.df$Stratum, 5, 1:5)
-splinepop.df$Cluster <- cut(splinepop.df$Cluster, 100, 1:100)
-splinepop.df <- splinepop.df %>%
-  dplyr::arrange(ID) %>%
-  dplyr::select(ID, Response, Predictor, Cluster, Stratum)
+                Cluster = dplyr::row_number()) %>% 
+  dplyr::mutate(Stratum = cut(Stratum, 5, 1:5),
+                Cluster = cut(Cluster, 100, 1:100)) %>%
+  # full pop has 1000 units; 200 units/stratum; 100 clusters of 10 units each
+  dplyr::mutate(fpcSRS = 1000,
+                fpcStratum = 1000/5,
+                fpcCluster = 100) %>%
+  dplyr::arrange(ID)
 
 lm_quad <- stats::lm(Response ~ Predictor + I(Predictor^2),
                      data = splinepop.df)
@@ -177,7 +178,7 @@ Sims.Weight.plot <- function(n, loops, plot, weights) {
 }
 ```
 
-```{r WeightsSimsResultsAndPlots, results = FALSE, fig.width=7, fig.height=7}
+```{r WeightsSimsResultsAndPlots, fig.width=7, fig.height=7}
 Main.weights.plot <- Sims.Weight.plot(200, 10, "box", "samp_wt_quad")
 ```
 
@@ -186,16 +187,12 @@ Main.weights.plot <- Sims.Weight.plot(200, 10, "box", "samp_wt_quad")
 
 ## Sims: Use of surveyCV folds with SRS, clustered, or stratified samples
 
-
-```{r FoldsSimsResults, results = FALSE, eval=FALSE}
-# TODO: both here and for weights sims,
-# separate the simulated-data code from the ggplot code, so that we can
-# (1) store the raw data inside package instead of storing larger ggplot objects;
-# (2) double-check things (like the warning about boxplot removing non-finite values)
-
+```{r FoldsSimsSetup}
 n <- 100
 loops <- 100
+```
 
+```{r FoldsSimsResults, eval = FALSE}
 # Use SRS samples and make SRS folds
 srssrsds <- data.frame(df = c(), MSE = c())
 # Use SRS samples and use dAIC
@@ -227,12 +224,12 @@ for (i in 1:loops) {
   
   # Using our SRS function on SRS samples
   srs.CV.out <- cv.svy(sim.srs, modelsToFit,
-                       nfolds = 5) %>% as.vector()
+                       nfolds = 5, fpcID = "fpcSRS") %>% as.vector()
   srssrsds2 <- data.frame(df = 1:6, MSE = srs.CV.out)
   srssrsds <- rbind(srssrsds, srssrsds2)
 
   # Using dAIC on SRS samples
-  srs.des <- svydesign(ids = ~1, data = sim.srs)
+  srs.des <- svydesign(ids = ~1, fpc = ~fpcSRS, data = sim.srs)
   srs.dAIC.out <- sapply(1:6,
     function(ii) AIC(svyglm(formula = formula(modelsToFit[ii]),
                             design = srs.des))["AIC"])
@@ -249,18 +246,18 @@ for (i in 1:loops) {
   
   # Using our Cluster function on Cluster samples
   clus.CV.out <- cv.svy(sim.clus, modelsToFit,
-                        clusterID = "Cluster", nfolds = 5) %>% as.vector()
+                        clusterID = "Cluster", nfolds = 5, fpcID = "fpcCluster") %>% as.vector()
   clusclusds2 <- data.frame(df = 1:6, MSE = clus.CV.out)
   clusclusds <- rbind(clusclusds, clusclusds2)
 
   # Using our SRS function on Cluster samples
   srs.CV.out <- cv.svy(sim.clus, modelsToFit,
-                       nfolds = 5) %>% as.vector()
+                       nfolds = 5, fpcID = "fpcSRS") %>% as.vector()
   clussrsds2 <- data.frame(df = 1:6, MSE = srs.CV.out)
   clussrsds <- rbind(clussrsds, clussrsds2)
   
   # Using dAIC on Cluster samples
-  clus.des <- svydesign(ids = ~Cluster, data = sim.clus)
+  clus.des <- svydesign(ids = ~Cluster, fpc = ~fpcCluster, data = sim.clus)
   clus.dAIC.out <- sapply(1:6,
     function(ii) AIC(svyglm(modelsToFit[ii], clus.des))["AIC"])
   clusdAICds2 <- data.frame(df = 1:6, dAIC = clus.dAIC.out)
@@ -277,18 +274,18 @@ for (i in 1:loops) {
   
   # Using our Strat function on Strat samples
   strat.CV.out <- cv.svy(sim.strat, modelsToFit,
-                         strataID = "Stratum", nfolds = 5) %>% as.vector()
+                         strataID = "Stratum", nfolds = 5, fpcID = "fpcStratum") %>% as.vector()
   stratstratds2 <- data.frame(df = 1:6, MSE = strat.CV.out)
   stratstratds <- rbind(stratstratds, stratstratds2)
   
   # Using our SRS function on Strat samples
   srs.CV.out <- cv.svy(sim.strat, modelsToFit,
-                       nfolds = 5) %>% as.vector()
+                       nfolds = 5, fpcID = "fpcSRS") %>% as.vector()
   stratsrsds2 <- data.frame(df = 1:6, MSE = srs.CV.out)
   stratsrsds <- rbind(stratsrsds, stratsrsds2)
   
   # Using dAIC on Strat samples
-  strat.des <- svydesign(ids = ~1, strata = ~Stratum, data = sim.strat)
+  strat.des <- svydesign(ids = ~1, strata = ~Stratum, fpc = ~fpcStratum, data = sim.strat)
   strat.dAIC.out <- sapply(1:6,
     function(ii) AIC(svyglm(modelsToFit[ii], strat.des))["AIC"])
   stratdAICds2 <- data.frame(df = 1:6, dAIC = strat.dAIC.out)
@@ -305,17 +302,36 @@ stratstratds$df <- as.factor(stratstratds$df)
 stratsrsds$df <- as.factor(stratsrsds$df)
 stratdAICds$df <- as.factor(stratdAICds$df)
 
-# Find the y-ranges of MSEs and dAICs
-yminMSE <- min(min(srssrsds$MSE), min(clusclusds$MSE), min(clussrsds$MSE),
-               min(stratstratds$MSE), min(stratsrsds$MSE))
-ymaxMSE <- max(max(srssrsds$MSE), max(clusclusds$MSE), max(clussrsds$MSE),
-               max(stratstratds$MSE), max(stratsrsds$MSE))
-yminAIC <- min(min(srsdAICds$dAIC), min(clusdAICds$dAIC), min(stratdAICds$dAIC))
-ymaxAIC <- max(max(srsdAICds$dAIC), max(clusdAICds$dAIC), max(stratdAICds$dAIC))
+usethis::use_data(srssrsds, srsdAICds,
+                  clusclusds, clussrsds, clusdAICds,
+                  stratstratds, stratsrsds, stratdAICds,
+                  internal = FALSE)
+# for now setting internal=FALSE
+# so that we don't overwrite the sysdata.Rda for intro.Rmd;
+# but eventually when we're ready to replace that old vignette,
+# we can return to internal=TRUE here
+# if that's indeed better for R packages
 ```
 
 
-```{r FoldsSimsPlots, fig.width=7, fig.height=7, eval=FALSE}
+```{r FoldsSimsPlots, fig.width=7, fig.height=7}
+data("srssrsds",
+     "clusclusds", "clussrsds",
+     "stratstratds", "stratsrsds",
+     "srsdAICds", "clusdAICds", "stratdAICds")
+
+# Find the y-ranges of MSEs and dAICs
+yminMSE <- min(min(srssrsds$MSE),
+               min(clusclusds$MSE), min(clussrsds$MSE),
+               min(stratstratds$MSE), min(stratsrsds$MSE))
+ymaxMSE <- max(max(srssrsds$MSE),
+               max(clusclusds$MSE), max(clussrsds$MSE),
+               max(stratstratds$MSE), max(stratsrsds$MSE))
+yminAIC <- min(min(srsdAICds$dAIC), min(clusdAICds$dAIC),
+               min(stratdAICds$dAIC))
+ymaxAIC <- max(max(srsdAICds$dAIC), max(clusdAICds$dAIC),
+               max(stratdAICds$dAIC))
+
 # Making ggplot objects for the MSEs and AICs
 plot.srssrs <- ggplot(data = srssrsds, mapping = aes(x = df, y = MSE/1e4)) +
   geom_boxplot() +
