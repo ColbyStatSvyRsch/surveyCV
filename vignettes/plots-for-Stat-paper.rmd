@@ -12,7 +12,8 @@ Writing cleaner code for **only** the simulations needed for our submission to *
 
 Currently based on the sims in `plot_generation.R` -- but instead of having similar functions repeatedly defined separately in that file, use our actual functions from the package such as `cv.svy()`.
 
-* TODO: Fix the use of ` %>% print()`
+* TODO: Rewrite `Sims.Weight.plot` to save the sim results, and make the plots separately
+* TODO: Save the actual results of the CV-folds sims, so we can knit vignette quickly without `cache=TRUE` which isn't working for some reason
 
 ```{r Packages, message=FALSE}
 library(survey)
@@ -28,70 +29,39 @@ library(surveyCV)
 
 ```{r ArtifPop}
 set.seed(47)
+
 x1 = stats::runif(1:500, min = 26, max = 38)
 y1 = (x1-29)^3 - 13*(x1-29)^2 + 0*(x1-29) + 900
 
-set.seed(47)
 x2 = stats::runif(1:500, min = 38, max = 50)
 y2 = (x2-36)^3 - 10*(x2-36)^2 + 2*(x2-36) + 600
 
-set.seed(47)
-# TODO: remove these 1st few duplicate lines eventually --
-# but would mess up the random seed, so don't remove yet
-# until we've tested and can replicate old plots first...
-# THEN when we are happy with ability to replicate old result,
-# revise so that both sets of sims (eval folds AND eval weights)
-# are using the SAME simulated dataset.
-z1 = jitter(y1, 15000)
 z1 = jitter(y1, 15000)
 z2 = jitter(y2, 15000)
-z3 = jitter(y1, 15000)
-z4 = jitter(y2, 15000)
 
 ds1 <- data.frame(Response = z1, Predictor = x1)
 ds2 <- data.frame(Response = z2, Predictor = x2)
 ds12 <- rbind(ds1, ds2)
 
-ds3 <- data.frame(Response = z3, Predictor = x1)
-ds4 <- data.frame(Response = z4, Predictor = x2)
-ds34 <- rbind(ds3, ds4)
-
 b12 <- data.frame(ID = c(1:1000))
-spline.df2 <- cbind(b12, ds12)
-spline.df2 <- spline.df2 %>%
+splinepop.df <- cbind(b12, ds12)
+splinepop.df <- splinepop.df %>%
   dplyr::arrange(Predictor) %>%
   dplyr::mutate(Stratum = dplyr::row_number(),
                 Cluster = dplyr::row_number())
-spline.df2$Stratum <- cut(spline.df2$Stratum, 5, 1:5)
-spline.df2$Cluster <- cut(spline.df2$Cluster, 100, 1:100)
-spline.df2 <- spline.df2 %>%
-  dplyr::arrange(ID) %>%
-  dplyr::select(ID, Response, Predictor, Cluster, Stratum)
-
-
-
-
-# TODO: remove this eventually (once we can replicate old results)
-# and just add samp_wt_quad to the original artificial pop above
-b34 <- data.frame(ID = c(1:1000))
-spline.df3 <- cbind(b34, ds34)
-spline.df3 <- spline.df3 %>%
-  dplyr::arrange(Predictor) %>%
-  dplyr::mutate(Stratum = dplyr::row_number(),
-                Cluster = dplyr::row_number())
-spline.df3$Stratum <- cut(spline.df3$Stratum, 5, 1:5)
-spline.df3$Cluster <- cut(spline.df3$Cluster, 100, 1:100)
-spline.df3 <- spline.df3 %>%
+splinepop.df$Stratum <- cut(splinepop.df$Stratum, 5, 1:5)
+splinepop.df$Cluster <- cut(splinepop.df$Cluster, 100, 1:100)
+splinepop.df <- splinepop.df %>%
   dplyr::arrange(ID) %>%
   dplyr::select(ID, Response, Predictor, Cluster, Stratum)
 
 lm_quad <- stats::lm(Response ~ Predictor + I(Predictor^2),
-                     data = spline.df3)
-spline.df3$samp_prob_quad <-
+                     data = splinepop.df)
+splinepop.df$samp_prob_quad <-
   (1/(abs(lm_quad$residuals))) / sum(1/(abs(lm_quad$residuals)))
-spline.df3$samp_wt_quad <- 1/spline.df3$samp_prob_quad
+splinepop.df$samp_wt_quad <- 1/splinepop.df$samp_prob_quad
 
-quad.sample.graph <- ggplot(spline.df3,
+quad.sample.graph <- ggplot(splinepop.df,
   aes(x = Predictor, y = Response)) +
   geom_point(aes(size = samp_prob_quad), alpha = 0.2) +
   stat_smooth(method = "lm", formula = y ~ x + I(x^2), se = FALSE)
@@ -106,18 +76,8 @@ quad.sample.graph
 
 
 ```{r WeightsSimsFunction}
-# TODO: rename spline.df3 to be more clearly
-# the sim dataset used for testing effect of weights
-
-# # TEMPORARILY check that using different artif pop DOES give diff results?
-# spline.df3$Predictor <- spline.df2$Predictor
-# spline.df3$Response <- spline.df2$Response
-# # YES it does... Quite substantially!
-# # TODO: we ought to run many more than just 10 loops in the function below
-# # before we can safely interpret the results.
-
 Sims.Weight.plot <- function(n, loops, plot, weights) {
-  stopifnot(all.equal(sum(1/spline.df3[[weights]]), 1))
+  stopifnot(all.equal(sum(1/splinepop.df[[weights]]), 1))
 
   # In all the following cases,
   # we are only checking the effect of using sampling **weights**
@@ -137,31 +97,31 @@ Sims.Weight.plot <- function(n, loops, plot, weights) {
   for (i in 1:loops) {
     # Take a sample of size n, using the sampling probabilities instead of SRS
     # (using 1/samp_wt as the samp_prob)
-    in.sample <- sampling::UPtille(n / spline.df3[[weights]])
-    spline.df3.sample <- spline.df3[in.sample > 0, ]
+    in.sample <- sampling::UPtille(n / splinepop.df[[weights]])
+    splinesamp.df <- splinepop.df[in.sample > 0, ]
     modelsToFit <- c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
                      "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
                      "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)")
 
-    AllWdat <- cv.svy(spline.df3.sample, modelsToFit,
-                      nfolds = 5, weightsID = weights) %>% print()
-    NoWdat <- cv.svy(spline.df3.sample, modelsToFit,
-                     nfolds = 5) %>% print()
-    ModWdat <- cv.svy(spline.df3.sample, modelsToFit,
+    AllWdat <- cv.svy(splinesamp.df, modelsToFit,
+                      nfolds = 5, weightsID = weights) %>% as.vector()
+    NoWdat <- cv.svy(splinesamp.df, modelsToFit,
+                     nfolds = 5) %>% as.vector()
+    ModWdat <- cv.svy(splinesamp.df, modelsToFit,
                       nfolds = 5, weightsID = weights,
-                      useSvyForLoss = FALSE) %>% print()
-    MSEWdat <- cv.svy(spline.df3.sample, modelsToFit,
+                      useSvyForLoss = FALSE) %>% as.vector()
+    MSEWdat <- cv.svy(splinesamp.df, modelsToFit,
                       nfolds = 5, weightsID = weights,
-                      useSvyForFits = FALSE) %>% print()
+                      useSvyForFits = FALSE) %>% as.vector()
 
     # compiling one data frame
-    AllW2 <- data.frame(df = 1:6, MSE = AllWdat[,1], sample = rep(i, 6))
+    AllW2 <- data.frame(df = 1:6, MSE = AllWdat, sample = rep(i, 6))
     AllW <- rbind(AllW, AllW2)
-    NoW2 <- data.frame(df = 1:6, MSE = NoWdat[,1], sample = rep(i, 6))
+    NoW2 <- data.frame(df = 1:6, MSE = NoWdat, sample = rep(i, 6))
     NoW <- rbind(NoW, NoW2)
-    ModW2 <- data.frame(df = 1:6, MSE = ModWdat[,1], sample = rep(i, 6))
+    ModW2 <- data.frame(df = 1:6, MSE = ModWdat, sample = rep(i, 6))
     ModW <- rbind(ModW, ModW2)
-    MSEW2 <- data.frame(df = 1:6, MSE = MSEWdat[,1], sample = rep(i, 6))
+    MSEW2 <- data.frame(df = 1:6, MSE = MSEWdat, sample = rep(i, 6))
     MSEW <- rbind(MSEW, MSEW2)
   }
   # Making the degrees of freedom variable a factor variable
@@ -217,7 +177,7 @@ Sims.Weight.plot <- function(n, loops, plot, weights) {
 }
 ```
 
-```{r WeightsSimsResultsAndPlots, results = FALSE, fig.width=7, fig.height=7, eval=FALSE}
+```{r WeightsSimsResultsAndPlots, results = FALSE, fig.width=7, fig.height=7}
 Main.weights.plot <- Sims.Weight.plot(200, 10, "box", "samp_wt_quad")
 ```
 
@@ -227,10 +187,7 @@ Main.weights.plot <- Sims.Weight.plot(200, 10, "box", "samp_wt_quad")
 ## Sims: Use of surveyCV folds with SRS, clustered, or stratified samples
 
 
-```{r FoldsSimsResults, results = FALSE, cache = TRUE}
-# TODO: rename spline.df2 to be more clearly
-# the sim dataset used for testing effect of folds (SRS vs clus vs strat)
-
+```{r FoldsSimsResults, results = FALSE, eval=FALSE}
 # TODO: both here and for weights sims,
 # separate the simulated-data code from the ggplot code, so that we can
 # (1) store the raw data inside package instead of storing larger ggplot objects;
@@ -266,12 +223,12 @@ modelsToFit <- c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
 for (i in 1:loops) {
   # Take a SRS
   set.seed(i)
-  sim.srs <- dplyr::sample_n(spline.df2, n)
+  sim.srs <- dplyr::sample_n(splinepop.df, n)
   
   # Using our SRS function on SRS samples
   srs.CV.out <- cv.svy(sim.srs, modelsToFit,
-                       nfolds = 5) %>% print()
-  srssrsds2 <- data.frame(df = 1:6, MSE = srs.CV.out[,1])
+                       nfolds = 5) %>% as.vector()
+  srssrsds2 <- data.frame(df = 1:6, MSE = srs.CV.out)
   srssrsds <- rbind(srssrsds, srssrsds2)
 
   # Using dAIC on SRS samples
@@ -287,19 +244,19 @@ for (i in 1:loops) {
 for (i in 1:loops) {
   # Take a Cluster sample
   set.seed(i)
-  c <- unique(spline.df2[["Cluster"]])
-  sim.clus <- spline.df2[spline.df2[["Cluster"]] %in% sample(c, n/10),]
+  c <- unique(splinepop.df[["Cluster"]])
+  sim.clus <- splinepop.df[splinepop.df[["Cluster"]] %in% sample(c, n/10),]
   
   # Using our Cluster function on Cluster samples
   clus.CV.out <- cv.svy(sim.clus, modelsToFit,
-                        clusterID = "Cluster", nfolds = 5) %>% print()
-  clusclusds2 <- data.frame(df = 1:6, MSE = clus.CV.out[,1])
+                        clusterID = "Cluster", nfolds = 5) %>% as.vector()
+  clusclusds2 <- data.frame(df = 1:6, MSE = clus.CV.out)
   clusclusds <- rbind(clusclusds, clusclusds2)
 
   # Using our SRS function on Cluster samples
   srs.CV.out <- cv.svy(sim.clus, modelsToFit,
-                       nfolds = 5) %>% print()
-  clussrsds2 <- data.frame(df = 1:6, MSE = srs.CV.out[,1])
+                       nfolds = 5) %>% as.vector()
+  clussrsds2 <- data.frame(df = 1:6, MSE = srs.CV.out)
   clussrsds <- rbind(clussrsds, clussrsds2)
   
   # Using dAIC on Cluster samples
@@ -314,20 +271,20 @@ for (i in 1:loops) {
 for (i in 1:loops) {
   # Take a Strat sample
   set.seed(i)
-  s <- survey::stratsample(spline.df2$Stratum,
+  s <- survey::stratsample(splinepop.df$Stratum,
          c("1" = n/5, "2" = n/5, "3" = n/5, "4" = n/5, "5" = n/5))
-  sim.strat <- spline.df2[s,]
+  sim.strat <- splinepop.df[s,]
   
   # Using our Strat function on Strat samples
   strat.CV.out <- cv.svy(sim.strat, modelsToFit,
-                         strataID = "Stratum", nfolds = 5) %>% print()
-  stratstratds2 <- data.frame(df = 1:6, MSE = strat.CV.out[,1])
+                         strataID = "Stratum", nfolds = 5) %>% as.vector()
+  stratstratds2 <- data.frame(df = 1:6, MSE = strat.CV.out)
   stratstratds <- rbind(stratstratds, stratstratds2)
   
   # Using our SRS function on Strat samples
   srs.CV.out <- cv.svy(sim.strat, modelsToFit,
-                       nfolds = 5) %>% print()
-  stratsrsds2 <- data.frame(df = 1:6, MSE = srs.CV.out[,1])
+                       nfolds = 5) %>% as.vector()
+  stratsrsds2 <- data.frame(df = 1:6, MSE = srs.CV.out)
   stratsrsds <- rbind(stratsrsds, stratsrsds2)
   
   # Using dAIC on Strat samples
@@ -358,102 +315,51 @@ ymaxAIC <- max(max(srsdAICds$dAIC), max(clusdAICds$dAIC), max(stratdAICds$dAIC))
 ```
 
 
-```{r FoldsSimsPlots, fig.width=7, fig.height=7}
-  # Making ggplot objects for the MSEs and AICs
-  plot.srssrs <- ggplot(data = srssrsds, mapping = aes(x = df, y = MSE/1e4)) +
-    geom_boxplot() +
-    ggtitle("SRS folds,\nSRS sample") +
-    scale_y_log10(limits = c(yminMSE, ymaxMSE)/1e4)
-  plot.blank <- rectGrob(width = 0, height = 0) # empty spot here -- no corresponding sim
-  plot.clusclus <- ggplot(data = clusclusds, mapping = aes(x = df, y = MSE/1e4)) +
-    geom_boxplot() +
-    ggtitle("Cluster folds,\nCluster sample") +
-    scale_y_log10(limits = c(yminMSE, ymaxMSE)/1e4)
-  plot.clussrs <- ggplot(data = clussrsds, mapping = aes(x = df, y = MSE/1e4)) +
-    geom_boxplot() +
-    ggtitle("SRS folds,\nCluster sample") +
-    scale_y_log10(limits = c(yminMSE, ymaxMSE)/1e4)
-  plot.stratstrat <- ggplot(data = stratstratds, mapping = aes(x = df, y = MSE/1e4)) +
-    geom_boxplot() +
-    ggtitle("Strat folds,\nStrat sample") +
-    scale_y_log10(limits = c(yminMSE, ymaxMSE)/1e4)
-  plot.stratsrs <- ggplot(data = stratsrsds, mapping = aes(x = df, y = MSE/1e4)) +
-    geom_boxplot() +
-    ggtitle("SRS folds,\nStrat sample") +
-    scale_y_log10(limits = c(yminMSE, ymaxMSE)/1e4)
+```{r FoldsSimsPlots, fig.width=7, fig.height=7, eval=FALSE}
+# Making ggplot objects for the MSEs and AICs
+plot.srssrs <- ggplot(data = srssrsds, mapping = aes(x = df, y = MSE/1e4)) +
+  geom_boxplot() +
+  ggtitle("SRS folds,\nSRS sample") +
+  scale_y_log10(limits = c(yminMSE, ymaxMSE)/1e4)
+plot.blank <- rectGrob(width = 0, height = 0) # empty spot here -- no corresponding sim
+plot.clusclus <- ggplot(data = clusclusds, mapping = aes(x = df, y = MSE/1e4)) +
+  geom_boxplot() +
+  ggtitle("Cluster folds,\nCluster sample") +
+  scale_y_log10(limits = c(yminMSE, ymaxMSE)/1e4)
+plot.clussrs <- ggplot(data = clussrsds, mapping = aes(x = df, y = MSE/1e4)) +
+  geom_boxplot() +
+  ggtitle("SRS folds,\nCluster sample") +
+  scale_y_log10(limits = c(yminMSE, ymaxMSE)/1e4)
+plot.stratstrat <- ggplot(data = stratstratds, mapping = aes(x = df, y = MSE/1e4)) +
+  geom_boxplot() +
+  ggtitle("Strat folds,\nStrat sample") +
+  scale_y_log10(limits = c(yminMSE, ymaxMSE)/1e4)
+plot.stratsrs <- ggplot(data = stratsrsds, mapping = aes(x = df, y = MSE/1e4)) +
+  geom_boxplot() +
+  ggtitle("SRS folds,\nStrat sample") +
+  scale_y_log10(limits = c(yminMSE, ymaxMSE)/1e4)
 
-  plot.srsdAIC <- ggplot(data = srsdAICds, mapping = aes(x = df, y = dAIC/1e6)) +
-    geom_boxplot() +
-    ggtitle("dAIC,\nSRS sample") +
-    scale_y_log10(limits = c(yminAIC, ymaxAIC)/1e6)
-  plot.clusdAIC <- ggplot(data = clusdAICds, mapping = aes(x = df, y = dAIC/1e6)) +
-    geom_boxplot() +
-    ggtitle("dAIC,\nCluster sample") +
-    scale_y_log10(limits = c(yminAIC, ymaxAIC)/1e6)
-  plot.stratdAIC <- ggplot(data = stratdAICds, mapping = aes(x = df, y = dAIC/1e6)) +
-    geom_boxplot() +
-    ggtitle("dAIC,\nStrat sample") +
-    scale_y_log10(limits = c(yminAIC, ymaxAIC)/1e6)
-
-  
-  # Making a grid display of the plot objects above
-  gridExtra::grid.arrange(plot.srsdAIC, plot.srssrs, plot.blank,
-                          plot.clusdAIC, plot.clussrs, plot.clusclus,
-                          plot.stratdAIC, plot.stratsrs, plot.stratstrat,
-               ncol = 3,
-               top = paste0("Simulated Spline Data (Sample Sizes = ", n,
-                            ", Clusters = ", n/10,
-                            " or Strata = 5, Loops = ", loops, ", Folds = 5)"))
-```
+plot.srsdAIC <- ggplot(data = srsdAICds, mapping = aes(x = df, y = dAIC/1e6)) +
+  geom_boxplot() +
+  ggtitle("dAIC,\nSRS sample") +
+  scale_y_log10(limits = c(yminAIC, ymaxAIC)/1e6)
+plot.clusdAIC <- ggplot(data = clusdAICds, mapping = aes(x = df, y = dAIC/1e6)) +
+  geom_boxplot() +
+  ggtitle("dAIC,\nCluster sample") +
+  scale_y_log10(limits = c(yminAIC, ymaxAIC)/1e6)
+plot.stratdAIC <- ggplot(data = stratdAICds, mapping = aes(x = df, y = dAIC/1e6)) +
+  geom_boxplot() +
+  ggtitle("dAIC,\nStrat sample") +
+  scale_y_log10(limits = c(yminAIC, ymaxAIC)/1e6)
 
 
-
-
-## Sims: Attempt to use dAIC with SRS, clustered, or stratified samples and compare to surveyCV
-
-```{r, fig.width=7, fig.height=5, results=FALSE}
-n <- 100
-loops <- 10
-
-# Use SRS samples and make SRS folds
-srssrsds <- data.frame(df = c(), MSE = c())
-# Use SRS samples and use dAIC
-srsdAICds <- data.frame(df = c(), dAIC = c())
-
-modelsToFit <- c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
-                 "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
-                 "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)")
-
-# Making as many simple random samples as we specify for 'loops'
-for (i in 1:loops) {
-  set.seed(i)
-  sim.srs <- dplyr::sample_n(spline.df2, n)
-  # Using our SRS function on SRS samples
-  srs.CV.data <- cv.svy(sim.srs, modelsToFit,
-                        nfolds = 5) %>% print()
-  srs.des <- svydesign(ids = 1:n, data = sim.srs, fpc = rep(n/1000, n))
-  srs.dAIC.data <- sapply(1:6, function(ii) AIC(svyglm(modelsToFit[ii], srs.des))["AIC"])
-
-  srssrsds2 <- data.frame(df = 1:6, MSE = srs.CV.data[,1])
-  srssrsds <- rbind(srssrsds, srssrsds2)
-  srsdAICds2 <- data.frame(df = 1:6, dAIC = srs.dAIC.data)
-  srsdAICds <- rbind(srsdAICds, srsdAICds2)
-}
-
-srssrsds$df <- as.factor(srssrsds$df)
-srsdAICds$df <- as.factor(srsdAICds$df)
-
-plot1 <- ggplot(srssrsds, aes(x = df, y = MSE)) + geom_boxplot() +
-    ggtitle("SRS folds with SRS sample")
-plot2 <- ggplot(srsdAICds, aes(x = df, y = dAIC)) + geom_boxplot() +
-    ggtitle("dAIC with SRS sample")
-
-gridExtra::grid.arrange(plot1,plot2,
-             ncol = 2,
+# Making a grid display of the plot objects above
+gridExtra::grid.arrange(plot.srsdAIC, plot.srssrs, plot.blank,
+                        plot.clusdAIC, plot.clussrs, plot.clusclus,
+                        plot.stratdAIC, plot.stratsrs, plot.stratstrat,
+             ncol = 3,
              top = paste0("Simulated Spline Data (Sample Sizes = ", n,
                           ", Clusters = ", n/10,
-                          " or Strata = 5, Loops = ", loops, ")"))
+                          " or Strata = 5, Loops = ", loops, ", Folds = 5)"))
 ```
 
-TODO: go back and add these dAIC sims to `clusVsrsVstrat.cross.cv.spline.plot()`,
-showing them as a 3rd column of plots (one each for SRS, strat, and clus).
