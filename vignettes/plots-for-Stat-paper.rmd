@@ -20,7 +20,11 @@ library(magrittr)
 ```
 ```{r LoadSurveyCV}
 library(surveyCV)
+rerunSims <- FALSE  # when we *do* rerun sims, remember to reinstall package & restart R
+knitr::opts_chunk$set(dpi=300, out.extra ='WIDTH="95%"')
 ```
+
+
 
 ## Generate the artificial population
 
@@ -111,11 +115,12 @@ gridExtra::grid.arrange(a, b, c, d, ncol = 2,
 ## Sims: Use of surveyCV folds with SRS, clustered, or stratified samples
 
 ```{r FoldsSimsSetup}
+# TODO: redo with different n's?
 n <- 100
-loops <- 100
+loops <- 500
 ```
 
-```{r FoldsSimsResults, eval = FALSE}
+```{r FoldsSimsResults, eval = rerunSims}
 # Use SRS samples and make SRS folds
 srssrsds <- data.frame(df = c(), MSE = c())
 # Use SRS samples and use dAIC
@@ -142,7 +147,6 @@ modelsToFit <- c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
 # Making as many simple random samples as we specify for 'loops'
 for (i in 1:loops) {
   # Take a SRS
-  set.seed(i)
   sim.srs <- dplyr::sample_n(splinepop.df, n)
   
   # Using our SRS function on SRS samples
@@ -163,7 +167,6 @@ for (i in 1:loops) {
 # Making as many cluster samples as we specify for 'loops'
 for (i in 1:loops) {
   # Take a Cluster sample
-  set.seed(i)
   c <- unique(splinepop.df[["Cluster"]])
   sim.clus <- splinepop.df[splinepop.df[["Cluster"]] %in% sample(c, n/10),]
   
@@ -190,7 +193,6 @@ for (i in 1:loops) {
 # Making as many stratified samples as we specify for 'loops'
 for (i in 1:loops) {
   # Take a Strat sample
-  set.seed(i)
   s <- survey::stratsample(splinepop.df$Stratum,
          c("1" = n/5, "2" = n/5, "3" = n/5, "4" = n/5, "5" = n/5))
   sim.strat <- splinepop.df[s,]
@@ -228,7 +230,7 @@ stratdAICds$df <- as.factor(stratdAICds$df)
 usethis::use_data(srssrsds, srsdAICds,
                   clusclusds, clussrsds, clusdAICds,
                   stratstratds, stratsrsds, stratdAICds,
-                  internal = FALSE)
+                  internal = FALSE, overwrite = TRUE)
 # TODO: for now setting internal=FALSE
 # so that we don't overwrite the sysdata.Rda for intro.Rmd;
 # but eventually when we're ready to replace that old vignette,
@@ -238,10 +240,12 @@ usethis::use_data(srssrsds, srsdAICds,
 
 
 ```{r FoldsSimsPlots, fig.width=7, fig.height=7}
-data("srssrsds",
-     "clusclusds", "clussrsds",
-     "stratstratds", "stratsrsds",
-     "srsdAICds", "clusdAICds", "stratdAICds")
+if(!rerunSims) {
+  data("srssrsds",
+       "clusclusds", "clussrsds",
+       "stratstratds", "stratsrsds",
+       "srsdAICds", "clusdAICds", "stratdAICds")
+}
 
 # Find the y-ranges of MSEs and dAICs
 yminMSE <- min(min(srssrsds$MSE),
@@ -297,7 +301,7 @@ gridExtra::grid.arrange(plot.srssrs, plot.blank, plot.srsdAIC,
                         plot.clussrs, plot.clusclus, plot.clusdAIC, 
                         plot.stratsrs, plot.stratstrat, plot.stratdAIC, 
              ncol = 3,
-             top = paste0("Simulated Spline Data (Sample Sizes = ", n,
+             top = paste0("Simulated Data (Sample Sizes = ", n,
                           ", Clusters = ", n/10,
                           " or Strata = 5, Loops = ", loops, ", Folds = 5)"))
 ```
@@ -324,13 +328,13 @@ ggplot(splinepop.df,
 
 
 ```{r WeightsSimsSetup}
-# TODO: redo with different n's? and more loops?
+# TODO: redo with different n's?
 n <- 100
-loops <- 100
+loops <- 500
 weights <- "samp_wt_quad"
 ```
 
-```{r WeightsSimsResults, eval = FALSE}
+```{r WeightsSimsResults, eval = rerunSims}
 # In all the following cases,
 # we are only checking the effect of using sampling **weights**
 # during model-fitting on training sets, and testing on test sets;
@@ -396,7 +400,9 @@ usethis::use_data(AllW, NoW,
 ```
 
 ```{r WeightsSimsResultsAndPlots, fig.width=7, fig.height=9}
-data("AllW", "NoW", "MSEW", "ModW")
+if(!rerunSims) {
+  data("AllW", "NoW", "MSEW", "ModW")
+}
 
 # Find the y-range of MSEs
 ymin <- min(min(AllW$MSE), min(NoW$MSE), min(MSEW$MSE), min(ModW$MSE))
@@ -404,22 +410,22 @@ ymax <- max(max(AllW$MSE), max(NoW$MSE), max(MSEW$MSE), max(ModW$MSE))
 # Making a ggplot object for the MSEs collected when using
 # SRS folds, SRS models, and SRS error calculations
 pAllW <- ggplot(data = AllW, mapping = aes(x = df, y = MSE/1e5)) +
-  ggtitle("Weights for both") +
+  ggtitle("Weights for both training and testing") +
   scale_y_log10(limits = c(ymin, ymax)/1e5) + geom_boxplot()
 # Making a ggplot object for the MSEs collected when using
 # SRS folds, Clus models, and SRS error calculations
 pNoW <- ggplot(data = NoW, mapping = aes(x = df, y = MSE/1e5)) +
-  ggtitle("No Weights") +
+  ggtitle("No weights") +
   scale_y_log10(limits = c(ymin, ymax)/1e5) + geom_boxplot()
 # Making a ggplot object for the MSEs collected when using
 # Clus folds, Clus models, and Clus error calculations
 pModW <- ggplot(data = ModW, mapping = aes(x = df, y = MSE/1e5)) +
-  ggtitle("Weights when modeling") +
+  ggtitle("Weights when training models") +
   scale_y_log10(limits = c(ymin, ymax)/1e5) + geom_boxplot()
 # Making a ggplot object for the MSEs collected when using
 # Clus folds, SRS models, and Clus error calculations
 pMSEW <- ggplot(data = MSEW, mapping = aes(x = df, y = MSE/1e5)) +
-  ggtitle("Weights when MSE gen") +
+  ggtitle("Weights when estimating test MSE") +
   scale_y_log10(limits = c(ymin, ymax)/1e5) + geom_boxplot()
 
 # Making a grid display of the four plot objects above
@@ -430,10 +436,8 @@ lay <- matrix(c(NA, 1, 1, NA,
                 NA, 4, 4, NA,
                 NA, 4, 4, NA), byrow = TRUE, ncol = 4)
 gridExtra::grid.arrange(pAllW, pModW, pMSEW, pNoW, ncol = 2,
-             top = paste0("Simulated Spline Data (Sample Size = ", n,
-                          ", Loops = ", loops, ", Weights = ", weights, ")"),
+             top = paste0("Simulated Data (Sample Sizes = ", n,
+                          ", Loops = ", loops, ", 5 Folds, Samp. Wts from Quad. Fit)"),
              layout_matrix = lay)
 ```
-
-
 
