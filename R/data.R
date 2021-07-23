@@ -32,5 +32,54 @@
 #' @source \url{https://www.cdc.gov/nchs/data/nsfg/nsfg_2011_2013_sampledesign.pdf}
 "NSFG_data"
 
-
 # TODO: confirm details and document the remaining variables
+
+
+
+
+
+
+#' Internal datasets for plots-for-Stat-paper vignette.
+#'
+#' See plots-for-Stat-paper vignette for details.
+#'
+#' @format Data frames containing simulations from plots-for-Stat-paper.
+#' @name StatPaperSims
+NULL
+
+
+#' @rdname StatPaperSims
+"AllW"
+
+#' @rdname StatPaperSims
+"ModW"
+
+#' @rdname StatPaperSims
+"MSEW"
+
+#' @rdname StatPaperSims
+"NoW"
+
+#' @rdname StatPaperSims
+"stratsrsds"
+
+#' @rdname StatPaperSims
+"stratstratds"
+
+#' @rdname StatPaperSims
+"stratdAICds"
+
+#' @rdname StatPaperSims
+"clussrsds"
+
+#' @rdname StatPaperSims
+"clusclusds"
+
+#' @rdname StatPaperSims
+"clusdAICds"
+
+#' @rdname StatPaperSims
+"srssrsds"
+
+#' @rdname StatPaperSims
+"srsdAICds"
