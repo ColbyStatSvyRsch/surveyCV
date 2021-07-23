@@ -12,8 +12,6 @@ Writing cleaner code for **only** the simulations needed for our submission to *
 
 Currently based on the sims in `plot_generation.R` -- but instead of having similar functions repeatedly defined separately in that file, use our actual functions from the package such as `cv.svy()`.
 
-* TODO: Rewrite `Sims.Weight.plot` to save the sim results, and make the plots separately
-
 ```{r Packages, message=FALSE}
 library(survey)
 library(ggplot2)
@@ -27,6 +25,7 @@ library(surveyCV)
 ## Generate the artificial population
 
 ```{r ArtifPop}
+# Generate a cubic-ish artificial population with 1000 units
 set.seed(47)
 
 x1 = stats::runif(1:500, min = 26, max = 38)
@@ -46,141 +45,65 @@ b12 <- data.frame(ID = c(1:1000))
 splinepop.df <- cbind(b12, ds12)
 splinepop.df <- splinepop.df %>%
   dplyr::arrange(Predictor) %>%
+  # Create Cluster and Stratum variables so that
+  # we can (separately) simulate both kinds of sampling
   dplyr::mutate(Stratum = dplyr::row_number(),
                 Cluster = dplyr::row_number()) %>% 
   dplyr::mutate(Stratum = cut(Stratum, 5, 1:5),
                 Cluster = cut(Cluster, 100, 1:100)) %>%
+  # Create fpc variables for each sampling type:
   # full pop has 1000 units; 200 units/stratum; 100 clusters of 10 units each
+  # (& if we add a combined Strat+Clus sim, we'll need different fpc's for that)
   dplyr::mutate(fpcSRS = 1000,
                 fpcStratum = 1000/5,
                 fpcCluster = 100) %>%
   dplyr::arrange(ID)
 
+# Create unequal sampling weights that are intentionally 
+# NOT well matched to the true shape of the population,
+# so we can see how the use of weights impacts
+# model-training step vs test-error estimation step
+# in a case where naively ignoring weights will confidently pick wrong model
 lm_quad <- stats::lm(Response ~ Predictor + I(Predictor^2),
                      data = splinepop.df)
 splinepop.df$samp_prob_quad <-
   (1/(abs(lm_quad$residuals))) / sum(1/(abs(lm_quad$residuals)))
 splinepop.df$samp_wt_quad <- 1/splinepop.df$samp_prob_quad
 
-quad.sample.graph <- ggplot(splinepop.df,
-  aes(x = Predictor, y = Response)) +
-  geom_point(aes(size = samp_prob_quad), alpha = 0.2) +
-  stat_smooth(method = "lm", formula = y ~ x + I(x^2), se = FALSE)
-```
-
-```{r QuadWeightsPlot, fig.width=7, fig.height=7}
-quad.sample.graph
+stopifnot(all.equal(sum(1/splinepop.df$samp_wt_quad), 1))
 ```
 
 
-## Sims: Use of sampling weights (in training model-fits vs in test loss-estimates)
-
-
-```{r WeightsSimsFunction}
-Sims.Weight.plot <- function(n, loops, plot, weights) {
-  stopifnot(all.equal(sum(1/splinepop.df[[weights]]), 1))
-
-  # In all the following cases,
-  # we are only checking the effect of using sampling **weights**
-  # during model-fitting on training sets, and testing on test sets;
-  # we did not use cluster or stratified sampling,
-  # so all CV folds will (sensibly) be SRS (regardless of samp weights)
-  
-  # Use weighted models, and calculate MSEs using weighted design
-  AllW <- data.frame(df = c(), MSE = c())
-  # Use SRS models, and calculate MSEs using SRS design
-  NoW <- data.frame(df = c(), MSE = c())
-  # Use weighted models, and calculate MSEs using SRS design
-  ModW <- data.frame(df = c(), MSE = c())
-  # Use SRS models, and calculate MSEs using weighted design
-  MSEW <- data.frame(df = c(), MSE = c())
-  
-  for (i in 1:loops) {
-    # Take a sample of size n, using the sampling probabilities instead of SRS
-    # (using 1/samp_wt as the samp_prob)
-    in.sample <- sampling::UPtille(n / splinepop.df[[weights]])
-    splinesamp.df <- splinepop.df[in.sample > 0, ]
-    modelsToFit <- c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
-                     "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
-                     "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)")
-
-    AllWdat <- cv.svy(splinesamp.df, modelsToFit,
-                      nfolds = 5, weightsID = weights) %>% as.vector()
-    NoWdat <- cv.svy(splinesamp.df, modelsToFit,
-                     nfolds = 5) %>% as.vector()
-    ModWdat <- cv.svy(splinesamp.df, modelsToFit,
-                      nfolds = 5, weightsID = weights,
-                      useSvyForLoss = FALSE) %>% as.vector()
-    MSEWdat <- cv.svy(splinesamp.df, modelsToFit,
-                      nfolds = 5, weightsID = weights,
-                      useSvyForFits = FALSE) %>% as.vector()
-
-    # compiling one data frame
-    AllW2 <- data.frame(df = 1:6, MSE = AllWdat, sample = rep(i, 6))
-    AllW <- rbind(AllW, AllW2)
-    NoW2 <- data.frame(df = 1:6, MSE = NoWdat, sample = rep(i, 6))
-    NoW <- rbind(NoW, NoW2)
-    ModW2 <- data.frame(df = 1:6, MSE = ModWdat, sample = rep(i, 6))
-    ModW <- rbind(ModW, ModW2)
-    MSEW2 <- data.frame(df = 1:6, MSE = MSEWdat, sample = rep(i, 6))
-    MSEW <- rbind(MSEW, MSEW2)
-  }
-  # Making the degrees of freedom variable a factor variable
-  AllW$df <- as.factor(AllW$df)
-  NoW$df <- as.factor(NoW$df)
-  MSEW$df <- as.factor(MSEW$df)
-  ModW$df <- as.factor(ModW$df)
-  # Find the y-range of MSEs
-  ymin <- min(min(AllW$MSE), min(NoW$MSE), min(MSEW$MSE), min(ModW$MSE))
-  ymax <- max(max(AllW$MSE), max(NoW$MSE), max(MSEW$MSE), max(ModW$MSE))
-  # Making a ggplot object for the MSEs collected when using
-  # SRS folds, SRS models, and SRS error calculations
-  p1 <- ggplot(data = AllW, mapping = aes(x = df, y = MSE)) +
-    ggtitle("Weights for both") +
-    ylim(ymin, ymax)
-  # Making a ggplot object for the MSEs collected when using
-  # SRS folds, Clus models, and SRS error calculations
-  p2 <- ggplot(data = NoW, mapping = aes(x = df, y = MSE)) +
-    ggtitle("No Weights") +
-    ylim(ymin, ymax)
-  # Making a ggplot object for the MSEs collected when using
-  # Clus folds, Clus models, and Clus error calculations
-  p3 <- ggplot(data = ModW, mapping = aes(x = df, y = MSE)) +
-    ggtitle("Weights when modeling") +
-    ylim(ymin, ymax)
-  # Making a ggplot object for the MSEs collected when using
-  # Clus folds, SRS models, and Clus error calculations
-  p4 <- ggplot(data = MSEW, mapping = aes(x = df, y = MSE)) +
-    ggtitle("Weights when MSE gen") +
-    ylim(ymin, ymax)
-
-  # Either turning our ggplot objects into boxplots or spaghetti plots
-  # (as objects still)
-  if (plot == "box") {
-    plot1 <- p1 + geom_boxplot()
-    plot2 <- p2 + geom_boxplot()
-    plot3 <- p3 + geom_boxplot()
-    plot4 <- p4 + geom_boxplot()
-  } else if (plot == "line") {
-    plot1 <- p1 + geom_line(aes(group = sample, colour = sample)) +
-      theme(legend.position = "none")
-    plot2 <- p2 + geom_line(aes(group = sample, colour = sample)) +
-      theme(legend.position = "none")
-    plot3 <- p3 + geom_line(aes(group = sample, colour = sample)) +
-      theme(legend.position = "none")
-    plot4 <- p4 + geom_line(aes(group = sample, colour = sample)) +
-      theme(legend.position = "none")
-  }
-  # Making a grid display of the four plot objects above
-  gridExtra::grid.arrange(plot1,plot2,plot3,plot4, ncol = 2,
-               top = paste0("Simulated Spline Data (Sample Size = ", n,
-                            ", Loops = ", loops, ", Weights = ", weights, ")"))
-}
+```{r PopulationPlot, fig.width=7, fig.height=7}
+n <- 100
+srs.df <- dplyr::sample_n(splinepop.df, n)
+s <- stratsample(splinepop.df$Stratum,
+                 c("1" = n/5, "2" = n/5, "3" = n/5, "4" = n/5, "5" = n/5))
+strat.df <- splinepop.df[s,]
+c <- unique(splinepop.df[["Cluster"]]) 
+clus.df <- splinepop.df[splinepop.df[["Cluster"]] %in% sample(c, n/10),]
+a <- ggplot(splinepop.df, aes(x = Predictor, y = Response)) + 
+  geom_point(shape = 1) +
+  labs(title = "Full Artificial Population", x = "Predictor", y = "Response") + 
+  ylim(100,1650) + xlim(25, 51)
+b <- ggplot(srs.df, aes(x = Predictor, y = Response)) + 
+  geom_point(shape = 8, color = "darkgreen") +
+  labs(title = "A Simple Random Sample", x = "Predictor", y = "Response") + 
+  ylim(100,1650) + xlim(25, 51)
+c <- ggplot(strat.df, aes(x = Predictor, y = Response)) +
+  geom_point(shape = 3, color = "darkred") +
+  labs(title = "A Stratified Sample", x = "Predictor", y = "Response") + 
+  ylim(100,1650) + xlim(25, 51)
+d <- ggplot(clus.df, aes(x = Predictor, y = Response)) +
+  geom_point(shape = 4, color = "steelblue") +
+  labs(title = "A Cluster Sample", x = "Predictor", y = "Response") + 
+  ylim(100,1650) + xlim(25, 51)
+gridExtra::grid.arrange(a, b, c, d, ncol = 2,
+                        top = "Simulated Data and Examples of How It Was Sampled")
 ```
 
-```{r WeightsSimsResultsAndPlots, fig.width=7, fig.height=7}
-Main.weights.plot <- Sims.Weight.plot(200, 10, "box", "samp_wt_quad")
-```
+
+
 
 
 
@@ -306,7 +229,7 @@ usethis::use_data(srssrsds, srsdAICds,
                   clusclusds, clussrsds, clusdAICds,
                   stratstratds, stratsrsds, stratdAICds,
                   internal = FALSE)
-# for now setting internal=FALSE
+# TODO: for now setting internal=FALSE
 # so that we don't overwrite the sysdata.Rda for intro.Rmd;
 # but eventually when we're ready to replace that old vignette,
 # we can return to internal=TRUE here
@@ -335,24 +258,24 @@ ymaxAIC <- max(max(srsdAICds$dAIC), max(clusdAICds$dAIC),
 # Making ggplot objects for the MSEs and AICs
 plot.srssrs <- ggplot(data = srssrsds, mapping = aes(x = df, y = MSE/1e4)) +
   geom_boxplot() +
-  ggtitle("SRS folds,\nSRS sample") +
+  ggtitle("CV: SRS folds,\nSRS sample") +
   scale_y_log10(limits = c(yminMSE, ymaxMSE)/1e4)
 plot.blank <- rectGrob(width = 0, height = 0) # empty spot here -- no corresponding sim
 plot.clusclus <- ggplot(data = clusclusds, mapping = aes(x = df, y = MSE/1e4)) +
   geom_boxplot() +
-  ggtitle("Cluster folds,\nCluster sample") +
+  ggtitle("CV: Cluster folds,\nCluster sample") +
   scale_y_log10(limits = c(yminMSE, ymaxMSE)/1e4)
 plot.clussrs <- ggplot(data = clussrsds, mapping = aes(x = df, y = MSE/1e4)) +
   geom_boxplot() +
-  ggtitle("SRS folds,\nCluster sample") +
+  ggtitle("CV: SRS folds,\nCluster sample") +
   scale_y_log10(limits = c(yminMSE, ymaxMSE)/1e4)
 plot.stratstrat <- ggplot(data = stratstratds, mapping = aes(x = df, y = MSE/1e4)) +
   geom_boxplot() +
-  ggtitle("Strat folds,\nStrat sample") +
+  ggtitle("CV: Strat folds,\nStrat sample") +
   scale_y_log10(limits = c(yminMSE, ymaxMSE)/1e4)
 plot.stratsrs <- ggplot(data = stratsrsds, mapping = aes(x = df, y = MSE/1e4)) +
   geom_boxplot() +
-  ggtitle("SRS folds,\nStrat sample") +
+  ggtitle("CV: SRS folds,\nStrat sample") +
   scale_y_log10(limits = c(yminMSE, ymaxMSE)/1e4)
 
 plot.srsdAIC <- ggplot(data = srsdAICds, mapping = aes(x = df, y = dAIC/1e6)) +
@@ -370,12 +293,147 @@ plot.stratdAIC <- ggplot(data = stratdAICds, mapping = aes(x = df, y = dAIC/1e6)
 
 
 # Making a grid display of the plot objects above
-gridExtra::grid.arrange(plot.srsdAIC, plot.srssrs, plot.blank,
-                        plot.clusdAIC, plot.clussrs, plot.clusclus,
-                        plot.stratdAIC, plot.stratsrs, plot.stratstrat,
+gridExtra::grid.arrange(plot.srssrs, plot.blank, plot.srsdAIC, 
+                        plot.clussrs, plot.clusclus, plot.clusdAIC, 
+                        plot.stratsrs, plot.stratstrat, plot.stratdAIC, 
              ncol = 3,
              top = paste0("Simulated Spline Data (Sample Sizes = ", n,
                           ", Clusters = ", n/10,
                           " or Strata = 5, Loops = ", loops, ", Folds = 5)"))
 ```
+
+
+
+
+
+## Sims: Use of sampling weights (in training model-fits vs in test loss-estimates)
+
+
+
+```{r QuadWeightsPlot, fig.width=7, fig.height=5}
+ggplot(splinepop.df,
+  aes(x = Predictor, y = Response)) +
+  geom_point(aes(size = samp_prob_quad), alpha = 0.2) +
+  stat_smooth(method = "lm", formula = y ~ x + I(x^2), se = FALSE) +
+  labs(title = "Artificial Population with Sampling Probabilities",
+       subtitle = "Sampling prob. is higher for points nearer the blue curve",
+       x = "Predictor", y = "Response",
+       size = "Sampling Probability")
+```
+
+
+
+```{r WeightsSimsSetup}
+# TODO: redo with different n's? and more loops?
+n <- 100
+loops <- 100
+weights <- "samp_wt_quad"
+```
+
+```{r WeightsSimsResults, eval = FALSE}
+# In all the following cases,
+# we are only checking the effect of using sampling **weights**
+# during model-fitting on training sets, and testing on test sets;
+# we did not use cluster or stratified sampling,
+# so all CV folds will (sensibly) be SRS (regardless of samp weights)
+
+# Use weighted models, and calculate MSEs using weighted design
+AllW <- data.frame(df = c(), MSE = c())
+# Use SRS models, and calculate MSEs using SRS design
+NoW <- data.frame(df = c(), MSE = c())
+# Use weighted models, and calculate MSEs using SRS design
+ModW <- data.frame(df = c(), MSE = c())
+# Use SRS models, and calculate MSEs using weighted design
+MSEW <- data.frame(df = c(), MSE = c())
+
+for (i in 1:loops) {
+  # Take a sample of size n, using the sampling probabilities instead of SRS
+  # (using 1/samp_wt as the samp_prob per unit,
+  #  or n/samp_wt as overall samp_prob to get a sample of size n)
+  in.sample <- sampling::UPtille(n / splinepop.df[[weights]])
+  splinesamp.df <- splinepop.df[in.sample > 0, ]
+  modelsToFit <- c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
+                   "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
+                   "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)")
+
+  AllWdat <- cv.svy(splinesamp.df, modelsToFit,
+                    nfolds = 5, weightsID = weights) %>% as.vector()
+  NoWdat <- cv.svy(splinesamp.df, modelsToFit,
+                   nfolds = 5) %>% as.vector()
+  ModWdat <- cv.svy(splinesamp.df, modelsToFit,
+                    nfolds = 5, weightsID = weights,
+                    useSvyForLoss = FALSE) %>% as.vector()
+  MSEWdat <- cv.svy(splinesamp.df, modelsToFit,
+                    nfolds = 5, weightsID = weights,
+                    useSvyForFits = FALSE) %>% as.vector()
+
+  # compiling one data frame
+  AllW2 <- data.frame(df = 1:6, MSE = AllWdat, sample = rep(i, 6))
+  AllW <- rbind(AllW, AllW2)
+  NoW2 <- data.frame(df = 1:6, MSE = NoWdat, sample = rep(i, 6))
+  NoW <- rbind(NoW, NoW2)
+  ModW2 <- data.frame(df = 1:6, MSE = ModWdat, sample = rep(i, 6))
+  ModW <- rbind(ModW, ModW2)
+  MSEW2 <- data.frame(df = 1:6, MSE = MSEWdat, sample = rep(i, 6))
+  MSEW <- rbind(MSEW, MSEW2)
+}
+
+# Making the degrees of freedom variable a factor variable
+AllW$df <- as.factor(AllW$df)
+NoW$df <- as.factor(NoW$df)
+MSEW$df <- as.factor(MSEW$df)
+ModW$df <- as.factor(ModW$df)
+
+
+usethis::use_data(AllW, NoW,
+                  MSEW, ModW,
+                  internal = FALSE, overwrite = TRUE)
+# TODO: as above, for now setting internal=FALSE
+# so that we don't overwrite the sysdata.Rda for intro.Rmd;
+# but eventually when we're ready to replace that old vignette,
+# we can return to internal=TRUE here
+# if that's indeed better for R packages
+```
+
+```{r WeightsSimsResultsAndPlots, fig.width=7, fig.height=9}
+data("AllW", "NoW", "MSEW", "ModW")
+
+# Find the y-range of MSEs
+ymin <- min(min(AllW$MSE), min(NoW$MSE), min(MSEW$MSE), min(ModW$MSE))
+ymax <- max(max(AllW$MSE), max(NoW$MSE), max(MSEW$MSE), max(ModW$MSE))
+# Making a ggplot object for the MSEs collected when using
+# SRS folds, SRS models, and SRS error calculations
+pAllW <- ggplot(data = AllW, mapping = aes(x = df, y = MSE/1e5)) +
+  ggtitle("Weights for both") +
+  scale_y_log10(limits = c(ymin, ymax)/1e5) + geom_boxplot()
+# Making a ggplot object for the MSEs collected when using
+# SRS folds, Clus models, and SRS error calculations
+pNoW <- ggplot(data = NoW, mapping = aes(x = df, y = MSE/1e5)) +
+  ggtitle("No Weights") +
+  scale_y_log10(limits = c(ymin, ymax)/1e5) + geom_boxplot()
+# Making a ggplot object for the MSEs collected when using
+# Clus folds, Clus models, and Clus error calculations
+pModW <- ggplot(data = ModW, mapping = aes(x = df, y = MSE/1e5)) +
+  ggtitle("Weights when modeling") +
+  scale_y_log10(limits = c(ymin, ymax)/1e5) + geom_boxplot()
+# Making a ggplot object for the MSEs collected when using
+# Clus folds, SRS models, and Clus error calculations
+pMSEW <- ggplot(data = MSEW, mapping = aes(x = df, y = MSE/1e5)) +
+  ggtitle("Weights when MSE gen") +
+  scale_y_log10(limits = c(ymin, ymax)/1e5) + geom_boxplot()
+
+# Making a grid display of the four plot objects above
+lay <- matrix(c(NA, 1, 1, NA,
+                NA, 1, 1, NA,
+                2, 2, 3, 3,
+                2, 2, 3, 3,
+                NA, 4, 4, NA,
+                NA, 4, 4, NA), byrow = TRUE, ncol = 4)
+gridExtra::grid.arrange(pAllW, pModW, pMSEW, pNoW, ncol = 2,
+             top = paste0("Simulated Spline Data (Sample Size = ", n,
+                          ", Loops = ", loops, ", Weights = ", weights, ")"),
+             layout_matrix = lay)
+```
+
+
 
