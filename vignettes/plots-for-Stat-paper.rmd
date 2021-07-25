@@ -121,6 +121,24 @@ loops <- 500
 ```
 
 ```{r FoldsSimsResults, eval = rerunSims}
+# Write a function that is a copy of code from inside of 
+# survey:::extractAIC.svyglm
+# so that we can skip the if(is.svylm(fit))
+# which seems to be buggy, because it makes the dAICs look drastically different
+# when we rescale the response variable...
+dAIC <- function(fit) {
+  ftest <- delete.response(formula(fit))
+  r <- regTermTest(fit, ftest, method="LRT")
+  d <- fit$deviance
+  AIC <- d + 2 * sum(r$lambda)
+  return(AIC)
+}
+# However, I'm still not convinced that this is right;
+# we should probably remove the dAIC sims from the paper
+# until we can confirm dAIC is working the way we expect.
+
+
+
 # Use SRS samples and make SRS folds
 srssrsds <- data.frame(df = c(), MSE = c())
 # Use SRS samples and use dAIC
@@ -158,8 +176,7 @@ for (i in 1:loops) {
   # Using dAIC on SRS samples
   srs.des <- svydesign(ids = ~1, fpc = ~fpcSRS, data = sim.srs)
   srs.dAIC.out <- sapply(1:6,
-    function(ii) AIC(svyglm(formula = formula(modelsToFit[ii]),
-                            design = srs.des))["AIC"])
+    function(ii) dAIC(svyglm(modelsToFit[ii], srs.des)))
   srsdAICds2 <- data.frame(df = 1:6, dAIC = srs.dAIC.out)
   srsdAICds <- rbind(srsdAICds, srsdAICds2)
 }
@@ -185,7 +202,7 @@ for (i in 1:loops) {
   # Using dAIC on Cluster samples
   clus.des <- svydesign(ids = ~Cluster, fpc = ~fpcCluster, data = sim.clus)
   clus.dAIC.out <- sapply(1:6,
-    function(ii) AIC(svyglm(modelsToFit[ii], clus.des))["AIC"])
+    function(ii) dAIC(svyglm(modelsToFit[ii], clus.des)))
   clusdAICds2 <- data.frame(df = 1:6, dAIC = clus.dAIC.out)
   clusdAICds <- rbind(clusdAICds, clusdAICds2)
 }
@@ -212,7 +229,7 @@ for (i in 1:loops) {
   # Using dAIC on Strat samples
   strat.des <- svydesign(ids = ~1, strata = ~Stratum, fpc = ~fpcStratum, data = sim.strat)
   strat.dAIC.out <- sapply(1:6,
-    function(ii) AIC(svyglm(modelsToFit[ii], strat.des))["AIC"])
+    function(ii) dAIC(svyglm(modelsToFit[ii], strat.des)))
   stratdAICds2 <- data.frame(df = 1:6, dAIC = strat.dAIC.out)
   stratdAICds <- rbind(stratdAICds, stratdAICds2)
 }
