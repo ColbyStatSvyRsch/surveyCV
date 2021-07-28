@@ -256,7 +256,7 @@ usethis::use_data(srssrsds, srsdAICds,
 ```
 
 
-```{r FoldsSimsPlots, fig.width=7, fig.height=7}
+```{r FoldsSimsPlots, fig.width=7, fig.height=4.7}
 if(!rerunSims) {
   data("srssrsds",
        "clusclusds", "clussrsds",
@@ -299,24 +299,26 @@ plot.stratsrs <- ggplot(data = stratsrsds, mapping = aes(x = df, y = MSE/1e4)) +
   ggtitle("CV: SRS folds,\nStrat sample") +
   scale_y_log10(limits = c(yminMSE, ymaxMSE)/1e4)
 
-plot.srsdAIC <- ggplot(data = srsdAICds, mapping = aes(x = df, y = dAIC/1e6)) +
-  geom_boxplot() +
-  ggtitle("dAIC,\nSRS sample") +
-  scale_y_log10(limits = c(yminAIC, ymaxAIC)/1e6)
-plot.clusdAIC <- ggplot(data = clusdAICds, mapping = aes(x = df, y = dAIC/1e6)) +
-  geom_boxplot() +
-  ggtitle("dAIC,\nCluster sample") +
-  scale_y_log10(limits = c(yminAIC, ymaxAIC)/1e6)
-plot.stratdAIC <- ggplot(data = stratdAICds, mapping = aes(x = df, y = dAIC/1e6)) +
-  geom_boxplot() +
-  ggtitle("dAIC,\nStrat sample") +
-  scale_y_log10(limits = c(yminAIC, ymaxAIC)/1e6)
+# plot.srsdAIC <- ggplot(data = srsdAICds, mapping = aes(x = df, y = dAIC/1e6)) +
+#   geom_boxplot() +
+#   ggtitle("dAIC,\nSRS sample") +
+#   scale_y_log10(limits = c(yminAIC, ymaxAIC)/1e6)
+# plot.clusdAIC <- ggplot(data = clusdAICds, mapping = aes(x = df, y = dAIC/1e6)) +
+#   geom_boxplot() +
+#   ggtitle("dAIC,\nCluster sample") +
+#   scale_y_log10(limits = c(yminAIC, ymaxAIC)/1e6)
+# plot.stratdAIC <- ggplot(data = stratdAICds, mapping = aes(x = df, y = dAIC/1e6)) +
+#   geom_boxplot() +
+#   ggtitle("dAIC,\nStrat sample") +
+#   scale_y_log10(limits = c(yminAIC, ymaxAIC)/1e6)
 
 
 # Making a grid display of the plot objects above
-gridExtra::grid.arrange(plot.srssrs, plot.blank, plot.srsdAIC, 
-                        plot.clussrs, plot.clusclus, plot.clusdAIC, 
-                        plot.stratsrs, plot.stratstrat, plot.stratdAIC, 
+# gridExtra::grid.arrange(plot.srssrs, plot.blank, plot.srsdAIC, 
+#                         plot.clussrs, plot.clusclus, plot.clusdAIC, 
+#                         plot.stratsrs, plot.stratstrat, plot.stratdAIC, 
+gridExtra::grid.arrange(plot.srssrs, plot.clussrs, plot.stratsrs, 
+                        plot.blank, plot.clusclus, plot.stratstrat,
              ncol = 3,
              top = paste0("Simulated Data (Sample Sizes = ", n,
                           ", Clusters = ", n/10,
