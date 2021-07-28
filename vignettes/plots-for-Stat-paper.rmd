@@ -78,7 +78,7 @@ stopifnot(all.equal(sum(1/splinepop.df$samp_wt_quad), 1))
 ```
 
 
-```{r PopulationPlot, fig.width=7, fig.height=7}
+```{r PopulationPlot, fig.width=8.3, fig.height=3}
 n <- 100
 srs.df <- dplyr::sample_n(splinepop.df, n)
 s <- stratsample(splinepop.df$Stratum,
@@ -88,21 +88,21 @@ c <- unique(splinepop.df[["Cluster"]])
 clus.df <- splinepop.df[splinepop.df[["Cluster"]] %in% sample(c, n/10),]
 a <- ggplot(splinepop.df, aes(x = Predictor, y = Response)) + 
   geom_point(shape = 1) +
-  labs(title = "Full Artificial Population", x = "Predictor", y = "Response") + 
+  labs(title = "Artificial Pop.", x = "Predictor", y = "Response") + 
   ylim(100,1650) + xlim(25, 51)
 b <- ggplot(srs.df, aes(x = Predictor, y = Response)) + 
   geom_point(shape = 8, color = "darkgreen") +
-  labs(title = "A Simple Random Sample", x = "Predictor", y = "Response") + 
+  labs(title = "SRS", x = "Predictor", y = "Response") + 
   ylim(100,1650) + xlim(25, 51)
 c <- ggplot(strat.df, aes(x = Predictor, y = Response)) +
   geom_point(shape = 3, color = "darkred") +
-  labs(title = "A Stratified Sample", x = "Predictor", y = "Response") + 
+  labs(title = "Stratified Sample", x = "Predictor", y = "Response") + 
   ylim(100,1650) + xlim(25, 51)
 d <- ggplot(clus.df, aes(x = Predictor, y = Response)) +
   geom_point(shape = 4, color = "steelblue") +
-  labs(title = "A Cluster Sample", x = "Predictor", y = "Response") + 
+  labs(title = "Cluster Sample", x = "Predictor", y = "Response") + 
   ylim(100,1650) + xlim(25, 51)
-gridExtra::grid.arrange(a, b, c, d, ncol = 2,
+gridExtra::grid.arrange(a, b, c, d, ncol = 4,
                         top = "Simulated Data and Examples of How It Was Sampled")
 ```
 
