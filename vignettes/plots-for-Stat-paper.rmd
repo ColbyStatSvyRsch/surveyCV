@@ -53,13 +53,13 @@ splinepop.df <- splinepop.df %>%
   # we can (separately) simulate both kinds of sampling
   dplyr::mutate(Stratum = dplyr::row_number(),
                 Cluster = dplyr::row_number()) %>% 
-  dplyr::mutate(Stratum = cut(Stratum, 5, 1:5),
+  dplyr::mutate(Stratum = cut(Stratum, 10, 1:10),
                 Cluster = cut(Cluster, 100, 1:100)) %>%
   # Create fpc variables for each sampling type:
-  # full pop has 1000 units; 200 units/stratum; 100 clusters of 10 units each
+  # full pop has 1000 units; 100 units/stratum; 100 clusters of 10 units each
   # (& if we add a combined Strat+Clus sim, we'll need different fpc's for that)
   dplyr::mutate(fpcSRS = 1000,
-                fpcStratum = 1000/5,
+                fpcStratum = 1000/10,
                 fpcCluster = 100) %>%
   dplyr::arrange(ID)
 
@@ -82,7 +82,9 @@ stopifnot(all.equal(sum(1/splinepop.df$samp_wt_quad), 1))
 n <- 100
 srs.df <- dplyr::sample_n(splinepop.df, n)
 s <- stratsample(splinepop.df$Stratum,
-                 c("1" = n/5, "2" = n/5, "3" = n/5, "4" = n/5, "5" = n/5))
+                 # c("1" = n/5, "2" = n/5, "3" = n/5, "4" = n/5, "5" = n/5))
+                 c("1" = n/10, "2" = n/10, "3" = n/10, "4" = n/10, "5" = n/10,
+                   "6" = n/10, "7" = n/10, "8" = n/10, "9" = n/10, "10" = n/10))
 strat.df <- splinepop.df[s,]
 c <- unique(splinepop.df[["Cluster"]]) 
 clus.df <- splinepop.df[splinepop.df[["Cluster"]] %in% sample(c, n/10),]
@@ -121,64 +123,54 @@ loops <- 500
 ```
 
 ```{r FoldsSimsResults, eval = rerunSims}
-# Write a function that is a copy of code from inside of 
-# survey:::extractAIC.svyglm
-# so that we can skip the if(is.svylm(fit))
-# which seems to be buggy, because it makes the dAICs look drastically different
-# when we rescale the response variable...
-dAIC <- function(fit) {
-  ftest <- delete.response(formula(fit))
-  r <- regTermTest(fit, ftest, method="LRT")
-  d <- fit$deviance
-  AIC <- d + 2 * sum(r$lambda)
-  return(AIC)
-}
-# However, I'm still not convinced that this is right;
-# we should probably remove the dAIC sims from the paper
-# until we can confirm dAIC is working the way we expect.
-
-
-
 # Use SRS samples and make SRS folds
 srssrsds <- data.frame(df = c(), MSE = c())
-# Use SRS samples and use dAIC
-srsdAICds <- data.frame(df = c(), dAIC = c())
+# Use SRS samples and evaluate on full pop
+srspopds <- data.frame(df = c(), MSE = c())
 
 # Use Cluster samples and make Cluster folds
 clusclusds <- data.frame(df = c(), MSE = c())
 # Use Cluster samples and make SRS folds
 clussrsds <- data.frame(df = c(), MSE = c())
-# Use Cluster samples and use dAIC
-clusdAICds <- data.frame(df = c(), dAIC = c())
+# Use Cluster samples and evaluate on full pop
+cluspopds <- data.frame(df = c(), MSE = c())
 
 # Use Strat samples and make Strat folds
 stratstratds <- data.frame(df = c(), MSE = c())
 # Use Strat samples and make SRS folds
 stratsrsds <- data.frame(df = c(), MSE = c())
-# Use Strat samples and use dAIC
-stratdAICds <- data.frame(df = c(), dAIC = c())
+# Use Strat samples and evaluate on full pop
+stratpopds <- data.frame(df = c(), MSE = c())
 
-modelsToFit <- c("Response~ns(Predictor, df=1)", "Response~ns(Predictor, df=2)",
-                 "Response~ns(Predictor, df=3)", "Response~ns(Predictor, df=4)",
-                 "Response~ns(Predictor, df=5)", "Response~ns(Predictor, df=6)")
+modelsToFit <- c("Response~splines::ns(Predictor, df=1)",
+                 "Response~splines::ns(Predictor, df=2)",
+                 "Response~splines::ns(Predictor, df=3)",
+                 "Response~splines::ns(Predictor, df=4)",
+                 "Response~splines::ns(Predictor, df=5)",
+                 "Response~splines::ns(Predictor, df=6)")
 
 # Making as many simple random samples as we specify for 'loops'
 for (i in 1:loops) {
   # Take a SRS
   sim.srs <- dplyr::sample_n(splinepop.df, n)
-  
+
   # Using our SRS function on SRS samples
   srs.CV.out <- cv.svy(sim.srs, modelsToFit,
                        nfolds = 5, fpcID = "fpcSRS") %>% as.vector()
   srssrsds2 <- data.frame(df = 1:6, MSE = srs.CV.out)
   srssrsds <- rbind(srssrsds, srssrsds2)
 
-  # Using dAIC on SRS samples
-  srs.des <- svydesign(ids = ~1, fpc = ~fpcSRS, data = sim.srs)
-  srs.dAIC.out <- sapply(1:6,
-    function(ii) dAIC(svyglm(modelsToFit[ii], srs.des)))
-  srsdAICds2 <- data.frame(df = 1:6, dAIC = srs.dAIC.out)
-  srsdAICds <- rbind(srsdAICds, srsdAICds2)
+  # Eval SRS samples on full pop
+  sub.srs <- dplyr::sample_n(sim.srs, 80)
+  srs.des <- svydesign(ids = ~1, fpc = ~fpcSRS, data = sub.srs)
+  srs.pop.out <- sapply(1:6,
+    function(ii) {
+        yhat <- predict(svyglm(modelsToFit[ii], srs.des),
+                        newdata = splinepop.df)
+        return(mean((yhat - splinepop.df$Response)^2))
+      })
+  srspopds2 <- data.frame(df = 1:6, MSE = srs.pop.out)
+  srspopds <- rbind(srspopds, srspopds2)
 }
 
 # Making as many cluster samples as we specify for 'loops'
@@ -199,19 +191,27 @@ for (i in 1:loops) {
   clussrsds2 <- data.frame(df = 1:6, MSE = srs.CV.out)
   clussrsds <- rbind(clussrsds, clussrsds2)
   
-  # Using dAIC on Cluster samples
-  clus.des <- svydesign(ids = ~Cluster, fpc = ~fpcCluster, data = sim.clus)
-  clus.dAIC.out <- sapply(1:6,
-    function(ii) dAIC(svyglm(modelsToFit[ii], clus.des)))
-  clusdAICds2 <- data.frame(df = 1:6, dAIC = clus.dAIC.out)
-  clusdAICds <- rbind(clusdAICds, clusdAICds2)
+  # Eval 80% Cluster samples on full pop
+  sub.c <- unique(sim.clus[["Cluster"]])
+  sub.clus <- sim.clus[sim.clus[["Cluster"]] %in% sample(sub.c, 8),]
+
+  clus.des <- svydesign(ids = ~Cluster, fpc = ~fpcCluster, data = sub.clus)
+  clus.pop.out <- sapply(1:6,
+    function(ii) {
+        yhat <- predict(svyglm(modelsToFit[ii], clus.des),
+                        newdata = splinepop.df)
+        return(mean((yhat - splinepop.df$Response)^2))
+      })
+  cluspopds2 <- data.frame(df = 1:6, MSE = clus.pop.out)
+  cluspopds <- rbind(cluspopds, cluspopds2)
 }
 
 # Making as many stratified samples as we specify for 'loops'
 for (i in 1:loops) {
   # Take a Strat sample
   s <- survey::stratsample(splinepop.df$Stratum,
-         c("1" = n/5, "2" = n/5, "3" = n/5, "4" = n/5, "5" = n/5))
+               c("1" = n/10, "2" = n/10, "3" = n/10, "4" = n/10, "5" = n/10,
+                 "6" = n/10, "7" = n/10, "8" = n/10, "9" = n/10, "10" = n/10))
   sim.strat <- splinepop.df[s,]
   
   # Using our Strat function on Strat samples
@@ -226,27 +226,36 @@ for (i in 1:loops) {
   stratsrsds2 <- data.frame(df = 1:6, MSE = srs.CV.out)
   stratsrsds <- rbind(stratsrsds, stratsrsds2)
   
-  # Using dAIC on Strat samples
-  strat.des <- svydesign(ids = ~1, strata = ~Stratum, fpc = ~fpcStratum, data = sim.strat)
-  strat.dAIC.out <- sapply(1:6,
-    function(ii) dAIC(svyglm(modelsToFit[ii], strat.des)))
-  stratdAICds2 <- data.frame(df = 1:6, dAIC = strat.dAIC.out)
-  stratdAICds <- rbind(stratdAICds, stratdAICds2)
+  # Eval 80% Strat samples on full pop
+  sub.s <- survey::stratsample(sim.strat$Stratum,
+               c("1" = 8, "2" = 8, "3" = 8, "4" = 8, "5" = 8,
+                 "6" = 8, "7" = 8, "8" = 8, "9" = 8, "10" = 8))
+  sub.strat <- sim.strat[sub.s,]
+
+  strat.des <- svydesign(ids = ~1, strata = ~Stratum, fpc = ~fpcStratum, data = sub.strat)
+  strat.pop.out <- sapply(1:6,
+    function(ii) {
+        yhat <- predict(svyglm(modelsToFit[ii], strat.des),
+                        newdata = splinepop.df)
+        return(mean((yhat - splinepop.df$Response)^2))
+      })
+  stratpopds2 <- data.frame(df = 1:6, MSE = strat.pop.out)
+  stratpopds <- rbind(stratpopds, stratpopds2)
 }
 
 # Making the degrees of freedom variable a factor variable
 srssrsds$df <- as.factor(srssrsds$df)
-srsdAICds$df <- as.factor(srsdAICds$df)
+srspopds$df <- as.factor(srspopds$df)
 clusclusds$df <- as.factor(clusclusds$df)
 clussrsds$df <- as.factor(clussrsds$df)
-clusdAICds$df <- as.factor(clusdAICds$df)
+cluspopds$df <- as.factor(cluspopds$df)
 stratstratds$df <- as.factor(stratstratds$df)
 stratsrsds$df <- as.factor(stratsrsds$df)
-stratdAICds$df <- as.factor(stratdAICds$df)
+stratpopds$df <- as.factor(stratpopds$df)
 
-usethis::use_data(srssrsds, srsdAICds,
-                  clusclusds, clussrsds, clusdAICds,
-                  stratstratds, stratsrsds, stratdAICds,
+usethis::use_data(srssrsds, srspopds,
+                  clusclusds, clussrsds, cluspopds,
+                  stratstratds, stratsrsds, stratpopds,
                   internal = FALSE, overwrite = TRUE)
 # TODO: for now setting internal=FALSE
 # so that we don't overwrite the sysdata.Rda for intro.Rmd;
@@ -261,68 +270,62 @@ if(!rerunSims) {
   data("srssrsds",
        "clusclusds", "clussrsds",
        "stratstratds", "stratsrsds",
-       "srsdAICds", "clusdAICds", "stratdAICds")
+       "srspopds", "cluspopds", "stratpopds")
 }
 
-# Find the y-ranges of MSEs and dAICs
+# Find the y-ranges of MSEs
 yminMSE <- min(min(srssrsds$MSE),
                min(clusclusds$MSE), min(clussrsds$MSE),
                min(stratstratds$MSE), min(stratsrsds$MSE))
 ymaxMSE <- max(max(srssrsds$MSE),
                max(clusclusds$MSE), max(clussrsds$MSE),
                max(stratstratds$MSE), max(stratsrsds$MSE))
-yminAIC <- min(min(srsdAICds$dAIC), min(clusdAICds$dAIC),
-               min(stratdAICds$dAIC))
-ymaxAIC <- max(max(srsdAICds$dAIC), max(clusdAICds$dAIC),
-               max(stratdAICds$dAIC))
+
+srspopds <- dplyr::group_by(srspopds, df) %>%
+  dplyr::summarise(MSE = mean(MSE)) %>% 
+  dplyr::mutate(df = as.numeric(df))
+cluspopds <- dplyr::group_by(cluspopds, df) %>%
+  dplyr::summarise(MSE = mean(MSE)) %>% 
+  dplyr::mutate(df = as.numeric(df))
+stratpopds <- dplyr::group_by(stratpopds, df) %>%
+  dplyr::summarise(MSE = mean(MSE)) %>% 
+  dplyr::mutate(df = as.numeric(df))
+
 
 # Making ggplot objects for the MSEs and AICs
 plot.srssrs <- ggplot(data = srssrsds, mapping = aes(x = df, y = MSE/1e4)) +
   geom_boxplot() +
+  geom_line(data = srspopds, mapping = aes(x = df, y = MSE/1e4)) +
   ggtitle("CV: SRS folds,\nSRS sample") +
   scale_y_log10(limits = c(yminMSE, ymaxMSE)/1e4)
 plot.blank <- rectGrob(width = 0, height = 0) # empty spot here -- no corresponding sim
 plot.clusclus <- ggplot(data = clusclusds, mapping = aes(x = df, y = MSE/1e4)) +
   geom_boxplot() +
+  geom_line(data = cluspopds) +
   ggtitle("CV: Cluster folds,\nCluster sample") +
   scale_y_log10(limits = c(yminMSE, ymaxMSE)/1e4)
 plot.clussrs <- ggplot(data = clussrsds, mapping = aes(x = df, y = MSE/1e4)) +
   geom_boxplot() +
+  geom_line(data = cluspopds) +
   ggtitle("CV: SRS folds,\nCluster sample") +
   scale_y_log10(limits = c(yminMSE, ymaxMSE)/1e4)
 plot.stratstrat <- ggplot(data = stratstratds, mapping = aes(x = df, y = MSE/1e4)) +
   geom_boxplot() +
+  geom_line(data = stratpopds) +
   ggtitle("CV: Strat folds,\nStrat sample") +
   scale_y_log10(limits = c(yminMSE, ymaxMSE)/1e4)
 plot.stratsrs <- ggplot(data = stratsrsds, mapping = aes(x = df, y = MSE/1e4)) +
   geom_boxplot() +
+  geom_line(data = stratpopds) +
   ggtitle("CV: SRS folds,\nStrat sample") +
   scale_y_log10(limits = c(yminMSE, ymaxMSE)/1e4)
 
-# plot.srsdAIC <- ggplot(data = srsdAICds, mapping = aes(x = df, y = dAIC/1e6)) +
-#   geom_boxplot() +
-#   ggtitle("dAIC,\nSRS sample") +
-#   scale_y_log10(limits = c(yminAIC, ymaxAIC)/1e6)
-# plot.clusdAIC <- ggplot(data = clusdAICds, mapping = aes(x = df, y = dAIC/1e6)) +
-#   geom_boxplot() +
-#   ggtitle("dAIC,\nCluster sample") +
-#   scale_y_log10(limits = c(yminAIC, ymaxAIC)/1e6)
-# plot.stratdAIC <- ggplot(data = stratdAICds, mapping = aes(x = df, y = dAIC/1e6)) +
-#   geom_boxplot() +
-#   ggtitle("dAIC,\nStrat sample") +
-#   scale_y_log10(limits = c(yminAIC, ymaxAIC)/1e6)
-
-
-# Making a grid display of the plot objects above
-# gridExtra::grid.arrange(plot.srssrs, plot.blank, plot.srsdAIC, 
-#                         plot.clussrs, plot.clusclus, plot.clusdAIC, 
-#                         plot.stratsrs, plot.stratstrat, plot.stratdAIC, 
 gridExtra::grid.arrange(plot.srssrs, plot.clussrs, plot.stratsrs, 
                         plot.blank, plot.clusclus, plot.stratstrat,
              ncol = 3,
              top = paste0("Simulated Data (Sample Sizes = ", n,
                           ", Clusters = ", n/10,
-                          " or Strata = 5, Loops = ", loops, ", Folds = 5)"))
+                          " or Strata = 10, Loops = ", loops, ", Folds = 5)"))
 ```
 
 

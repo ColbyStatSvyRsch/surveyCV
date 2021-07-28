@@ -67,7 +67,7 @@ NULL
 "stratstratds"
 
 #' @rdname StatPaperSims
-"stratdAICds"
+"stratpopds"
 
 #' @rdname StatPaperSims
 "clussrsds"
@@ -76,10 +76,10 @@ NULL
 "clusclusds"
 
 #' @rdname StatPaperSims
-"clusdAICds"
+"cluspopds"
 
 #' @rdname StatPaperSims
 "srssrsds"
 
 #' @rdname StatPaperSims
-"srsdAICds"
+"srspopds"

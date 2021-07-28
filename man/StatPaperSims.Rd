@@ -9,12 +9,12 @@
 \alias{NoW}
 \alias{stratsrsds}
 \alias{stratstratds}
-\alias{stratdAICds}
+\alias{stratpopds}
 \alias{clussrsds}
 \alias{clusclusds}
-\alias{clusdAICds}
+\alias{cluspopds}
 \alias{srssrsds}
-\alias{srsdAICds}
+\alias{srspopds}
 \title{Internal datasets for plots-for-Stat-paper vignette.}
 \format{
 Data frames containing simulations from plots-for-Stat-paper.
@@ -56,17 +56,17 @@ stratsrsds
 
 stratstratds
 
-stratdAICds
+stratpopds
 
 clussrsds
 
 clusclusds
 
-clusdAICds
+cluspopds
 
 srssrsds
 
-srsdAICds
+srspopds
 }
 \description{
 See plots-for-Stat-paper vignette for details.
