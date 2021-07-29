@@ -10,7 +10,7 @@ vignette: >
 
 Writing cleaner code for **only** the simulations needed for our submission to *Stat* (the special issue for SDSS 2021 talks).
 
-Currently based on the sims in `plot_generation.R` -- but instead of having similar functions repeatedly defined separately in that file, use our actual functions from the package such as `cv.svy()`.
+Based on the sims from `plot_generation.R` -- but instead of having similar functions repeatedly defined separately as in that file, use our functions such as `cv.svy()` directly from the package.
 
 ```{r Packages, message=FALSE}
 library(survey)
@@ -32,10 +32,15 @@ knitr::opts_chunk$set(dpi=300, out.extra ='WIDTH="95%"')
 # Generate a cubic-ish artificial population with 1000 units
 set.seed(47)
 
-x1 = stats::runif(1:500, min = 26, max = 38)
+N <- 1000
+nrStrata <- 10
+nrClusters <- 100
+clusSizes <- N/nrClusters
+  
+x1 = stats::runif(1:(N/2), min = 26, max = 38)
 y1 = (x1-29)^3 - 13*(x1-29)^2 + 0*(x1-29) + 900
 
-x2 = stats::runif(1:500, min = 38, max = 50)
+x2 = stats::runif(1:(N/2), min = 38, max = 50)
 y2 = (x2-36)^3 - 10*(x2-36)^2 + 2*(x2-36) + 600
 
 z1 = jitter(y1, 15000)
@@ -53,14 +58,14 @@ splinepop.df <- splinepop.df %>%
   # we can (separately) simulate both kinds of sampling
   dplyr::mutate(Stratum = dplyr::row_number(),
                 Cluster = dplyr::row_number()) %>% 
-  dplyr::mutate(Stratum = cut(Stratum, 10, 1:10),
-                Cluster = cut(Cluster, 100, 1:100)) %>%
+  dplyr::mutate(Stratum = cut(Stratum, nrStrata, 1:nrStrata),
+                Cluster = cut(Cluster, nrClusters, 1:nrClusters)) %>%
   # Create fpc variables for each sampling type:
-  # full pop has 1000 units; 100 units/stratum; 100 clusters of 10 units each
-  # (& if we add a combined Strat+Clus sim, we'll need different fpc's for that)
-  dplyr::mutate(fpcSRS = 1000,
-                fpcStratum = 1000/10,
-                fpcCluster = 100) %>%
+  # full pop has 1000 units; 100 units/stratum; 100 clusters (of 10 units each);
+  # & if we added a combined Strat+Clus sim, we'd need different fpc's for that
+  dplyr::mutate(fpcSRS = N,
+                fpcStratum = N/nrStrata,
+                fpcCluster = nrClusters) %>%
   dplyr::arrange(ID)
 
 # Create unequal sampling weights that are intentionally 
@@ -80,14 +85,17 @@ stopifnot(all.equal(sum(1/splinepop.df$samp_wt_quad), 1))
 
 ```{r PopulationPlot, fig.width=8.3, fig.height=3}
 n <- 100
+
 srs.df <- dplyr::sample_n(splinepop.df, n)
-s <- stratsample(splinepop.df$Stratum,
-                 # c("1" = n/5, "2" = n/5, "3" = n/5, "4" = n/5, "5" = n/5))
-                 c("1" = n/10, "2" = n/10, "3" = n/10, "4" = n/10, "5" = n/10,
-                   "6" = n/10, "7" = n/10, "8" = n/10, "9" = n/10, "10" = n/10))
+
+stratcounts <- rep(n/nrStrata, nrStrata)
+names(stratcounts) <- 1:nrStrata
+s <- stratsample(splinepop.df$Stratum, stratcounts)
 strat.df <- splinepop.df[s,]
+
 c <- unique(splinepop.df[["Cluster"]]) 
-clus.df <- splinepop.df[splinepop.df[["Cluster"]] %in% sample(c, n/10),]
+clus.df <- splinepop.df[splinepop.df[["Cluster"]] %in% sample(c, n/clusSizes),]
+
 a <- ggplot(splinepop.df, aes(x = Predictor, y = Response)) + 
   geom_point(shape = 1) +
   labs(title = "Artificial Pop.", x = "Predictor", y = "Response") + 
@@ -161,7 +169,7 @@ for (i in 1:loops) {
   srssrsds <- rbind(srssrsds, srssrsds2)
 
   # Eval SRS samples on full pop
-  sub.srs <- dplyr::sample_n(sim.srs, 80)
+  sub.srs <- dplyr::sample_n(sim.srs, n*.8)
   srs.des <- svydesign(ids = ~1, fpc = ~fpcSRS, data = sub.srs)
   srs.pop.out <- sapply(1:6,
     function(ii) {
@@ -177,7 +185,7 @@ for (i in 1:loops) {
 for (i in 1:loops) {
   # Take a Cluster sample
   c <- unique(splinepop.df[["Cluster"]])
-  sim.clus <- splinepop.df[splinepop.df[["Cluster"]] %in% sample(c, n/10),]
+  sim.clus <- splinepop.df[splinepop.df[["Cluster"]] %in% sample(c, n/clusSizes),]
   
   # Using our Cluster function on Cluster samples
   clus.CV.out <- cv.svy(sim.clus, modelsToFit,
@@ -193,7 +201,7 @@ for (i in 1:loops) {
   
   # Eval 80% Cluster samples on full pop
   sub.c <- unique(sim.clus[["Cluster"]])
-  sub.clus <- sim.clus[sim.clus[["Cluster"]] %in% sample(sub.c, 8),]
+  sub.clus <- sim.clus[sim.clus[["Cluster"]] %in% sample(sub.c, (n/clusSizes)*.8),]
 
   clus.des <- svydesign(ids = ~Cluster, fpc = ~fpcCluster, data = sub.clus)
   clus.pop.out <- sapply(1:6,
@@ -209,9 +217,9 @@ for (i in 1:loops) {
 # Making as many stratified samples as we specify for 'loops'
 for (i in 1:loops) {
   # Take a Strat sample
-  s <- survey::stratsample(splinepop.df$Stratum,
-               c("1" = n/10, "2" = n/10, "3" = n/10, "4" = n/10, "5" = n/10,
-                 "6" = n/10, "7" = n/10, "8" = n/10, "9" = n/10, "10" = n/10))
+  stratcounts <- rep(n/nrStrata, nrStrata)
+  names(stratcounts) <- 1:nrStrata
+  s <- stratsample(splinepop.df$Stratum, stratcounts)
   sim.strat <- splinepop.df[s,]
   
   # Using our Strat function on Strat samples
@@ -227,9 +235,9 @@ for (i in 1:loops) {
   stratsrsds <- rbind(stratsrsds, stratsrsds2)
   
   # Eval 80% Strat samples on full pop
-  sub.s <- survey::stratsample(sim.strat$Stratum,
-               c("1" = 8, "2" = 8, "3" = 8, "4" = 8, "5" = 8,
-                 "6" = 8, "7" = 8, "8" = 8, "9" = 8, "10" = 8))
+  sub.stratcounts <- rep((n/nrStrata)*.8, nrStrata)
+  names(sub.stratcounts) <- 1:nrStrata
+  sub.s <- survey::stratsample(sim.strat$Stratum, sub.stratcounts)
   sub.strat <- sim.strat[sub.s,]
 
   strat.des <- svydesign(ids = ~1, strata = ~Stratum, fpc = ~fpcStratum, data = sub.strat)
@@ -324,8 +332,9 @@ gridExtra::grid.arrange(plot.srssrs, plot.clussrs, plot.stratsrs,
                         plot.blank, plot.clusclus, plot.stratstrat,
              ncol = 3,
              top = paste0("Simulated Data (Sample Sizes = ", n,
-                          ", Clusters = ", n/10,
-                          " or Strata = 10, Loops = ", loops, ", Folds = 5)"))
+                          ", Clusters = ", n/clusSizes,
+                          " or Strata = ", nrStrata,
+                          ", Loops = ", loops, ", Folds = 5)"))
 ```
 
 
@@ -342,7 +351,7 @@ ggplot(splinepop.df,
   geom_point(aes(size = samp_prob_quad), alpha = 0.1) +
   stat_smooth(method = "lm", formula = y ~ x + I(x^2), se = FALSE) +
   labs(title = "Artificial Population with Sampling Probabilities",
-       subtitle = "Sampling prob. is higher for points nearer the blue curve",
+       subtitle = "Sampling prob. is higher for points nearer the solid curve",
        x = "Predictor", y = "Response",
        size = "Sampling Probability")
 ```
