@@ -336,10 +336,10 @@ gridExtra::grid.arrange(plot.srssrs, plot.clussrs, plot.stratsrs,
 
 
 
-```{r QuadWeightsPlot, fig.width=7, fig.height=5}
+```{r QuadWeightsPlot, fig.width=7, fig.height=3.5}
 ggplot(splinepop.df,
   aes(x = Predictor, y = Response)) +
-  geom_point(aes(size = samp_prob_quad), alpha = 0.2) +
+  geom_point(aes(size = samp_prob_quad), alpha = 0.1) +
   stat_smooth(method = "lm", formula = y ~ x + I(x^2), se = FALSE) +
   labs(title = "Artificial Population with Sampling Probabilities",
        subtitle = "Sampling prob. is higher for points nearer the blue curve",
@@ -421,7 +421,7 @@ usethis::use_data(AllW, NoW,
 # if that's indeed better for R packages
 ```
 
-```{r WeightsSimsResultsAndPlots, fig.width=7, fig.height=9}
+```{r WeightsSimsResultsAndPlots, fig.width=7, fig.height=7}
 if(!rerunSims) {
   data("AllW", "NoW", "MSEW", "ModW")
 }
