@@ -14,9 +14,8 @@ The package currently works for linear and logistic regression models, but we pl
 Install the latest development version from GitHub:
 
 ```r
-# install.packages("devtools")
-devtools::install_github("civilstat/RankingProject",
-                         build_vignettes = TRUE)
+# install.packages("remotes")
+remotes::install_github("ColbyStatSvyRsch/surveyCV")
 ```
 
 ## Usage
