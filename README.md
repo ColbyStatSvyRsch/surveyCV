@@ -34,7 +34,11 @@ The function `cv.svydesign()` only needs a `svydesign` object and a formula, and
 
 ## *Stat* paper
 
-We include R code to reproduce figures for our *Stat* submission. Scripts for the PPI and NSFG examples are in the `data-raw` folder. We cannot share the proprietary PPI dataset, but instructions for preprocessing the NSFG data are in the same folder in the `NSFG_data.R` script. Simulations are in the `plots-for-Stat-paper` vignette.
+We include R code to reproduce figures for our *Stat* submission.
+
+Scripts for the PPI and NSFG examples are in the `data-raw` folder, in the `PPI_Zambia_plot.R` and `NSFG_plot.R` scripts. We cannot share the proprietary PPI dataset, but the preprocessed NSFG dataset is included in the package as `NSFG_data`, and instructions for preprocessing the NSFG data are in the same folder in the `NSFG_data.R` script.
+
+Simulation code is in the `plots-for-Stat-paper` vignette.
 
 ## Authors
 
