@@ -57,7 +57,7 @@ cv.svydesign <- function(design_object, formulae, nfolds = 5, method = c("linear
   .data <- design_object[["variables"]]
 
   # Create a clusterID variable from the design object
-  ids.formula <- design_object[["call"]][["ids"]]
+  ids.formula <- design_object[["call"]]$id
   stopifnot(length(ids.formula) == 2)
   clusterID = as.character(ids.formula[[2]])
   if (clusterID %in% c("0", "1")) {
