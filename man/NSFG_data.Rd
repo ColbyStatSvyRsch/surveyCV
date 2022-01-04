@@ -3,27 +3,27 @@
 \docType{data}
 \name{NSFG_data}
 \alias{NSFG_data}
-\title{Subset of the 2015-2017 National Survey of Family Growth (NSFG).}
+\title{Subset of the 2015-2017 National Survey of Family Growth (NSFG): one birth per respondent.}
 \format{
-A data frame with 5089 rows and 17 variables:
+A data frame with 2801 rows and 17 variables:
 \describe{
-  \item{strata}{stratum ID (this was SEST in the original dataset)}
-  \item{SECU}{cluster ID -- these are nested within strata}
-  \item{wgt}{sampling weight}
-  \item{YrEdu}{years of education}
-  \item{income}{income in thousands of USD}
-  \item{CASEID}{(to be documented)}
-  \item{LBW}{(to be documented)}
-  \item{PreMe}{(to be documented)}
-  \item{gotPNcare}{(to be documented)}
-  \item{KnowPreg}{(to be documented)}
-  \item{age}{(to be documented)}
-  \item{race}{(to be documented)}
-  \item{BMI}{(to be documented)}
-  \item{PregNum}{(to be documented)}
-  \item{eduCat}{(to be documented)}
-  \item{GA}{(to be documented)}
-  \item{Wanted}{(to be documented)}
+  \item{CASEID}{Respondent ID number (per respondent, not per pregnancy)}
+  \item{LBW}{(originally LBW1) Low birthweight (TRUE/FALSE) for the 1st baby from this pregnancy}
+  \item{PreMe}{(recode of WKSGEST) Whether gestational age was premature (below 37 weeks) or full term}
+  \item{gotPNcare}{(recode of BGNPRENA) Whether or not respondent got prenatal care in first trimester (before 13 weeks)}
+  \item{KnowPreg}{(recode of KNEWPREG) Whether or not respondent learned she was pregnant by 6 weeks}
+  \item{age}{(originally AGECON) Age at time of conception}
+  \item{income}{(originally POVERTY) Income as percent of poverty level, so that 100 = income is at the poverty line; topcoded at 500}
+  \item{YrEdu}{(originally EDUCAT) Education (number of years of schooling)}
+  \item{race}{(originally HISPRACE) Race & Hispanic origin of respondent}
+  \item{BMI}{Body Mass Index}
+  \item{PregNum}{(originally PREGNUM) Respondent's total number of pregnancies}
+  \item{eduCat}{(originally HIEDUC) Highest completed year of school or highest degree received}
+  \item{GA}{(originally WKSGEST) Gestational length of completed pregnancy (in weeks)}
+  \item{Wanted}{(recode of NEWWANTR) Whether or not pregnancy came at right time according to respondent (rather than too soon, too late, or unwanted)}
+  \item{wgt}{(originally WGT2015_2017) Final weight for the 2015-2017 NSFG (at the respondent level, not pregnancy level)}
+  \item{SECU}{Randomized version of cluster ID, or "sampling error computational unit" -- these are nested within strata}
+  \item{strata}{(originally SEST) Randomized version of stratum ID}
 }
 }
 \source{
@@ -41,7 +41,15 @@ We downloaded this data from the NSFG website and cleaned it following
 an approach posted to RPubs by Hunter Ratliff.
 }
 \details{
-Note that SECUs = Sampling Error Computation Units are effectively
+Note that these data were filtered down to include only:
+
+- live births,
+- with gestational ages below 45 weeks,
+- born to mothers who were aged 20-40 years old at time of conception;
+
+...then filtered further down to only the *first* such birth per respondent.
+
+Also note that SECUs = Sampling Error Computation Units are effectively
 pseudo-PSUs, nested within (pseudo-)strata. See page 35 of the NSFG
 2011-2013 sample design documentation for details.
 }

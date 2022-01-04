@@ -1238,8 +1238,13 @@ plot_generation2 <- function() {
 
 plot_generation3 <- function(){
 
-  NSFG_data$strata <- as.factor(NSFG_data$strata)
-  NSFG_data$SECU <- as.factor(NSFG_data$SECU)
+  # Using NSFG data at the pregancy level, same as Hunter Ratliff,
+  # like we originally did
+  # (though later realized it would be better to do this at respondent level,
+  #  NOT at this level where there may be multiple pregnancies per respondent...
+  #  TODO: we ought to redo this eventually)
+  NSFG_data_everypreg$strata <- as.factor(NSFG_data_everypreg$strata)
+  NSFG_data_everypreg$SECU <- as.factor(NSFG_data_everypreg$SECU)
 
   income.year_edu.plot <- function(loops) {
     # Making an empty data set for output when we take into consideration the design method
@@ -1250,16 +1255,16 @@ plot_generation3 <- function(){
     # looping and generating MSEs
     for (i in 1:loops) {
       set.seed(i)
-      method.data <- cv.svy(NSFG_data, c("income~ns(YrEdu, df = 1)","income~ns(YrEdu, df = 2)","income~ns(YrEdu, df = 3)","income~ns(YrEdu, df = 4)","income~ns(YrEdu, df = 5)","income~ns(YrEdu, df = 6)"),
+      method.data <- cv.svy(NSFG_data_everypreg, c("income~ns(YrEdu, df = 1)","income~ns(YrEdu, df = 2)","income~ns(YrEdu, df = 3)","income~ns(YrEdu, df = 4)","income~ns(YrEdu, df = 5)","income~ns(YrEdu, df = 6)"),
                             nfolds = 4, strataID = "strata",
                             clusterID = "SECU", nest = TRUE, weightsID = "wgt") %>% print()
       method.ds2 <- data.frame(df = 1:6, MSE = method.data[,1])
       method.ds <- rbind(method.ds, method.ds2)
-      ignore.data <- cv.svy(NSFG_data, c("income~ns(YrEdu, df = 1)","income~ns(YrEdu, df = 2)","income~ns(YrEdu, df = 3)","income~ns(YrEdu, df = 4)","income~ns(YrEdu, df = 5)","income~ns(YrEdu, df = 6)"),
+      ignore.data <- cv.svy(NSFG_data_everypreg, c("income~ns(YrEdu, df = 1)","income~ns(YrEdu, df = 2)","income~ns(YrEdu, df = 3)","income~ns(YrEdu, df = 4)","income~ns(YrEdu, df = 5)","income~ns(YrEdu, df = 6)"),
                             nfolds = 4) %>% print()
       ignore.ds2 <- data.frame(df = 1:6, MSE = ignore.data[,1])
       ignore.ds <- rbind(ignore.ds, ignore.ds2)
-      fold.data <- cv.svy(NSFG_data, c("income~ns(YrEdu, df = 1)","income~ns(YrEdu, df = 2)","income~ns(YrEdu, df = 3)","income~ns(YrEdu, df = 4)","income~ns(YrEdu, df = 5)","income~ns(YrEdu, df = 6)"),
+      fold.data <- cv.svy(NSFG_data_everypreg, c("income~ns(YrEdu, df = 1)","income~ns(YrEdu, df = 2)","income~ns(YrEdu, df = 3)","income~ns(YrEdu, df = 4)","income~ns(YrEdu, df = 5)","income~ns(YrEdu, df = 6)"),
                           nfolds = 4, strataID = "strata",
                           clusterID = "SECU", nest = TRUE, weightsID = "wgt", useSvyForFolds = FALSE) %>% print()
       fold.ds2 <- data.frame(df = 1:6, MSE = fold.data[,1])
@@ -1288,14 +1293,14 @@ plot_generation3 <- function(){
 
   NSFG.plot <- income.year_edu.plot(100)
 
-  NSFG.cluster.plot <- ggplot2::ggplot(NSFG_data, ggplot2::aes(x = YrEdu, y = income)) +
+  NSFG.cluster.plot <- ggplot2::ggplot(NSFG_data_everypreg, ggplot2::aes(x = YrEdu, y = income)) +
     ggplot2::geom_jitter(pch='.') +
     ggplot2::geom_smooth(method = "loess", se = TRUE) +
     ggplot2::facet_grid(strata~SECU) +  ## SECUs are nested within strata
     ggplot2::labs(x = "Years Educated", y = "Income (Expressed as % of Poverty Level)",
          title = "Relationship Separated by Cluster")
 
-  NSFG.strata.plot <- ggplot2::ggplot(NSFG_data, ggplot2::aes(x = YrEdu, y = income)) +
+  NSFG.strata.plot <- ggplot2::ggplot(NSFG_data_everypreg, ggplot2::aes(x = YrEdu, y = income)) +
     ggplot2::geom_jitter() +
     ggplot2::geom_smooth(method = "loess", se = TRUE) +
     ggplot2::facet_wrap(strata~., ncol = 6) +

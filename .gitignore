@@ -2,3 +2,9 @@ inst/doc
 .Rproj.user
 .DS_Store
 .Rhistory
+data-raw/2015_2017_FemRespData.dat
+data-raw/2015_2017_FemRespSetup.sas
+data-raw/2015_2017_FemPregData.dat
+data-raw/2015_2017_FemPregSetup.sas
+data-raw/respAll.csv
+data-raw/pregAll.csv

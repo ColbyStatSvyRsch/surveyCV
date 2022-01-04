@@ -7,20 +7,13 @@ library(ggplot2)
 library(gridExtra)
 data("NSFG_data")
 
-# These data were preprocessed following Hunter Ratliff's code on RPubs here:
+# The NSFG data were preprocessed following Hunter Ratliff's code on RPubs here,
+# stopping at the end of creating/editing the `data0` dataset:
 # https://rpubs.com/HunterRatliff1/NSFG_Wrangle
-# stopping at the end of creating/editing the `data0` dataset.
-#
-# However, this data is at the PREGNANCY level --
-#   each row is one pregnancy, so some mothers are in the dataset many times.
-# Our analysis below should be at the RESPONDENT level,
-# so subset to just one row per CASEID:
-sub <- NSFG_data[!duplicated(NSFG_data$CASEID), ]
-nrow(sub) == length(unique(NSFG_data$CASEID))
-head(sub)
-# OK, this looks right.
-# Overwrite full dataframe with this subset
-NSFG_data <- sub
+# then further subset to one row per RESPONDENT (mother), not one row per pregnancy.
+# See NSFG_data.R in this folder for the script.
+
+
 
 # As a reasonable pair of variables to regress with the NSFG,
 #   let's use income (at time of svy)
