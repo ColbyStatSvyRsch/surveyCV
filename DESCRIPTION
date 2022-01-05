@@ -5,8 +5,8 @@ Version: 0.0.0.9000
 Authors@R: c(
     person("Cole", "Guerin", email = "cole@guerincreative.com", role = "aut"),
     person("Thomas", "McMahon", email = "thomasmcmahon9@gmail.com", role = "aut"),
-    person("Jerzy", "Wieczorek", email = "jawieczo@colby.edu", role = c("cre", "aut"))),
-    person("Hunter", "Ratliff", role = "ctb")
+    person("Jerzy", "Wieczorek", email = "jawieczo@colby.edu", role = c("cre", "aut")),
+    person("Hunter", "Ratliff", role = "ctb"))
 Description: Functions to generate test error estimates using cross validation, 
     based on how a survey design is constructed
     (SRS, clustering, stratification, and/or unequal sampling weights).

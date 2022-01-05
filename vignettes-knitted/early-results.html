@@ -168,7 +168,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>plot_list <span class="ot">&lt;-</span> surveyCV<span class="sc">:::</span><span class="fu">plot_generation</span>()</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>plot_list2 <span class="ot">&lt;-</span> surveyCV<span class="sc">:::</span><span class="fu">plot_generation2</span>()</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>plot_list3 <span class="ot">&lt;-</span> surveyCV<span class="sc">:::</span><span class="fu">plot_generation3</span>()</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>usethis<span class="sc">::</span><span class="fu">use_data</span>(plot_list, plot_list2, plot_list3, <span class="at">internal =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>usethis<span class="sc">::</span><span class="fu">use_data</span>(plot_list, plot_list2, plot_list3, <span class="at">internal =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># ...</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># OK, now we&#39;ve written those lists,</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co">#   AND the 12 dataframes from plots-for-Stat-paper vignette,</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">#   all into R/sysdata.Rda together</span></span></code></pre></div>
 <p>Make the pre-computed images available for the vignette:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>sim.clusvsrs.sd.n100 <span class="ot">&lt;-</span> surveyCV<span class="sc">:::</span>plot_list<span class="sc">$</span>sim.clusvsrs.sd.n100</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>sim.clusvsrs.bp.n100 <span class="ot">&lt;-</span> surveyCV<span class="sc">:::</span>plot_list<span class="sc">$</span>sim.clusvsrs.bp.n100</span>

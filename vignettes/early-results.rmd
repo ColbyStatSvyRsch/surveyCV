@@ -46,6 +46,10 @@ plot_list <- surveyCV:::plot_generation()
 plot_list2 <- surveyCV:::plot_generation2()
 plot_list3 <- surveyCV:::plot_generation3()
 usethis::use_data(plot_list, plot_list2, plot_list3, internal = TRUE)
+# ...
+# OK, now we've written those lists,
+#   AND the 12 dataframes from plots-for-Stat-paper vignette,
+#   all into R/sysdata.Rda together
 ```
 
 Make the pre-computed images available for the vignette:

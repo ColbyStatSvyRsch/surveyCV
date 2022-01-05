@@ -270,15 +270,23 @@ usethis::use_data(srssrsds, srspopds,
 # but eventually when we're ready to replace that old vignette,
 # we can return to internal=TRUE here
 # if that's indeed better for R packages
+# ...
+# OK, now we've written those dataframes,
+#   AND the 4 below, AND the 3 lists from early-results vignette,
+#   all into R/sysdata.Rda together
 ```
 
 
 ```{r FoldsSimsPlots, fig.width=7, fig.height=4.7}
 if(!rerunSims) {
-  data("srssrsds",
-       "clusclusds", "clussrsds",
-       "stratstratds", "stratsrsds",
-       "srspopds", "cluspopds", "stratpopds")
+  srssrsds <- surveyCV:::srssrsds
+  clusclusds <- surveyCV:::clusclusds
+  clussrsds <- surveyCV:::clussrsds
+  stratstratds <- surveyCV:::stratstratds
+  stratsrsds <- surveyCV:::stratsrsds
+  srspopds <- surveyCV:::srspopds
+  cluspopds <- surveyCV:::cluspopds
+  stratpopds <- surveyCV:::stratpopds
 }
 
 # Find the y-ranges of MSEs
@@ -428,11 +436,18 @@ usethis::use_data(AllW, NoW,
 # but eventually when we're ready to replace that old vignette,
 # we can return to internal=TRUE here
 # if that's indeed better for R packages
+# ...
+# OK, now we've written those dataframes,
+#   AND the 8 above, AND the 3 lists from early-results vignette,
+#   all into R/sysdata.Rda together
 ```
 
 ```{r WeightsSimsResultsAndPlots, fig.width=7, fig.height=7}
 if(!rerunSims) {
-  data("AllW", "NoW", "MSEW", "ModW")
+  AllW <- surveyCV:::AllW
+  NoW <- surveyCV:::NoW
+  MSEW <- surveyCV:::MSEW
+  ModW <- surveyCV:::ModW
 }
 
 # Find the y-range of MSEs
