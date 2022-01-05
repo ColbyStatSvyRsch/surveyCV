@@ -3,12 +3,11 @@
 #' Wrapper function which takes a `svyglm` object
 #' (which itself contains a `svydesign` object)
 #' and passes it through `cv.svydesign()` to `cv.svy()`.
+#' Chooses linear or logistic regression based on the `svyglm` object's family.
 #'
 #' @param glm_object Name of a `svyglm` object created from the `survey` package
 #' @param nfolds Number of folds to be used during cross validation, defaults to
 #'   5
-#' @param method String, must be either "linear" or "logistic", determines type of
-#'   model fit during cross validation, defaults to linear
 #' @examples
 #' # Calculate CV MSE and its SE under one `svyglm` model
 #' # for a stratified sample and a one-stage cluster sample,
@@ -36,9 +35,15 @@
 
 # TODO: Write formal unit tests
 
-cv.svyglm <- function(glm_object, nfolds = 5, method = c("linear", "logistic")) {
+cv.svyglm <- function(glm_object, nfolds = 5) {
 
-  method <- match.arg(method)
+  family <- glm_object$family$family
+  stopifnot(family %in% c("gaussian", "quasibinomial"))
+  method <- if (family == "gaussian") {
+    "linear"
+  } else if (family == "quasibinomial" ) {
+      "logistic"
+  }
 
   formulae <- deparse1(glm_object[["formula"]])
   design_object <- glm_object[["survey.design"]]
