@@ -61,6 +61,7 @@ stratified, clustered, or clustered-and-stratified sampling design.
 # Compare CV MSEs and their SEs under 3 models
 # for a stratified sample and a one-stage cluster sample,
 # from the `survey` package
+library(survey)
 data("api", package = "survey")
 # stratified sample
 cv.svy(apistrat, c("api00~ell",

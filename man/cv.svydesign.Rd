@@ -35,6 +35,7 @@ and passes it into `cv.svy()`.
 # Compare CV MSEs and their SEs under 3 models
 # for a stratified sample and a one-stage cluster sample,
 # from the `survey` package
+library(survey)
 data("api", package = "survey")
 # stratified sample
 dstrat <- svydesign(id = ~1, strata = ~stype, weights = ~pw, data = apistrat,

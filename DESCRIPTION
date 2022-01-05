@@ -5,12 +5,17 @@ Version: 0.0.0.9000
 Authors@R: c(
     person("Cole", "Guerin", email = "cole@guerincreative.com", role = "aut"),
     person("Thomas", "McMahon", email = "thomasmcmahon9@gmail.com", role = "aut"),
-    person("Jerzy", "Wieczorek", email = "jawieczo@colby.edu", role = c("cre", "aut")))
-Description: Functions to generate mean squared error estimates using cross validation, 
-    based on how a survey design is constructed (SRS, Cluster, Stratification).
+    person("Jerzy", "Wieczorek", email = "jawieczo@colby.edu", role = c("cre", "aut"))),
+    person("Hunter", "Ratliff", role = "ctb")
+Description: Functions to generate test error estimates using cross validation, 
+    based on how a survey design is constructed
+    (SRS, clustering, stratification, and/or unequal sampling weights).
     You can input linear and logistic regression models, along with data and a 
-    type of survey design in order to get and output that can help you determine
+    type of survey design in order to get an output that can help you determine
     which model best fits the data using K-fold cross validation.
+    Our draft paper on "K-Fold Cross-Validation for Complex Sample Surveys"
+    (under review; a copy is in the \code{data-raw} folder of our GitHub repo)
+    explains why differing how we take folds based on survey design is useful.
 License: GPL-2 | GPL-3
 Encoding: UTF-8
 LazyData: TRUE
