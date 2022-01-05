@@ -10,28 +10,28 @@
 #' @param method String, must be either "linear" or "logistic", determines type of
 #'   model fit during cross validation, defaults to linear
 #' @examples
-#' # MSEs generated for different tests of first and second degree polynomial
-#' # fits predicting mpg from horsepower in the Auto dataset. Clustering and
-#' # Stratification was done along the "year" variable.
-#' # Using a survey glm to generate MSEs.
-#' data("Auto", package = "ISLR")
-#' library(survey)
-#' auto.srs.svy <- svydesign(ids = ~0,
-#'                          data = Auto)
-#' srs.model <- svyglm(mpg~horsepower+I(horsepower^2)+I(horsepower^3),
-#'                     design = auto.srs.svy)
-#' auto.clus.svy <- svydesign(ids = ~year,
-#'                           data = Auto)
-#' clus.model <- svyglm(mpg~horsepower+I(horsepower^2)+I(horsepower^3),
-#'                      design = auto.clus.svy)
-#' auto.strat.svy <- svydesign(ids = ~0,
-#'                            strata = ~year,
-#'                            data = Auto)
-#' strat.model <- svyglm(mpg~horsepower+I(horsepower^2)+I(horsepower^3),
-#'                       design = auto.strat.svy)
-#' cv.svyglm(glm_object = srs.model, nfolds = 10)
-#' cv.svyglm(glm_object = clus.model, nfolds = 10)
-#' cv.svyglm(glm_object = strat.model, nfolds = 10)
+#' # Calculate CV MSE and its SE under one `svyglm` model
+#' # for a stratified sample and a one-stage cluster sample,
+#' # from the `survey` package
+#' data("api", package = "survey")
+#' # stratified sample
+#' dstrat <- svydesign(id = ~1, strata = ~stype, weights = ~pw, data = apistrat,
+#'                     fpc = ~fpc)
+#' glmstrat <- svyglm(api00 ~ ell+meals+mobility, design = dstrat)
+#' cv.svyglm(glmstrat, nfolds = 5)
+#' # one-stage cluster sample
+#' dclus1 <- svydesign(id = ~dnum, weights = ~pw, data = apiclus1, fpc = ~fpc)
+#' glmclus1 <- svyglm(api00 ~ ell+meals+mobility, design = dclus1)
+#' cv.svyglm(glmclus1, nfolds = 5)
+#'
+#' # Calculate CV MSE and its SE under one `svyglm` model
+#' # for a stratified cluster sample with clusters nested within strata
+#' data(NSFG_data)
+#' library(splines)
+#' NSFG.svydes <- svydesign(id = ~SECU, strata = ~strata, nest = TRUE,
+#'                          weights = ~wgt, data = NSFG_data)
+#' NSFG.svyglm <- svyglm(income ~ ns(age, df = 3), design = NSFG.svydes)
+#' cv.svyglm(glm_object = NSFG.svyglm, nfolds = 4)
 #' @export
 
 # TODO: Write formal unit tests

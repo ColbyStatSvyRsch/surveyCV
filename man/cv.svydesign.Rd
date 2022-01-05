@@ -32,29 +32,32 @@ and a vector of model formulas (as strings),
 and passes it into `cv.svy()`.
 }
 \examples{
-# MSEs generated for different tests of first and second degree polynomial
-# fits predicting mpg from horsepower in the Auto dataset. Clustering and
-# Stratification was done along the "year" variable.
-# Using a survey design object to generate MSEs.
-data("Auto", package = "ISLR")
-library(survey)
-auto.srs.svy <- svydesign(ids = ~0,
-                         data = Auto)
-auto.clus.svy <- svydesign(ids = ~year,
-                          data = Auto)
-auto.strat.svy <- svydesign(ids = ~0,
-                           strata = ~year,
-                           data = Auto)
-cv.svydesign(formulae = c("mpg~poly(horsepower,1, raw = TRUE)",
-                          "mpg~poly(horsepower,2, raw = TRUE)",
-                          "mpg~poly(horsepower,3, raw = TRUE)"),
-             design_object = auto.srs.svy, nfolds = 10)
-cv.svydesign(formulae = c("mpg~poly(horsepower,1, raw = TRUE)",
-                          "mpg~poly(horsepower,2, raw = TRUE)",
-                          "mpg~poly(horsepower,3, raw = TRUE)"),
-             design_object = auto.clus.svy, nfolds = 10)
-cv.svydesign(formulae = c("mpg~poly(horsepower,1, raw = TRUE)",
-                          "mpg~poly(horsepower,2, raw = TRUE)",
-                          "mpg~poly(horsepower,3, raw = TRUE)"),
-             design_object = auto.strat.svy, nfolds = 10)
+# Compare CV MSEs and their SEs under 3 models
+# for a stratified sample and a one-stage cluster sample,
+# from the `survey` package
+data("api", package = "survey")
+# stratified sample
+dstrat <- svydesign(id = ~1, strata = ~stype, weights = ~pw, data = apistrat,
+                    fpc = ~fpc)
+cv.svydesign(formulae = c("api00~ell",
+                          "api00~ell+meals",
+                          "api00~ell+meals+mobility"),
+             design_object = dstrat, nfolds = 5)
+# one-stage cluster sample
+dclus1 <- svydesign(id = ~dnum, weights = ~pw, data = apiclus1, fpc = ~fpc)
+cv.svydesign(formulae = c("api00~ell",
+                          "api00~ell+meals",
+                          "api00~ell+meals+mobility"),
+             design_object = dclus1, nfolds = 5)
+
+# Compare CV MSEs and their SEs under 3 models
+# for a stratified cluster sample with clusters nested within strata
+data(NSFG_data)
+library(splines)
+NSFG.svydes <- svydesign(id = ~SECU, strata = ~strata, nest = TRUE,
+                         weights = ~wgt, data = NSFG_data)
+cv.svydesign(formulae = c("income ~ ns(age, df = 2)",
+                          "income ~ ns(age, df = 3)",
+                          "income ~ ns(age, df = 4)"),
+             design_object = NSFG.svydes, nfolds = 4)
 }

@@ -58,11 +58,29 @@ This is a cross validation function designed for survey samples taken using a SR
 stratified, clustered, or clustered-and-stratified sampling design.
 }
 \examples{
-# MSEs generated for a stratified test of a first and second degree polynomial
-# fit predicting mpg from horsepower in the Auto dataset, stratified on the
-# "year" variable
-data("Auto", package = "ISLR")
-cv.svy(Auto, c("mpg~poly(horsepower,1, raw = TRUE)",
-               "mpg~poly(horsepower,2, raw = TRUE)"),
-       nfolds = 10, strataID = "year")
+# Compare CV MSEs and their SEs under 3 models
+# for a stratified sample and a one-stage cluster sample,
+# from the `survey` package
+data("api", package = "survey")
+# stratified sample
+cv.svy(apistrat, c("api00~ell",
+                   "api00~ell+meals",
+                   "api00~ell+meals+mobility"),
+       nfolds = 5, strataID = "stype", weightsID = "pw", fpcID = "fpc")
+# one-stage cluster sample
+cv.svy(apiclus1, c("api00~ell",
+                   "api00~ell+meals",
+                   "api00~ell+meals+mobility"),
+       nfolds = 5, clusterID = "dnum", weightsID = "pw", fpcID = "fpc")
+
+# Compare CV MSEs and their SEs under 3 models
+# for a stratified cluster sample with clusters nested within strata
+data(NSFG_data)
+library(splines)
+cv.svy(NSFG_data, c("income ~ ns(age, df = 2)",
+                    "income ~ ns(age, df = 3)",
+                    "income ~ ns(age, df = 4)"),
+       nfolds = 4,
+       strataID = "strata", clusterID = "SECU",
+       nest = TRUE, weightsID = "wgt")
 }
