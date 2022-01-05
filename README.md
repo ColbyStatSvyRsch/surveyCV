@@ -1,5 +1,9 @@
 # surveyCV
 
+<!-- badges: start -->
+[![R build status](https://github.com/ColbyStatSvyRsch/surveyCV/workflows/R-CMD-check/badge.svg)](https://github.com/ColbyStatSvyRsch/surveyCV/actions)
+<!-- badges: end -->
+
 The R package `surveyCV` carries out cross-validation for complex sample survey data.  
 It is a companion R package to [our SDSS 2021 presentation](https://ww2.amstat.org/meetings/sdss/2021/onlineprogram/AbstractDetails.cfm?AbstractID=309674), presented by Jerzy Wieczorek.
 

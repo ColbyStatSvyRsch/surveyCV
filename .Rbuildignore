@@ -4,3 +4,4 @@
 ^vignettes-knitted$
 ^doc$
 ^Meta$
+^\.github$
