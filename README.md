@@ -32,10 +32,10 @@ cv.svy(NSFG_data, c("income ~ ns(age, df = 2)",
        nfolds = 4,
        strataID = "strata", clusterID = "SECU",
        nest = TRUE, weightsID = "wgt")
-##           mean     SE
-## .Model_1 22616 756.02
-## .Model_2 22536 748.01
-## .Model_3 22559 766.89
+#>           mean     SE
+#> .Model_1 22616 756.02
+#> .Model_2 22536 748.01
+#> .Model_3 22559 766.89
 ```
 
 For convenience, the function `cv.svydesign()` only needs a `svydesign` object and a formula, and will parse the relevant survey design information before passing it to `cv.svy()`.  
@@ -48,15 +48,15 @@ cv.svydesign(formulae = c("income ~ ns(age, df = 2)",
                           "income ~ ns(age, df = 3)",
                           "income ~ ns(age, df = 4)"),
              design_object = NSFG.svydes, nfolds = 4)
-##           mean     SE
-## .Model_1 22576 744.59
-## .Model_2 22436 739.81
-## .Model_3 22577 752.62
+#>           mean     SE
+#> .Model_1 22576 744.59
+#> .Model_2 22436 739.81
+#> .Model_3 22577 752.62
 
 NSFG.svyglm <- svyglm(income ~ ns(age, df = 3), design = NSFG.svydes)
 cv.svyglm(glm_object = NSFG.svyglm, nfolds = 4)
-##           mean     SE
-## .Model_1 22411 741.93
+#>           mean     SE
+#> .Model_1 22411 741.93
 ```
 
 ## *Stat* paper

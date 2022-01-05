@@ -1,5 +1,5 @@
 ---
-title: "surveyCV: Cross Validation Based on Survey Design [deprecated]"
+title: "surveyCV: Cross Validation Based on Survey Design"
 author: "Cole Guerin, Thomas McMahon, Jerzy Wieczorek"
 output: rmarkdown::html_vignette
 vignette: >
@@ -15,263 +15,201 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Caution: deprecated vignette
+# Introduction to `surveyCV`
 
-This vignette was meant as a working document where we kept track of our early research on cross validation for complex survey data and initial tests of our `surveyCV` code.
+This package implements cross validation (CV) for complex survey data, by accounting for strata, clusters, FPCs, and survey weights when creating CV folds as well as when calculating test-set loss estimates (currently either mean squared error (MSE) for linear models, or binary cross-entropy for logistic models). It is meant to work smoothly with [the `survey` package](https://cran.r-project.org/package=survey).
 
-* For more rigorous R code examples, see our `plots-for-Stat-paper` vignette.
-* For a more up-to-date writeup, read our journal paper submitted to the *Stat* special issue from the SDSS 2021 conference [currently under review]. A copy can be found in the `data-raw` folder of our GitHub repository as `Stat_SDSS_submission.pdf`.
+To understand why we believe it's important to account for survey design when carrying out CV, please see our journal paper submitted to the *Stat* special issue from the SDSS 2021 conference [currently under review]. (A copy can be found in the `data-raw` folder of our GitHub repository as [`Stat_SDSS_submission.pdf`](https://github.com/ColbyStatSvyRsch/surveyCV/blob/master/data-raw/Stat_SDSS_submission.pdf).)  
+Briefly, the problem is that standard CV assumes exchangeable data, which is not true of most complex sampling designs. We argue (1) that CV folds should mimic the sampling design (so that we're honest about how much the model-fits will vary across "samples like this one"), and (2) that test set MSEs should be averaged and weighted in ways that generalize to the full population from which the sample was drawn, assuming that is the population for which the models will be applied.
+
+This vignette briefly illustrates how to use `surveyCV` with several common types of sampling design. We provide three equivalent ways to carry out CV: direct control with `cv.svy`, use of an existing survey design object with `cv.svydesign`, or use of an existing survey GLM object with `cv.svyglm`.
 
 
 
 # Setup
 
 ```{r setup-packages, message=FALSE}
+# We set a random seed in this vignette only to ensure
+#   that our discussion will match the CV output;
+# otherwise, each time we reran the vignette, we'd get different CV folds
+set.seed(2022)
+
 library(surveyCV)
+data("NSFG_data")
 library(survey)
-library(ISLR)
-library(dplyr)
+data("api")
+```
+
+
+
+# Direct control with `cv.svy`
+
+First, we borrow some examples from the documentation for `survey::svyglm()`, based on the `api` data (the Academic Performance Index for California schools in the year 2000).
+
+Say that we want to carry out complex survey CV for several linear models, and we are working with the stratified sample in `apistrat`. Using `cv.svy()`, we specify the dataset; the formulas for the models being compared; the number of folds; and any necessary information about the sampling design. For this particular stratified design, we must specify the strata variable, the weights variable, and the FPC variable.
+
+```{r}
+#stratified sample
+cv.svy(apistrat, c("api00~ell",
+                   "api00~ell+meals",
+                   "api00~ell+meals+mobility"),
+       nfolds = 5, strataID = "stype", weightsID = "pw", fpcID = "fpc")
+```
+
+The 2nd model (`api00~ell+meals`) appears to have the lowest average test MSE (in the `mean`) column, although its performance does not differ much from the 3rd model and the difference between them is much smaller than either of their standard errors (in the `SE` column).
+
+If we were to use the single-stage cluster sample in `apiclus1` instead, the command would be similar but we would need to specify clusters instead of strata:
+
+```{r}
+# one-stage cluster sample
+cv.svy(apiclus1, c("api00~ell",
+                   "api00~ell+meals",
+                   "api00~ell+meals+mobility"),
+       nfolds = 5, clusterID = "dnum", weightsID = "pw", fpcID = "fpc")
+```
+
+On the other hand, if we are working with a simple random sample as in `apisrs`, we could just use standard CV instead of complex survey CV to generate the folds. However, complex survey CV may still be useful with a SRS if we want to account for the finite population correction (FPC) when estimating the SEs of our CV MSEs.
+
+```{r}
+# simple random sample
+cv.svy(apisrs, c("api00~ell",
+                 "api00~ell+meals",
+                 "api00~ell+meals+mobility"),
+       nfolds = 5, fpcID = "fpc")
+```
+
+Note that our intent in this vignette is **not** to compare the stratified sample results vs. the cluster sample results vs. the SRS results. We show 3 approaches only to illustrate how the code depends on the sampling design. Each of these samples was taken in a different way, and so it should be analyzed in a different way. In most cases, the data analyst will have only one dataset, and they ought to choose the right form of CV based on that one dataset's sampling design.
+
+(But if we *do* have different datasets taken under different sampling designs from the same population, it's plausible that the "best model" might differ across sampling designs. For instance, a stratified sample will likely have more precision than a cluster sample with the same number of ultimate observation units---so it's possible that the stratified-sample's CV would choose a larger model than the cluster-sample's CV. That is, the stratified sample might have enough precision to fit a larger model without overfitting, while CV might show us that the cluster sample is overfitting when it tries to fit a larger model.)
+
+Finally, we show an example from a different dataset, the 2015-2017 National Survey of Family Growth (NSFG), which uses clusters nested within strata as well as unequal sample weights. In this case we are using 4 folds, not 5 as above, because each stratum only has 4 clusters.
+
+```{r}
+# complex sample from NSFG
 library(splines)
-library(ggplot2)
-library(grid)
-library(gridExtra)
+cv.svy(NSFG_data, c("income ~ ns(age, df = 1)",
+                    "income ~ ns(age, df = 2)",
+                    "income ~ ns(age, df = 3)",
+                    "income ~ ns(age, df = 4)",
+                    "income ~ ns(age, df = 5)",
+                    "income ~ ns(age, df = 6)"),
+       nfolds = 4,
+       strataID = "strata", clusterID = "SECU",
+       nest = TRUE, weightsID = "wgt")
 ```
 
-Note: The longer-running simulations presented below are cached, but were generated by the following code. See the source code in `plot_generation.R` for details.
-
-```{r plotgen, eval=FALSE}
-data("NSFG_data_everypreg")
-plot_list <- surveyCV:::plot_generation()
-plot_list2 <- surveyCV:::plot_generation2()
-plot_list3 <- surveyCV:::plot_generation3()
-usethis::use_data(plot_list, plot_list2, plot_list3, internal = TRUE)
-```
-
-Make the pre-computed images available for the vignette:
-
-```{r plotprocess}
-sim.clusvsrs.sd.n100 <- surveyCV:::plot_list$sim.clusvsrs.sd.n100
-sim.clusvsrs.bp.n100 <- surveyCV:::plot_list$sim.clusvsrs.bp.n100
-sim.stratvsrs.bp.n100 <- surveyCV:::plot_list$sim.stratvsrs.bp.n100
-
-Main.weights.plot <- surveyCV:::plot_list2$Main.weights.plot
-quad.sample.graph <- surveyCV:::plot_list2$quad.sample.graph
-
-NSFG.plot <- surveyCV:::plot_list3$NSFG.plot
-NSFG.cluster.plot <- surveyCV:::plot_list3$NSFG.cluster.plot
-NSFG.strata.plot <- surveyCV:::plot_list3$NSFG.strata.plot
-```
-
-# Approach
-
-The purpose of the beginning of this document is to outline our findings when investigating the effects of accounting for complex survey designs on cross validation error estimates. We decided to look at differences in cross validation when using SRS, cluster, and stratification sampling designs. We expected that the difference in cross validation, based on these survey designs, would mainly come from how the folds for K-fold cross validation are generated. We also looked at if accounting for probability proportional to size (PPS) sampling weights could impact our cross validation estimates. Here was our approach to this in our functions:
-
-When generating folds, if an SRS model is used, observations will be assigned randomly to each fold. If a clustered model is used, observations within each cluster are kept together so at least one full cluster will be in each fold. When folds are generated with a stratified model, the strata are broken up so at least one observation from each strata are in each fold. 
-
-We also decided that sampling design would come into play in our functions when the survey model object is created and when the mean squared error estimates are generated. In these instances in our functions, we just vary the survey design object indicating which sampling design was used.
-
-We broke down our function as to be able to vary each of these uses (fold generation, model creation, MSE estimation) in order to determine which was influencing the differences observed. The results suggest fold generation appears to cause the greatest difference and the best examples can be seen below. The last part of this document will be some explicit examples of how to use the functions of our package.
-
-# Key Findings
-
-We simulated data that would be useful for spline modeling, and took clustered and stratified samples from this data set representative of clustered and stratified samples of survey data. We found that if a clustered sample was taken, not taking into consideration clustering during cross validation would lead to overconfidence in our results while for stratified samples, the opposite would occur. Below we have included the plots that best support our findings while the rest of the document contains further tests we ran on various sample sizes further supporting the importance of taking into consideration survey design when performing cross validation.
-
-Here is the simulated data that we were working with:
-
-```{r, fig.width = 8, fig.height = 6}
-set.seed(47)
-x1 = runif(1:500, min = 26, max = 38)
-y1 = (x1-29)^3 - 13*(x1-29)^2 + 0*(x1-29) + 900
-set.seed(47)
-x2 = runif(1:500, min = 38, max = 50)
-y2 = (x2-36)^3 - 10*(x2-36)^2 + 2*(x2-36) + 600
-set.seed(47)
-z1 = jitter(y1, 15000)
-z1 = jitter(y1, 15000)
-z2 = jitter(y2, 15000)
-ds1 <- data.frame(Response = z1, Predictor = x1)
-ds2 <- data.frame(Response = z2, Predictor = x2)
-ds <- rbind(ds1, ds2)
-b <- data.frame(ID = c(1:1000))
-spline.df2 <- cbind(b, ds)
-spline.df2 <- spline.df2 %>%
-  arrange(Predictor) %>%
-  mutate(Stratum = row_number(),
-         Cluster = row_number())  
-spline.df2$Stratum <- cut(spline.df2$Stratum,5, 1:5)
-spline.df2$Cluster <- cut(spline.df2$Cluster,100, 1:100) 
-spline.df2 <- spline.df2 %>%
-  arrange(ID) %>%
-  select(ID, Response, Predictor, Cluster, Stratum)
-n=100
-set.seed(32)
-srs.df <- sample_n(spline.df2, n)
-set.seed(32)
-s <- stratsample(spline.df2$Stratum, c("1" = n/5, "2" = n/5, "3" = n/5, "4" = n/5, "5" = n/5))
-strat.df <- spline.df2[s,]
-set.seed(32)
-c <- unique(spline.df2[["Cluster"]]) 
-clus.df <- spline.df2[spline.df2[["Cluster"]] %in% sample(c, n/10),]
-a <- ggplot(mapping = aes(x = spline.df2$Predictor, y = spline.df2$Response)) + geom_point(shape = 1) +
-  labs(title = "Simulated Data and Samples", x = "Predictor", y = "Response") + ylim(100,1650) +
-  geom_point(mapping = aes(x = srs.df$Predictor, y = srs.df$Response), color = "darkgreen", shape = 8) +
-  geom_point(mapping = aes(x = strat.df$Predictor, y = strat.df$Response), color = "darkred", shape = 3) +
-  geom_point(mapping = aes(x = clus.df$Predictor, y = clus.df$Response), color = "steelblue", shape = 4)
-b <- ggplot(mapping = aes(x = srs.df$Predictor, y = srs.df$Response)) + geom_point(shape = 8, color = "darkgreen") +
-  labs(title = "Simple Random Sample", x = "Predictor", y = "Response") + ylim(100,1650)
-c <- ggplot(mapping = aes(x = strat.df$Predictor, y = strat.df$Response)) + geom_point(shape = 3, color = "darkred") +
-  labs(title = "Stratification Sample", x = "Predictor", y = "Response") + ylim(100,1650)
-d <- ggplot(mapping = aes(x = clus.df$Predictor, y = clus.df$Response)) + geom_point(shape = 4, color = "steelblue") +
-  labs(title = "Cluster Sample", x = "Predictor", y = "Response") + ylim(100,1650)
-grid.arrange(a, b, c, d, ncol = 2, top = "Simulated Data And How It Was Sampled")
-```
-
-First we needed to prove that sampling method actually produced a difference in the estimates our function was giving. Below we see plots of the estimates produced from either a simple random sample or clustered sample of size 100 using either a simple random sample or clustered method of fold generation (every test in this part of the  document uses 5 folds). The cluster sampling in our simulations exaggerated the high design effects typically seen in real cluster samples. The below graphs show a distinct difference when using cluster fold generation with a clustered sample, suggesting that taking into account sampling design when doing survey based cross validation may be important. 
-
-```{r, fig.width = 8, fig.height = 6}
-grid.draw(sim.clusvsrs.sd.n100)
-```
-
-Since we determined that taking into consideration sampling design affected our estimates, we went on to determine what part of our function was causing this difference. We take into consideration survey design in 3 sections of our function. The first is when folds are being generated, the second is when a model is being fit to the folds, and the third is when mean squared errors of a model are being estimated.
+Here we tend to see that the spline with 3 degrees of freedom fits a little better than the others, but the differences between models are mostly smaller than the SEs.
 
 
-```{r, fig.width = 8, fig.height = 8}
-grid.draw(sim.clusvsrs.bp.n100)
-```
 
+# Using a survey design object with `cv.svydesign`
 
-Here we see the results of 100 runs of our cross validation function on clustered samples of our simulated data. In the Title above each plot, S represents Sampling method, F represents the method used for fold generation, M represents the survey design assumed by the spline model fits, and MSE represents the survey design used to average the mean squared errors. The sample size used for the above plots was 100 as the effects of including sampling design are most prominent at lower sampling sizes. As we can see, when we ignored the clustered sampling design when generating folds and instead used a simple random sample (SRS) fold generation method (rows 1 and 2) we see much lower MSE estimates, and the MSEs were typically minimized by a higher degrees of freedom (DF) spline model. When we did take into consideration the clustered sampling design when generating folds, we got much higher MSEs overall and a lower DF spline model being chosen. These findings are representative of the lower effective sampling size caused by clustered sampling and suggest that using an SRS model during fold generation would lead to overconfidence and overfitting. Meanwhile, taking the clustering into account appropriately leads to simpler models being chosen.
+When using the `survey` package, we will often create a `svydesign` object in order to calculate means and totals, fit GLMs, etc. In that case, instead of using `cv.svy()`, it is more convenient to use `cv.svydesign()`, which will read the relevant information out of the `svydesign` object and internally pass it along to `cv.svy()` for us.
 
-
-```{r, fig.width = 8, fig.height = 8}
-grid.draw(sim.stratvsrs.bp.n100)
-```
-
-
-Next we will discuss stratified samples. Above we have a similar set of plots, with the sample size equal to 100, but instead using a stratified sample instead of a clustered one. The effects are harder to see here but, when using a SRS design to generate folds (rows 1 and 2),  the cross validation function has higher MSEs and may even choose a lower degree of freedom. When stratification is taken into consideration during fold generation, the MSEs appear lower, and models with greater DFs may be chosen. This is presumed to be caused by the overall increase in effective sampling size obtained when taking stratified samples which allows appropriately for higher confidence in more complex models.
-
-We also wanted to see if our function could take into PPS sampling weights and how that would impact our cross validation results. For our analysis, we decided to create a set of sampling weights for the data that we had simulated above. These weights are higher for points along a quadratic curve that fits the population poorly. Below is a plot of our simulated data population and the  curve of the quadratic that the weights are modeled after.
-
-```{r, fig.width = 8, fig.height = 8}
-grid.draw(quad.sample.graph)
-```
-
-We decided to then try and use our function to cross validate on this data frame using these sampling weights and to plot the difference when we accounted for the weights when fitting a model and generated MSEs, and when we did each individually, and when we did not account for weights at all. Below is this set of plots. 
-
-```{r, fig.width = 8, fig.height = 8}
-grid.draw(Main.weights.plot)
-```
-
-We see that when weights are not accounted for correctly, the best fit is quadratic, because that's what the samples look like due to our sampling weights. But larger-df splines are pretty similar to the model with two degrees of freedom because they just fit higher-degree terms close to zero.
-
-With weighted modeling but unweighted test MSEs, now the training data weights are saying: Don't only try fitting the bulk of the points along the quadratic line, try harder to fit the farther away points too. So when the higher-df splines are fitted, they look more wiggly than quadratics, and they have higher test MSEs on the test data that ignores the weights.
-
-With weighted tests MSEs and unweighted model fitting, MSEs are higher for all the fitted models because they are being fit to training data that looks mostly quadratic, but the test data wants to see a better fit to the off-quadratic points.
-
-When weights are accounted for in both model fitting and MSE generation, we see more of what we need. The training data fits wigglier high-df splines, and on the test data we look for models that do well beyond the points on the quadratic line. So in terms of talking about our function, it has displayed that it can take into account sampling weights correctly when it identifies the weights in the process of model fitting and MSE generation, which gives us a great amount of confidence in our function since taking into account sampling weights appears to have an effect in situations like this.
-
-# NSFG Dataset Findings
-
-(**TODO:** The analysis below incorrectly uses data at the level of one observation per pregnancy. This is not appropriate for the variables we analyze, which are at the respondent level -- there should be one observation per mother. We need to redo this analysis with the correct version of the dataset.)
-
-Here we wanted to confirm our previous findings on a real dataset and test when we had both stratum and clusters in our dataset. To do this, we decided to use a [2015-2017 National Survey of Family Growth (NSFG)](https://www.cdc.gov/nchs/nsfg/nsfg_2015_2017_puf.htm) dataset. We downloaded this data from the NSFG website and cleaned it following Hunter Ratliff's methods found at https://rpubs.com/HunterRatliff1/NSFG_Wrangle
-
-The stratum IDs are in the `strata` variable (`SEST` in the original dataset), and the cluster IDs are in the `SECU` variable. Note that SECUs = Sampling Error Computation Units are effectively pseudo-PSUs, nested within (pseudo-)strata. See [page 35 of the NSFG 2011-2013 sample design documentation](https://www.cdc.gov/nchs/data/nsfg/nsfg_2011_2013_sampledesign.pdf) for details.
-
-When looking at the variables for Income and Years Educated in relation to each other, we can see that there are sizable differences in trends across different clusters and stratum.
-
-```{r, fig.width = 8, fig.height = 10, message=FALSE, warning=FALSE}
-grid.draw(NSFG.cluster.plot)
-```
-
-```{r, fig.width = 8, fig.height = 10, message=FALSE}
-grid.draw(NSFG.strata.plot)
-```
-
-This is evidence that cross validation for a model using these two variables could give different results depending on if the proper survey design is taken into account. For this example, we will use a natural splines model with degrees of freedom of five, that uses the Years Educated variable to predict the Income variable. Here is the resulting boxplots of a distribution of 100 MSEs generated from using our cv.svy function when we account for the survey design and when we don't.
-
-```{r, fig.width = 8, fig.height = 6}
-grid.draw(NSFG.plot)
-```
-
-Based on the plots above, we can see evidence that when we don't take into account the actual survey design (which was a nested stratified and clustered design) the cross validation function is giving us overconfidence in our model compared to if we did take into account the survey design. This is consistent with our previous testing on the simulated data and the Auto data set. We also see that in the middle plot, where we acount for design except when generating folds, we fall somewhere in between the other two methodologies, and somewhat closer to the ignoring design method suggesting our previous findings, that fold generation is the most important location to create this distinction, is correct. This is also encouraging because this example includes data that was gathered from a survey whose design involved both stratification and clustering and provides an example of the function working with this kind of data. 
-
-# Examples Using surveyCV Functions
-
-Notes: 
-
-- The left column of the output gives the MSE estimates for the models, with the rows corresponding to the order that the models were input into the function.
-- All of these examples use the Auto data set from the ISLR package.
-- See help documentation for each function if you have questions about the parameters and possible input.
-
-(**TODO:** The Auto dataset used below is NOT actually a complex survey sample. We had just been using it to test out other CV code, and kept using it for convenience when debugging `surveyCV`. For code-testing purposes only, we arbitrarily treated the `year` variable as though it was either a stratum ID or a cluster ID, although it was not really. We should replace these examples with different datasets that really did come from stratified and clustered samples.)
-
-## cv.svy()
-
-MSEs generated for a SRS test of a first and second degree polynomial fit predicting mpg from horsepower in the Auto data set.
+We repeat the `api` stratified, cluster, and SRS examples above using this `cv.svydesign()` approach.
 
 ```{r}
-data("Auto")
-cv.svy(Auto, c("mpg~poly(horsepower,1, raw = TRUE)",
-               "mpg~poly(horsepower,2, raw = TRUE)"),
-       nfolds = 10)
+#stratified sample
+dstrat <- svydesign(id = ~1, strata = ~stype, weights = ~pw, data = apistrat, fpc = ~fpc)
+cv.svydesign(formulae = c("api00~ell",
+                          "api00~ell+meals",
+                          "api00~ell+meals+mobility"),
+             design_object = dstrat, nfolds = 5)
+
+# one-stage cluster sample
+dclus1 <- svydesign(id = ~dnum, weights = ~pw, data = apiclus1, fpc = ~fpc)
+cv.svydesign(formulae = c("api00~ell",
+                          "api00~ell+meals",
+                          "api00~ell+meals+mobility"),
+             design_object = dclus1, nfolds = 5)
+
+# simple random sample
+dsrs <- svydesign(id = ~1, data = apisrs, fpc = ~fpc)
+cv.svydesign(formulae = c("api00~ell",
+                          "api00~ell+meals",
+                          "api00~ell+meals+mobility"),
+             design_object = dsrs, nfolds = 5)
 ```
 
-
-MSEs generated for a clustered test of a first and second degree polynomial fit predicting mpg from horsepower in the Auto data set, clustering using the "year" variable.
+Next, we repeat the NSFG example using this approach.
 
 ```{r}
-data("Auto")
-cv.svy(Auto, c("mpg~poly(horsepower,1,raw=TRUE)",
-               "mpg~poly(horsepower,2,raw=TRUE)"),
-       nfolds = 10, clusterID = "year")
+NSFG.svydes <- svydesign(id = ~SECU, strata = ~strata, nest = TRUE,
+                         weights = ~wgt, data = NSFG_data)
+cv.svydesign(formulae = c("income ~ ns(age, df = 1)",
+                          "income ~ ns(age, df = 2)",
+                          "income ~ ns(age, df = 3)",
+                          "income ~ ns(age, df = 4)",
+                          "income ~ ns(age, df = 5)",
+                          "income ~ ns(age, df = 6)"),
+             design_object = NSFG.svydes, nfolds = 4)
 ```
 
 
-MSEs generated for a stratified test of a first and second degree polynomial fit predicting mpg from horsepower in the Auto data set, Stratified on the "year" variable.
+
+# Using a survey GLM object with `cv.svyglm`
+
+Finally, if we have already fit a `svyglm` object, we can use `cv.svyglm()` which will read the formula as well as the survey design information and internally pass it along to `cv.svy()` for us. However, this approach only works for one GLM at time instead of comparing several models in a single function.
+
+We repeat the `api` stratified, cluster, and SRS examples above using this `cv.svyglm()` approach, with the help of the `surveydesign` objects already created above.
 
 ```{r}
-data("Auto")
-cv.svy(Auto, c("mpg~poly(horsepower,1, raw = TRUE)",
-               "mpg~poly(horsepower,2, raw = TRUE)"),
-       nfolds = 10, strataID = "year")
+#stratified sample
+glmstrat <- svyglm(api00 ~ ell+meals+mobility, design = dstrat)
+cv.svyglm(glmstrat, nfolds = 5)
+
+# one-stage cluster sample
+glmclus1 <- svyglm(api00 ~ ell+meals+mobility, design = dclus1)
+cv.svyglm(glmclus1, nfolds = 5)
+
+# simple random sample
+glmsrs <- svyglm(api00 ~ ell+meals+mobility, design = dsrs)
+cv.svyglm(glmsrs, nfolds = 5)
 ```
 
-## cv.svyglm() and cv.svydesign()
-
-
-Using either a survey design object or survey glm to generate MSEs. `cv.svyglm` can take a premade `svyglm` object and perform cross validation on it, and `cv.svydesign` can take a survey design object for cross validation.
+Next, we repeat the NSFG example using this approach.
 
 ```{r}
-#Rework this once we have the new survey design function
-data("Auto")
-auto.srs.svy <- svydesign(ids = ~0,
-                          data = Auto)
-srs.model <- svyglm(mpg~horsepower+I(horsepower^2)+I(horsepower^3), 
-                    design = auto.srs.svy)
-auto.clus.svy <- svydesign(ids = ~year,
-                           data = Auto)
-clus.model <- svyglm(mpg~horsepower+I(horsepower^2)+I(horsepower^3), 
-                     design = auto.clus.svy)
-auto.strat.svy <- svydesign(ids = ~0,
-                            strata = ~year,
-                            data = Auto)
-strat.model <- svyglm(mpg~horsepower+I(horsepower^2)+I(horsepower^3), 
-                      design = auto.strat.svy)
-cv.svydesign(formulae = c("mpg~poly(horsepower,1, raw = TRUE)", 
-                          "mpg~poly(horsepower,2, raw = TRUE)",
-                          "mpg~poly(horsepower,3, raw = TRUE)"), 
-             design_object = auto.srs.svy, nfolds = 10)
-cv.svydesign(formulae = c("mpg~poly(horsepower,1, raw = TRUE)", 
-                          "mpg~poly(horsepower,2, raw = TRUE)",
-                          "mpg~poly(horsepower,3, raw = TRUE)"), 
-             design_object = auto.clus.svy, nfolds = 10)
-cv.svydesign(formulae = c("mpg~poly(horsepower,1, raw = TRUE)", 
-                          "mpg~poly(horsepower,2, raw = TRUE)",
-                          "mpg~poly(horsepower,3, raw = TRUE)"), 
-             design_object = auto.strat.svy, nfolds = 10)
-cv.svyglm(glm = srs.model, nfolds = 10)
-cv.svyglm(glm = clus.model, nfolds = 10)
-cv.svyglm(glm = strat.model, nfolds = 10)
+NSFG.svyglm <- svyglm(income ~ ns(age, df = 3), design = NSFG.svydes)
+cv.svyglm(glm_object = NSFG.svyglm, nfolds = 4)
 ```
+
+
+
+# Fitting a logistic model instead of linear
+
+If we have a binary response variable and wish to fit a logistic regression instead, we can use `family = quasibinomial()` in the call to `svyglm()` and feed that directly into `cv.svyglm()`:
+
+```{r}
+NSFG.svyglm.logistic <- svyglm(LBW ~ ns(age, df = 3), design = NSFG.svydes,
+                               family = quasibinomial())
+cv.svyglm(glm_object = NSFG.svyglm.logistic, nfolds = 4)
+```
+
+In this case, the `mean` column shows the average of the binary cross-entropy loss $-[y_i \log(\hat y_i) + (1-y_i)\log(1-\hat y_i)]$ rather than MSE.
+
+Or we can set `method = "logistic"` in `cv.svydesign()` or in `cv.svy()`:
+
+```{r}
+cv.svydesign(formulae = c("LBW ~ ns(age, df = 1)",
+                          "LBW ~ ns(age, df = 2)",
+                          "LBW ~ ns(age, df = 3)",
+                          "LBW ~ ns(age, df = 4)",
+                          "LBW ~ ns(age, df = 5)",
+                          "LBW ~ ns(age, df = 6)"),
+             design_object = NSFG.svydes, nfolds = 4,
+             method = "logistic")
+
+cv.svy(NSFG_data, c("LBW ~ ns(age, df = 1)",
+                    "LBW ~ ns(age, df = 2)",
+                    "LBW ~ ns(age, df = 3)",
+                    "LBW ~ ns(age, df = 4)",
+                    "LBW ~ ns(age, df = 5)",
+                    "LBW ~ ns(age, df = 6)"),
+       nfolds = 4,
+       strataID = "strata", clusterID = "SECU",
+       nest = TRUE, weightsID = "wgt",
+       method = "logistic")
+```
+
 
