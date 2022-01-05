@@ -4,21 +4,19 @@
 \alias{cv.svyglm}
 \title{CV for `svyglm` objects}
 \usage{
-cv.svyglm(glm_object, nfolds = 5, method = c("linear", "logistic"))
+cv.svyglm(glm_object, nfolds = 5)
 }
 \arguments{
 \item{glm_object}{Name of a `svyglm` object created from the `survey` package}
 
 \item{nfolds}{Number of folds to be used during cross validation, defaults to
 5}
-
-\item{method}{String, must be either "linear" or "logistic", determines type of
-model fit during cross validation, defaults to linear}
 }
 \description{
 Wrapper function which takes a `svyglm` object
 (which itself contains a `svydesign` object)
 and passes it through `cv.svydesign()` to `cv.svy()`.
+Chooses linear or logistic regression based on the `svyglm` object's family.
 }
 \examples{
 # Calculate CV MSE and its SE under one `svyglm` model
