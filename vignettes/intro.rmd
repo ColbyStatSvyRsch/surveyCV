@@ -1,5 +1,5 @@
 ---
-title: "surveyCV: Cross Validation Based on Survey Design"
+title: "surveyCV: Cross Validation Based on Survey Design [deprecated]"
 author: "Cole Guerin, Thomas McMahon, Jerzy Wieczorek"
 output: rmarkdown::html_vignette
 vignette: >
@@ -14,6 +14,17 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 ```
+
+# Caution: deprecated vignette
+
+This vignette was meant as a working document where we kept track of our early research on cross validation for complex survey data and initial tests of our `surveyCV` code.
+
+* For more rigorous R code examples, see our `plots-for-Stat-paper` vignette.
+* For a more up-to-date writeup, read our journal paper submitted to the *Stat* special issue from the SDSS 2021 conference [currently under review].
+
+
+
+# Setup
 
 ```{r setup-packages, message=FALSE}
 library(surveyCV)
@@ -53,7 +64,7 @@ NSFG.strata.plot <- surveyCV:::plot_list3$NSFG.strata.plot
 
 # Approach
 
-The purpose of the beginning of this document is to outline our findings when investigating the effects of accounting for complex survey designs on cross validation error estimates. We decided to look at differences in cross validation when using SRS, cluster, and stratification sampling designs. We decided that the difference in cross validation, based on these survey designs, would mainly come from how the folds for K-fold cross validation are generated. We also looked at if accounting for probability proportional to size (PPS) sampling weights could impact our cross validation estimates. Here was our approach to this in our functions:
+The purpose of the beginning of this document is to outline our findings when investigating the effects of accounting for complex survey designs on cross validation error estimates. We decided to look at differences in cross validation when using SRS, cluster, and stratification sampling designs. We expected that the difference in cross validation, based on these survey designs, would mainly come from how the folds for K-fold cross validation are generated. We also looked at if accounting for probability proportional to size (PPS) sampling weights could impact our cross validation estimates. Here was our approach to this in our functions:
 
 When generating folds, if an SRS model is used, observations will be assigned randomly to each fold. If a clustered model is used, observations within each cluster are kept together so at least one full cluster will be in each fold. When folds are generated with a stratified model, the strata are broken up so at least one observation from each strata are in each fold. 
 
@@ -121,7 +132,7 @@ First we needed to prove that sampling method actually produced a difference in 
 grid.draw(sim.clusvsrs.sd.n100)
 ```
 
-Since we determined that taking into consideration sampling design effected our estimates, we went on to determine what part of our function was causing this difference. We take into consideration survey design in 3 sections of our function. The first is when folds are being generated, the second is when a model is being fit to the folds, and the third is when mean squared errors of a model are being estimated.
+Since we determined that taking into consideration sampling design affected our estimates, we went on to determine what part of our function was causing this difference. We take into consideration survey design in 3 sections of our function. The first is when folds are being generated, the second is when a model is being fit to the folds, and the third is when mean squared errors of a model are being estimated.
 
 
 ```{r, fig.width = 8, fig.height = 8}
@@ -161,6 +172,8 @@ When weights are accounted for in both model fitting and MSE generation, we see 
 
 # NSFG Dataset Findings
 
+(**TODO:** The analysis below incorrectly uses data at the level of one observation per pregnancy. This is not appropriate for the variables we analyze, which are at the respondent level -- there should be one observation per mother. We need to redo this analysis with the correct version of the dataset.)
+
 Here we wanted to confirm our previous findings on a real dataset and test when we had both stratum and clusters in our dataset. To do this, we decided to use a [2015-2017 National Survey of Family Growth (NSFG)](https://www.cdc.gov/nchs/nsfg/nsfg_2015_2017_puf.htm) dataset. We downloaded this data from the NSFG website and cleaned it following Hunter Ratliff's methods found at https://rpubs.com/HunterRatliff1/NSFG_Wrangle
 
 The stratum IDs are in the `strata` variable (`SEST` in the original dataset), and the cluster IDs are in the `SECU` variable. Note that SECUs = Sampling Error Computation Units are effectively pseudo-PSUs, nested within (pseudo-)strata. See [page 35 of the NSFG 2011-2013 sample design documentation](https://www.cdc.gov/nchs/data/nsfg/nsfg_2011_2013_sampledesign.pdf) for details.
@@ -186,9 +199,12 @@ Based on the plots above, we can see evidence that when we don't take into accou
 # Examples Using surveyCV Functions
 
 Notes: 
+
 - The left column of the output gives the MSE estimates for the models, with the rows corresponding to the order that the models were input into the function.
 - All of these examples use the Auto data set from the ISLR package.
 - See help documentation for each function if you have questions about the parameters and possible input.
+
+(**TODO:** The Auto dataset used below is NOT actually a complex survey sample. We had just been using it to test out other CV code, and kept using it for convenience when debugging `surveyCV`. For code-testing purposes only, we arbitrarily treated the `year` variable as though it was either a stratum ID or a cluster ID, although it was not really. We should replace these examples with different datasets that really did come from stratified and clustered samples.)
 
 ## cv.svy()
 
