@@ -1,6 +1,6 @@
 Package: surveyCV
 Type: Package
-Title: surveyCV: Cross Validation Based on Survey Design
+Title: Cross Validation Based on Survey Design
 Version: 0.0.0.9000
 Authors@R: c(
     person("Cole", "Guerin", email = "cole@guerincreative.com", role = "aut"),
@@ -14,25 +14,25 @@ Description: Functions to generate test error estimates using cross validation,
     type of survey design in order to get an output that can help you determine
     which model best fits the data using K-fold cross validation.
     Our draft paper on "K-Fold Cross-Validation for Complex Sample Surveys"
-    (under review; a copy is in the \code{data-raw} folder of our GitHub repo)
+    (under review; a copy is in the `data-raw` folder of our GitHub repo)
     explains why differing how we take folds based on survey design is useful.
 License: GPL-2 | GPL-3
 Encoding: UTF-8
 LazyData: TRUE
-Depends: R (>= 4.0)
+Depends: R (>= 4.1)
 Imports:
-    survey (>= 4.0),
+    survey (>= 4.1),
     magrittr
 Suggests:
     ISLR (>= 1.2),
-    dplyr (>= 1.4.4),
-    splines (>= 4.02),
+    dplyr (>= 1.0),
+    splines (>= 4.1),
     sampling (>= 2.8),
     gridExtra (>= 2.3),
-    grid (>= 4.02),
-    ggplot2 (>= 3.3.1),
+    grid (>= 4.1),
+    ggplot2 (>= 3.3),
     knitr (>= 1.29),
     rmarkdown (>= 2.2),
-    testthat
+    testthat (>= 3.1)
 VignetteBuilder: knitr
 RoxygenNote: 7.1.2
