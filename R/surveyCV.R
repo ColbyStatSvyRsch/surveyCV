@@ -1,13 +1,14 @@
 #' surveyCV: Cross Validation Based on Survey Design
 #'
 #' Functions to generate mean squared error estimates using cross validation,
-#' based on how a survey design is constructed (SRS, Cluster, Stratification).
+#' based on how a survey design is constructed
+#' (SRS, clustering, stratification, and/or unequal sampling weights).
 #' You can input linear and logistic regression models, along with data and a
 #' type of survey design in order to get and output that can help you determine
 #' which model best fits the data using K-fold cross validation.
-#' See the Intro vignette (html) to see why differing how we take folds based
-#' on survey design is useful:
-#' \code{vignette("intro", package = "surveyCV")}.
+#' See our draft paper on "K-Fold Cross-Validation for Complex Sample Surveys"
+#' (under review; a copy is in the \code{data-raw} folder of our GitHub repo)
+#' to see why differing how we take folds based on survey design is useful.
 #'
 #' The code for this package seeks to create an alternative for the
 #' \code{boot::cv.glm()}

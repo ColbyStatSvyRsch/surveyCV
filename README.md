@@ -61,7 +61,7 @@ cv.svyglm(glm_object = NSFG.svyglm, nfolds = 4)
 
 ## *Stat* paper
 
-We include R code to reproduce figures for our *Stat* submission.
+We include R code to reproduce figures for our *Stat* submission. A copy of the submitted paper is in the `data-raw` folder as `Stat_SDSS_submission.pdf`.
 
 Scripts for the PPI and NSFG examples are in the `data-raw` folder, in the `PPI_Zambia_plot.R` and `NSFG_plot.R` scripts. We cannot share the proprietary PPI dataset, but the preprocessed NSFG dataset is included in the package as `NSFG_data`, and instructions for preprocessing the NSFG data are in the same folder in the `NSFG_data.R` script.
 

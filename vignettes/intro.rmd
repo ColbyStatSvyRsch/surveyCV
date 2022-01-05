@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 This vignette was meant as a working document where we kept track of our early research on cross validation for complex survey data and initial tests of our `surveyCV` code.
 
 * For more rigorous R code examples, see our `plots-for-Stat-paper` vignette.
-* For a more up-to-date writeup, read our journal paper submitted to the *Stat* special issue from the SDSS 2021 conference [currently under review].
+* For a more up-to-date writeup, read our journal paper submitted to the *Stat* special issue from the SDSS 2021 conference [currently under review]. A copy can be found in the `data-raw` folder of our GitHub repository as `Stat_SDSS_submission.pdf`.
 
 
 
