@@ -45,7 +45,12 @@ data("NSFG_data_everypreg")
 plot_list <- surveyCV:::plot_generation()
 plot_list2 <- surveyCV:::plot_generation2()
 plot_list3 <- surveyCV:::plot_generation3()
-usethis::use_data(plot_list, plot_list2, plot_list3, internal = TRUE)
+usethis::use_data(plot_list, plot_list2, plot_list3,
+                  internal = FALSE, overwrite = TRUE)
+# TODO: for now setting internal=FALSE
+# so that we don't overwrite the existing sysdata.Rda;
+# but eventually, return to internal=TRUE here
+# if that's indeed better for R packages
 # ...
 # OK, now we've written those lists,
 #   AND the 12 dataframes from plots-for-Stat-paper vignette,
