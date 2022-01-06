@@ -19,7 +19,7 @@ Description: Functions to generate test error estimates using cross validation,
 License: GPL-2 | GPL-3
 Encoding: UTF-8
 LazyData: TRUE
-Depends: R (>= 4.1.2)
+Depends: R (>= 4.1)
 Imports:
     survey (>= 4.1),
     magrittr
