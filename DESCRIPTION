@@ -1,7 +1,7 @@
 Package: surveyCV
 Type: Package
 Title: Cross Validation Based on Survey Design
-Version: 0.1.0
+Version: 0.1.0.9000
 Authors@R: c(
     person("Cole", "Guerin", email = "cole@guerincreative.com", role = "aut"),
     person("Thomas", "McMahon", email = "thomasmcmahon9@gmail.com", role = "aut"),

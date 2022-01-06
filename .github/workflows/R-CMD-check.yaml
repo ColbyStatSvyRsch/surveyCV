@@ -22,7 +22,11 @@ jobs:
           - {os: windows-latest, r: 'release'}
           - {os: ubuntu-latest,   r: 'devel', http-user-agent: 'release'}
           - {os: ubuntu-latest,   r: 'release'}
-          - {os: ubuntu-latest,   r: 'oldrel-1'}
+#          - {os: ubuntu-latest,   r: 'oldrel-1'}
+# (no point in testing oldrel currently,
+#  since we NEED latest R version due to grid update
+#  which broke vignette sims from earlier R version;
+#  but we'll uncomment this later once R moves to v4.2)
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
