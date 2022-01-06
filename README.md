@@ -7,7 +7,7 @@
 The R package `surveyCV` carries out cross-validation for complex sample survey data.  
 It is a companion R package to [our SDSS 2021 presentation](https://ww2.amstat.org/meetings/sdss/2021/onlineprogram/AbstractDetails.cfm?AbstractID=309674), presented by Jerzy Wieczorek.
 
-`surveyCV` is designed to work with the [`survey`](https://cran.r-project.org/web/packages/survey/index.html) package to specify the sampling design
+`surveyCV` is designed to work with the [`survey`](https://cran.r-project.org/package=survey) package to specify the sampling design
 (strata, clusters, sampling weights, etc.),
 and to account for this design when forming CV folds and estimating the CV test error.
 

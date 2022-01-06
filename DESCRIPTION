@@ -1,7 +1,7 @@
 Package: surveyCV
 Type: Package
 Title: Cross Validation Based on Survey Design
-Version: 0.0.0.9000
+Version: 0.1.0
 Authors@R: c(
     person("Cole", "Guerin", email = "cole@guerincreative.com", role = "aut"),
     person("Thomas", "McMahon", email = "thomasmcmahon9@gmail.com", role = "aut"),
@@ -19,7 +19,7 @@ Description: Functions to generate test error estimates using cross validation,
 License: GPL-2 | GPL-3
 Encoding: UTF-8
 LazyData: TRUE
-Depends: R (>= 4.1)
+Depends: R (>= 4.1.2)
 Imports:
     survey (>= 4.1),
     magrittr
@@ -35,4 +35,6 @@ Suggests:
     rmarkdown (>= 2.2),
     testthat (>= 3.1)
 VignetteBuilder: knitr
+URL: https://github.com/ColbyStatSvyRsch/surveyCV/
+BugReports: https://github.com/ColbyStatSvyRsch/surveyCV/issues
 RoxygenNote: 7.1.2
