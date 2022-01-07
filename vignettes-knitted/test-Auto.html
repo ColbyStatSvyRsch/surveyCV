@@ -15,39 +15,40 @@
 
 <title>Informal tests of surveyCV using the Auto dataset</title>
 
-<script>// Hide empty <a> tag within highlighted CodeBlock for screen reader accessibility (see https://github.com/jgm/pandoc/issues/6352#issuecomment-626106786) -->
-// v0.0.1
-// Written by JooYoung Seo (jooyoung@psu.edu) and Atsushi Yasumoto on June 1st, 2020.
+<script src="data:application/javascript;base64,Ly8gUGFuZG9jIDIuOSBhZGRzIGF0dHJpYnV0ZXMgb24gYm90aCBoZWFkZXIgYW5kIGRpdi4gV2UgcmVtb3ZlIHRoZSBmb3JtZXIgKHRvCi8vIGJlIGNvbXBhdGlibGUgd2l0aCB0aGUgYmVoYXZpb3Igb2YgUGFuZG9jIDwgMi44KS4KZG9jdW1lbnQuYWRkRXZlbnRMaXN0ZW5lcignRE9NQ29udGVudExvYWRlZCcsIGZ1bmN0aW9uKGUpIHsKICB2YXIgaHMgPSBkb2N1bWVudC5xdWVyeVNlbGVjdG9yQWxsKCJkaXYuc2VjdGlvbltjbGFzcyo9J2xldmVsJ10gPiA6Zmlyc3QtY2hpbGQiKTsKICB2YXIgaSwgaCwgYTsKICBmb3IgKGkgPSAwOyBpIDwgaHMubGVuZ3RoOyBpKyspIHsKICAgIGggPSBoc1tpXTsKICAgIGlmICghL15oWzEtNl0kL2kudGVzdChoLnRhZ05hbWUpKSBjb250aW51ZTsgIC8vIGl0IHNob3VsZCBiZSBhIGhlYWRlciBoMS1oNgogICAgYSA9IGguYXR0cmlidXRlczsKICAgIHdoaWxlIChhLmxlbmd0aCA+IDApIGgucmVtb3ZlQXR0cmlidXRlKGFbMF0ubmFtZSk7CiAgfQp9KTsK"></script>
 
-document.addEventListener('DOMContentLoaded', function() {
-  const codeList = document.getElementsByClassName("sourceCode");
-  for (var i = 0; i < codeList.length; i++) {
-    var linkList = codeList[i].getElementsByTagName('a');
-    for (var j = 0; j < linkList.length; j++) {
-      if (linkList[j].innerHTML === "") {
-        linkList[j].setAttribute('aria-hidden', 'true');
-      }
-    }
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+<style type="text/css">
+  code {
+    white-space: pre;
   }
-});
-</script>
-
-
-<style type="text/css">code{white-space: pre;}</style>
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
 <style type="text/css" data-origin="pandoc">
-code.sourceCode > span { display: inline-block; line-height: 1.25; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-code.sourceCode > span:empty { height: 1.2em; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
-code.sourceCode { white-space: pre; position: relative; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
 div.sourceCode { margin: 1em 0; }
 pre.sourceCode { margin: 0; }
 @media screen {
 div.sourceCode { overflow: auto; }
 }
 @media print {
-code.sourceCode { white-space: pre-wrap; }
-code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -67,7 +68,7 @@ pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-le
 div.sourceCode
   {   }
 @media screen {
-code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 code span.al { color: #ff0000; font-weight: bold; } /* Alert */
 code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
@@ -124,187 +125,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 
-<style type="text/css">body {
-background-color: #fff;
-margin: 1em auto;
-max-width: 700px;
-overflow: visible;
-padding-left: 2em;
-padding-right: 2em;
-font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
-font-size: 14px;
-line-height: 1.35;
-}
-#TOC {
-clear: both;
-margin: 0 0 10px 10px;
-padding: 4px;
-width: 400px;
-border: 1px solid #CCCCCC;
-border-radius: 5px;
-background-color: #f6f6f6;
-font-size: 13px;
-line-height: 1.3;
-}
-#TOC .toctitle {
-font-weight: bold;
-font-size: 15px;
-margin-left: 5px;
-}
-#TOC ul {
-padding-left: 40px;
-margin-left: -1.5em;
-margin-top: 5px;
-margin-bottom: 5px;
-}
-#TOC ul ul {
-margin-left: -2em;
-}
-#TOC li {
-line-height: 16px;
-}
-table {
-margin: 1em auto;
-border-width: 1px;
-border-color: #DDDDDD;
-border-style: outset;
-border-collapse: collapse;
-}
-table th {
-border-width: 2px;
-padding: 5px;
-border-style: inset;
-}
-table td {
-border-width: 1px;
-border-style: inset;
-line-height: 18px;
-padding: 5px 5px;
-}
-table, table th, table td {
-border-left-style: none;
-border-right-style: none;
-}
-table thead, table tr.even {
-background-color: #f7f7f7;
-}
-p {
-margin: 0.5em 0;
-}
-blockquote {
-background-color: #f6f6f6;
-padding: 0.25em 0.75em;
-}
-hr {
-border-style: solid;
-border: none;
-border-top: 1px solid #777;
-margin: 28px 0;
-}
-dl {
-margin-left: 0;
-}
-dl dd {
-margin-bottom: 13px;
-margin-left: 13px;
-}
-dl dt {
-font-weight: bold;
-}
-ul {
-margin-top: 0;
-}
-ul li {
-list-style: circle outside;
-}
-ul ul {
-margin-bottom: 0;
-}
-pre, code {
-background-color: #f7f7f7;
-border-radius: 3px;
-color: #333;
-white-space: pre-wrap; 
-}
-pre {
-border-radius: 3px;
-margin: 5px 0px 10px 0px;
-padding: 10px;
-}
-pre:not([class]) {
-background-color: #f7f7f7;
-}
-code {
-font-family: Consolas, Monaco, 'Courier New', monospace;
-font-size: 85%;
-}
-p > code, li > code {
-padding: 2px 0px;
-}
-div.figure {
-text-align: center;
-}
-img {
-background-color: #FFFFFF;
-padding: 2px;
-border: 1px solid #DDDDDD;
-border-radius: 3px;
-border: 1px solid #CCCCCC;
-margin: 0 5px;
-}
-h1 {
-margin-top: 0;
-font-size: 35px;
-line-height: 40px;
-}
-h2 {
-border-bottom: 4px solid #f7f7f7;
-padding-top: 10px;
-padding-bottom: 2px;
-font-size: 145%;
-}
-h3 {
-border-bottom: 2px solid #f7f7f7;
-padding-top: 10px;
-font-size: 120%;
-}
-h4 {
-border-bottom: 1px solid #f7f7f7;
-margin-left: 8px;
-font-size: 105%;
-}
-h5, h6 {
-border-bottom: 1px solid #ccc;
-font-size: 105%;
-}
-a {
-color: #0033dd;
-text-decoration: none;
-}
-a:hover {
-color: #6666ff; }
-a:visited {
-color: #800080; }
-a:visited:hover {
-color: #BB00BB; }
-a[href^="http:"] {
-text-decoration: underline; }
-a[href^="https:"] {
-text-decoration: underline; }
 
-code > span.kw { color: #555; font-weight: bold; } 
-code > span.dt { color: #902000; } 
-code > span.dv { color: #40a070; } 
-code > span.bn { color: #d14; } 
-code > span.fl { color: #d14; } 
-code > span.ch { color: #d14; } 
-code > span.st { color: #d14; } 
-code > span.co { color: #888888; font-style: italic; } 
-code > span.ot { color: #007020; } 
-code > span.al { color: #ff0000; font-weight: bold; } 
-code > span.fu { color: #900; font-weight: bold; } 
-code > span.er { color: #a61717; background-color: #e3d2d2; } 
-</style>
+<link rel="stylesheet" href="data:text/css,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" type="text/css" />
 
 
 
@@ -331,125 +153,125 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <li>TODO: Turn these into formal tests in the <code>tests</code> directory, not a vignette.</li>
 <li>TODO: Replace this vignette of informal tests with a practical demo vignette: how can you <em>use</em> <code>surveyCV</code> appropriately on a real complex-survey dataset?</li>
 </ul>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">library</span>(surveyCV)</span>
-<span id="cb1-2"><a href="#cb1-2"></a><span class="kw">library</span>(survey)</span>
-<span id="cb1-3"><a href="#cb1-3"></a><span class="kw">library</span>(ISLR)</span></code></pre></div>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw">data</span>(Auto)</span>
-<span id="cb2-2"><a href="#cb2-2"></a><span class="kw">with</span>(Auto, <span class="kw">plot</span>(horsepower, mpg, <span class="dt">pch =</span> <span class="st">&#39;.&#39;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(surveyCV)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(survey)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ISLR)</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(Auto)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(Auto, <span class="fu">plot</span>(horsepower, mpg, <span class="at">pch =</span> <span class="st">&#39;.&#39;</span>))</span></code></pre></div>
 <p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASAAAAEgCAMAAAAjXV6yAAAAaVBMVEUAAAAAADoAAGYAOjoAOpAAZrY6AAA6ADo6AGY6Ojo6OpA6kLY6kNtmAABmADpmZgBmZmZmkJBmtv+QOgCQkGaQtpCQ2/+2ZgC2kDq2///bkDrb2//b/7bb////tmb/25D//7b//9v////xUrSoAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAIbElEQVR4nO2djXriNhBFtWnCbrck25Ju3NDGEN7/IWtJljBg+cpCsgb2nq9NiRlG4lR/NjJRBzKJql0B6VAQgIIAFASgIAAFASgIQEEACgJQEICCABQEoCAABQEoCEBBAAoCUBCAggAUBKAgAAUBKAhAQQAKAlAQgIIAFASgIAAFASgIQEEACgJQEICCABQEoCAABQEoCEBBAAoCUBCAggAUBKAgAAUBKAhAQQAKAlAQgIIAFASgIAAFASgIQEEACgJQEICCABQEoCAABQEoCEBBAAoCUBCAggAUBKAgAAUBKAhAQQAKAlAQgIIAFASgIEBmQepmqCUob7pyUBCAggCyBAnUJkuQQCgIQEEACgJIEyROXG1B4oScU1tQ/syZESBINrUFiRdVW5B4KAhAQQAKAggVJMefUEFykCVIoDZZggSysKD5HxbUhi0IIEWQCj5TGSmCSpSRBVGCJCJHkDLHFApbGjmCJNgYQZKgIgVdiyxBSl7TkiVIINIEiRMnRZCdw1wfc2ciI/Pa0kgRVL7EROQIkuHjAjmC3LHwWVoVJAkSMeacI07QcHwuUfBcZAnyx+U0I2mCRrY11JUlQVDsjFbF1HxB+2d/XXkTjP58tREP77jcHO+7nLuEFtSqtfm52T+vA8FbtR7Gzii3n8dueQz6fH0y/90+fnT/jMZ+vnotoZCRcpU94VCjjauasZQuZntW+/DeBnqQC7FR88pVshpQUguyzUO3oMC7T2tBSdUqzjVjkOtsl2zd+B0zBp08VMOpXQkQlTLNm3msazxNcI7yU12g/URcOKyvxiJhHXRyXLnrQkLGooUFTX42H+hRt7eSNv0n2HmOtEp9eZtbroRxZ0jKIG3e9Tb43jWNUuvd94/hhB9IdyFEHY9K2AOSMs3b99xMtCH9XGM9pk3zM+pTmISF4ottOqEl4KFfKO6+vk1EzXh/tzYGuRYUahsHLUivfj7/nYjCC0U3namTTri4raSFoja0nTiXP/gldvB8du6nGjd1Lnacq4O9rB/C26DFiXJDi+w6yFkoBs/v6149kyNo7LnLTzluYQxyfSw8i0WnG2tHfmxWx0MXcct5SpnFIhbR+cqdHZyZ9AtmZcs9H56rtaH0C2bFynUDT78QUhfn9ePGCpEwBtklcvZypy7jVyRF0CrbIH1l6BLuUrpY6EJrxnJdL7LdzZ94RL02L1IH6anXCBdUfJAu8rpkRAzSoSv46ng9LXjtrLSxK05WFxqkay6j5xS27LmYOoszl/mPZ2YLKpIoaJkEucsRJEj6Srp4ucMlj1LnPhb+XEiioLEwdfbvYsgXNGMNXcLcwoLm3hauDv2VM3/OcVqV8o1JeAsqF5o9pRBBeNVYq6KVxyB1XD2qJXrWsAaZA0ulUyOP8mW/PtXSgo4T/EkLGg7Wp9c/Rk5QciBW0Jyw6ajrai5c0Gh8+LUFlpG3Imj4motp7aJrZTxbuyVBKElMztnl3rSggvnmJxYgCJ+sjnbCkwPx5Z7NlLHxuSjRxeyh0czp6+2bFrQEEgWFnsMdyP0yfWDwkoyL8htrQdny35Ggwemsfzi6Spqu1VmDuyNBZaAgwF0IOulEvouo826Gz+dG1w1zKxHFnNvCZVNGUPpt4eIoIuj6m3pzoQY/x8oNVKP0LHbNbeHSuM8WhE9nL46j5fsVZY4w67Zw2RSaxZJuCxfJXayDruHivHbq+ehEyfAr2yulK8cvLCiuCoXWQfCuTQGC4ijTgj5f0R7hX1wQvqHjVxc0cb9zUrp6VBukb4ZKglISz6hCkaQLJUpPTEH5qkBBNZIulCg9MQXlqwIF1Ui6UKL0xBSUrwr3JOheoCAABQEoCEBBAAoCUBCAggAUBKAgAAUBKAhAQYDsguzn0/rzxanvvj8cdt/Mh7Q+aCLahsLEZgvuOjZpLNkF+W/60t+R3wart382n2L7oInoPhQl/nztjm21wZik0WQX5LZ32g2NTeCj6tZuf/BBE9F9KEy8W5kvDH94j0kaT3ZB274+vr5jQa1am/frg8LRLjQusW4wEUlnkF1Q87sdCab/OED/jA+ajLaH4xI3g1yoClHkFrR/1hs8m3Xf98MjgKm3D5qMNqFxifX227iksZSZ5vUfKcssKCpx68Zo6YK63p+9i0Ukttu3ZXcxS1c1NELGDtKHU0FTift7bWQP0rZS7WCyDdDGTvMnLqcSu/sAhE/zpj7dWIpWaW30QtHNYiDxbuVuj5C9UNR/Qcr+r9xOrvP7fuODJqL7UJB4a3eO6WdiksbCk1UABQEoCEBBAAoCUBCAggAUBKAgAAUBKAhAQQAKAlAQgIIAFASgIAAFASgIQEEACgJQEICCABQEoCAABQEoCFBRUJ4/nlwaCgJQEKCqoL9WdkNLa/ev7l/+VnpfWL/NZet2tf5cHXfQdw/M94SZr8JqHj9clH1tgVpWFaS3xus9Tt2b3T8/2Y2sZieZPqKf0ZuiOmEb68PFbY0Xu4PMRdlNsAWoKmhtdtbZnXLtlzdzwG1INL+YrZhm51gnxcfpTWPNn48fu69vPso+KEDtMaj7YXcfdj/7A9aQ3Tqnd7XazYluB72N27/8/Pbu9wS715ZAjCD9rs2bNDftbMx4o3Hbfp0gHdSsd9//e3lrno5R9y/opBU0bhf4wW97HrSgrr/983Ro/njdHLdo3rOgwRi0OT7lf7FjUDMYgw67bz+64fm3zpyPumdBg1lsczju39Xzk25Ku1U/0fk4O/+15mu/XdRdC/LroGe3KDIdR69wugF7t3LLJRdn7ulx+6L7qHsUFIkdeqpBQQAKAsgXVBkKAlAQgIIAFASgIAAFASgIQEEACgJQEICCABQEoCAABQEoCEBBAAoCUBCAggAUBPgfwO8hzHrSV3UAAAAASUVORK5CYII=" /><!-- --></p>
 <div id="cv.svy" class="section level2">
 <h2><code>cv.svy()</code></h2>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="co"># Test the general cv.svy() function</span></span>
-<span id="cb3-2"><a href="#cb3-2"></a></span>
-<span id="cb3-3"><a href="#cb3-3"></a><span class="co"># The first line&#39;s results are usually around:</span></span>
-<span id="cb3-4"><a href="#cb3-4"></a><span class="co"># linear lm:      mean=24.3, se=1.45</span></span>
-<span id="cb3-5"><a href="#cb3-5"></a><span class="co"># quadratic lm:   mean=19.3, se=1.38</span></span>
-<span id="cb3-6"><a href="#cb3-6"></a><span class="kw">cv.svy</span>(Auto, <span class="kw">c</span>(<span class="st">&quot;mpg~poly(horsepower,1, raw = TRUE)&quot;</span>,</span>
-<span id="cb3-7"><a href="#cb3-7"></a>               <span class="st">&quot;mpg~poly(horsepower,2, raw = TRUE)&quot;</span>),</span>
-<span id="cb3-8"><a href="#cb3-8"></a>       <span class="dt">nfolds =</span> <span class="dv">10</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test the general cv.svy() function</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># The first line&#39;s results are usually around:</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># linear lm:      mean=24.3, se=1.45</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co"># quadratic lm:   mean=19.3, se=1.38</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="fu">cv.svy</span>(Auto, <span class="fu">c</span>(<span class="st">&quot;mpg~poly(horsepower,1, raw = TRUE)&quot;</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>               <span class="st">&quot;mpg~poly(horsepower,2, raw = TRUE)&quot;</span>),</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">nfolds =</span> <span class="dv">10</span>)</span></code></pre></div>
 <pre><code>##            mean     SE
-## .Model_1 24.105 1.8476
-## .Model_2 19.147 1.7593</code></pre>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="kw">cv.svy</span>(Auto, <span class="kw">c</span>(<span class="st">&quot;mpg~poly(horsepower,1,raw=TRUE)&quot;</span>,</span>
-<span id="cb5-2"><a href="#cb5-2"></a>               <span class="st">&quot;mpg~poly(horsepower,2,raw=TRUE)&quot;</span>),</span>
-<span id="cb5-3"><a href="#cb5-3"></a>       <span class="dt">nfolds =</span> <span class="dv">10</span>, <span class="dt">clusterID =</span> <span class="st">&quot;year&quot;</span>)</span></code></pre></div>
+## .Model_1 24.303 1.8510
+## .Model_2 19.250 1.7668</code></pre>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cv.svy</span>(Auto, <span class="fu">c</span>(<span class="st">&quot;mpg~poly(horsepower,1,raw=TRUE)&quot;</span>,</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>               <span class="st">&quot;mpg~poly(horsepower,2,raw=TRUE)&quot;</span>),</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>       <span class="at">nfolds =</span> <span class="dv">10</span>, <span class="at">clusterID =</span> <span class="st">&quot;year&quot;</span>)</span></code></pre></div>
 <pre><code>##            mean     SE
-## .Model_1 28.184 4.7615
-## .Model_2 21.176 3.7629</code></pre>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a><span class="kw">cv.svy</span>(Auto, <span class="kw">c</span>(<span class="st">&quot;mpg~poly(horsepower,1, raw = TRUE)&quot;</span>,</span>
-<span id="cb7-2"><a href="#cb7-2"></a>               <span class="st">&quot;mpg~poly(horsepower,2, raw = TRUE)&quot;</span>),</span>
-<span id="cb7-3"><a href="#cb7-3"></a>       <span class="dt">nfolds =</span> <span class="dv">10</span>, <span class="dt">strataID =</span> <span class="st">&quot;year&quot;</span>)</span></code></pre></div>
+## .Model_1 26.277 4.6503
+## .Model_2 20.650 3.9467</code></pre>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cv.svy</span>(Auto, <span class="fu">c</span>(<span class="st">&quot;mpg~poly(horsepower,1, raw = TRUE)&quot;</span>,</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>               <span class="st">&quot;mpg~poly(horsepower,2, raw = TRUE)&quot;</span>),</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>       <span class="at">nfolds =</span> <span class="dv">10</span>, <span class="at">strataID =</span> <span class="st">&quot;year&quot;</span>)</span></code></pre></div>
 <pre><code>##            mean     SE
-## .Model_1 24.112 1.7361
-## .Model_2 19.173 1.6804</code></pre>
+## .Model_1 24.144 1.7376
+## .Model_2 19.224 1.6837</code></pre>
 </div>
 <div id="cv.svydesign" class="section level2">
 <h2><code>cv.svydesign()</code></h2>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a><span class="co"># Test the cv.svydesign() function, which takes a svydesign object and formulas</span></span>
-<span id="cb9-2"><a href="#cb9-2"></a>auto.srs.svy &lt;-<span class="st"> </span><span class="kw">svydesign</span>(<span class="dt">ids =</span> <span class="op">~</span><span class="dv">0</span>,</span>
-<span id="cb9-3"><a href="#cb9-3"></a>                          <span class="dt">data =</span> Auto)</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test the cv.svydesign() function, which takes a svydesign object and formulas</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>auto.srs.svy <span class="ot">&lt;-</span> <span class="fu">svydesign</span>(<span class="at">ids =</span> <span class="sc">~</span><span class="dv">0</span>,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>                          <span class="at">data =</span> Auto)</span></code></pre></div>
 <pre><code>## Warning in svydesign.default(ids = ~0, data = Auto): No weights or probabilities
 ## supplied, assuming equal probability</code></pre>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a>auto.clus.svy &lt;-<span class="st"> </span><span class="kw">svydesign</span>(<span class="dt">ids =</span> <span class="op">~</span>year,</span>
-<span id="cb11-2"><a href="#cb11-2"></a>                           <span class="dt">data =</span> Auto)</span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>auto.clus.svy <span class="ot">&lt;-</span> <span class="fu">svydesign</span>(<span class="at">ids =</span> <span class="sc">~</span>year,</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>                           <span class="at">data =</span> Auto)</span></code></pre></div>
 <pre><code>## Warning in svydesign.default(ids = ~year, data = Auto): No weights or
 ## probabilities supplied, assuming equal probability</code></pre>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a>auto.strat.svy &lt;-<span class="st"> </span><span class="kw">svydesign</span>(<span class="dt">ids =</span> <span class="op">~</span><span class="dv">0</span>,</span>
-<span id="cb13-2"><a href="#cb13-2"></a>                            <span class="dt">strata =</span> <span class="op">~</span>year,</span>
-<span id="cb13-3"><a href="#cb13-3"></a>                            <span class="dt">data =</span> Auto)</span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>auto.strat.svy <span class="ot">&lt;-</span> <span class="fu">svydesign</span>(<span class="at">ids =</span> <span class="sc">~</span><span class="dv">0</span>,</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>                            <span class="at">strata =</span> <span class="sc">~</span>year,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>                            <span class="at">data =</span> Auto)</span></code></pre></div>
 <pre><code>## Warning in svydesign.default(ids = ~0, strata = ~year, data = Auto): No weights
 ## or probabilities supplied, assuming equal probability</code></pre>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a><span class="kw">cv.svydesign</span>(<span class="dt">formulae =</span> <span class="kw">c</span>(<span class="st">&quot;mpg~poly(horsepower,1, raw = TRUE)&quot;</span>,</span>
-<span id="cb15-2"><a href="#cb15-2"></a>                          <span class="st">&quot;mpg~poly(horsepower,2, raw = TRUE)&quot;</span>,</span>
-<span id="cb15-3"><a href="#cb15-3"></a>                          <span class="st">&quot;mpg~poly(horsepower,3, raw = TRUE)&quot;</span>),</span>
-<span id="cb15-4"><a href="#cb15-4"></a>             <span class="dt">design_object =</span> auto.srs.svy, <span class="dt">nfolds =</span> <span class="dv">10</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cv.svydesign</span>(<span class="at">formulae =</span> <span class="fu">c</span>(<span class="st">&quot;mpg~poly(horsepower,1, raw = TRUE)&quot;</span>,</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>                          <span class="st">&quot;mpg~poly(horsepower,2, raw = TRUE)&quot;</span>,</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>                          <span class="st">&quot;mpg~poly(horsepower,3, raw = TRUE)&quot;</span>),</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">design_object =</span> auto.srs.svy, <span class="at">nfolds =</span> <span class="dv">10</span>)</span></code></pre></div>
 <pre><code>##            mean     SE
-## .Model_1 24.121 1.8557
-## .Model_2 19.305 1.7820
-## .Model_3 19.581 1.8455</code></pre>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a><span class="kw">cv.svydesign</span>(<span class="dt">formulae =</span> <span class="kw">c</span>(<span class="st">&quot;mpg~poly(horsepower,1, raw = TRUE)&quot;</span>,</span>
-<span id="cb17-2"><a href="#cb17-2"></a>                          <span class="st">&quot;mpg~poly(horsepower,2, raw = TRUE)&quot;</span>,</span>
-<span id="cb17-3"><a href="#cb17-3"></a>                          <span class="st">&quot;mpg~poly(horsepower,3, raw = TRUE)&quot;</span>),</span>
-<span id="cb17-4"><a href="#cb17-4"></a>             <span class="dt">design_object =</span> auto.clus.svy, <span class="dt">nfolds =</span> <span class="dv">10</span>)</span></code></pre></div>
+## .Model_1 24.170 1.8475
+## .Model_2 19.129 1.7546
+## .Model_3 19.125 1.7819</code></pre>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cv.svydesign</span>(<span class="at">formulae =</span> <span class="fu">c</span>(<span class="st">&quot;mpg~poly(horsepower,1, raw = TRUE)&quot;</span>,</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>                          <span class="st">&quot;mpg~poly(horsepower,2, raw = TRUE)&quot;</span>,</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>                          <span class="st">&quot;mpg~poly(horsepower,3, raw = TRUE)&quot;</span>),</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">design_object =</span> auto.clus.svy, <span class="at">nfolds =</span> <span class="dv">10</span>)</span></code></pre></div>
 <pre><code>##            mean     SE
-## .Model_1 25.890 4.4972
-## .Model_2 20.156 3.7657
-## .Model_3 20.186 3.7638</code></pre>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1"></a><span class="kw">cv.svydesign</span>(<span class="dt">formulae =</span> <span class="kw">c</span>(<span class="st">&quot;mpg~poly(horsepower,1, raw = TRUE)&quot;</span>, </span>
-<span id="cb19-2"><a href="#cb19-2"></a>                          <span class="st">&quot;mpg~poly(horsepower,2, raw = TRUE)&quot;</span>,</span>
-<span id="cb19-3"><a href="#cb19-3"></a>                          <span class="st">&quot;mpg~poly(horsepower,3, raw = TRUE)&quot;</span>), </span>
-<span id="cb19-4"><a href="#cb19-4"></a>             <span class="dt">design_object =</span> auto.strat.svy, <span class="dt">nfolds =</span> <span class="dv">10</span>)</span></code></pre></div>
+## .Model_1 26.738 4.5945
+## .Model_2 20.764 3.8464
+## .Model_3 20.932 3.8461</code></pre>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cv.svydesign</span>(<span class="at">formulae =</span> <span class="fu">c</span>(<span class="st">&quot;mpg~poly(horsepower,1, raw = TRUE)&quot;</span>, </span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>                          <span class="st">&quot;mpg~poly(horsepower,2, raw = TRUE)&quot;</span>,</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>                          <span class="st">&quot;mpg~poly(horsepower,3, raw = TRUE)&quot;</span>), </span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">design_object =</span> auto.strat.svy, <span class="at">nfolds =</span> <span class="dv">10</span>)</span></code></pre></div>
 <pre><code>##            mean     SE
-## .Model_1 24.234 1.7512
-## .Model_2 19.253 1.6930
-## .Model_3 19.441 1.7515</code></pre>
+## .Model_1 24.076 1.7312
+## .Model_2 19.375 1.7087
+## .Model_3 19.576 1.7809</code></pre>
 </div>
 <div id="cv.svyglm" class="section level2">
 <h2><code>cv.svyglm()</code></h2>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1"></a><span class="co"># Test the cv.svyglm() function, which takes one svyglm object</span></span>
-<span id="cb21-2"><a href="#cb21-2"></a>srs.model &lt;-<span class="st"> </span><span class="kw">svyglm</span>(mpg<span class="op">~</span>horsepower<span class="op">+</span><span class="kw">I</span>(horsepower<span class="op">^</span><span class="dv">2</span>)<span class="op">+</span><span class="kw">I</span>(horsepower<span class="op">^</span><span class="dv">3</span>), <span class="dt">design =</span> auto.srs.svy)</span>
-<span id="cb21-3"><a href="#cb21-3"></a>clus.model &lt;-<span class="st"> </span><span class="kw">svyglm</span>(mpg<span class="op">~</span>horsepower<span class="op">+</span><span class="kw">I</span>(horsepower<span class="op">^</span><span class="dv">2</span>)<span class="op">+</span><span class="kw">I</span>(horsepower<span class="op">^</span><span class="dv">3</span>), <span class="dt">design =</span> auto.clus.svy)</span>
-<span id="cb21-4"><a href="#cb21-4"></a>strat.model &lt;-<span class="st"> </span><span class="kw">svyglm</span>(mpg<span class="op">~</span>horsepower<span class="op">+</span><span class="kw">I</span>(horsepower<span class="op">^</span><span class="dv">2</span>)<span class="op">+</span><span class="kw">I</span>(horsepower<span class="op">^</span><span class="dv">3</span>), <span class="dt">design =</span> auto.strat.svy)</span>
-<span id="cb21-5"><a href="#cb21-5"></a></span>
-<span id="cb21-6"><a href="#cb21-6"></a><span class="kw">cv.svyglm</span>(<span class="dt">glm =</span> srs.model, <span class="dt">nfolds =</span> <span class="dv">10</span>)</span></code></pre></div>
-<pre><code>##            mean     SE
-## .Model_1 19.308 1.8106</code></pre>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1"></a><span class="kw">cv.svyglm</span>(<span class="dt">glm =</span> clus.model, <span class="dt">nfolds =</span> <span class="dv">10</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test the cv.svyglm() function, which takes one svyglm object</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>srs.model <span class="ot">&lt;-</span> <span class="fu">svyglm</span>(mpg<span class="sc">~</span>horsepower<span class="sc">+</span><span class="fu">I</span>(horsepower<span class="sc">^</span><span class="dv">2</span>)<span class="sc">+</span><span class="fu">I</span>(horsepower<span class="sc">^</span><span class="dv">3</span>), <span class="at">design =</span> auto.srs.svy)</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>clus.model <span class="ot">&lt;-</span> <span class="fu">svyglm</span>(mpg<span class="sc">~</span>horsepower<span class="sc">+</span><span class="fu">I</span>(horsepower<span class="sc">^</span><span class="dv">2</span>)<span class="sc">+</span><span class="fu">I</span>(horsepower<span class="sc">^</span><span class="dv">3</span>), <span class="at">design =</span> auto.clus.svy)</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>strat.model <span class="ot">&lt;-</span> <span class="fu">svyglm</span>(mpg<span class="sc">~</span>horsepower<span class="sc">+</span><span class="fu">I</span>(horsepower<span class="sc">^</span><span class="dv">2</span>)<span class="sc">+</span><span class="fu">I</span>(horsepower<span class="sc">^</span><span class="dv">3</span>), <span class="at">design =</span> auto.strat.svy)</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="fu">cv.svyglm</span>(<span class="at">glm =</span> srs.model, <span class="at">nfolds =</span> <span class="dv">10</span>)</span></code></pre></div>
 <pre><code>##           mean     SE
-## .Model_1 21.24 3.9734</code></pre>
-<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1"></a><span class="kw">cv.svyglm</span>(<span class="dt">glm =</span> strat.model, <span class="dt">nfolds =</span> <span class="dv">10</span>)</span></code></pre></div>
-<pre><code>##            mean     SE
-## .Model_1 19.215 1.7219</code></pre>
+## .Model_1 19.42 1.8082</code></pre>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cv.svyglm</span>(<span class="at">glm =</span> clus.model, <span class="at">nfolds =</span> <span class="dv">10</span>)</span></code></pre></div>
+<pre><code>##            mean    SE
+## .Model_1 20.465 3.652</code></pre>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cv.svyglm</span>(<span class="at">glm =</span> strat.model, <span class="at">nfolds =</span> <span class="dv">10</span>)</span></code></pre></div>
+<pre><code>##           mean     SE
+## .Model_1 19.29 1.7205</code></pre>
 </div>
 <div id="test-for-equivalence-of-the-3-functions-at-same-random-seed" class="section level2">
 <h2>Test for equivalence of the 3 functions at same random seed</h2>
-<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1"></a>seed =<span class="st"> </span><span class="dv">20210708</span></span>
-<span id="cb27-2"><a href="#cb27-2"></a></span>
-<span id="cb27-3"><a href="#cb27-3"></a><span class="kw">set.seed</span>(seed)</span>
-<span id="cb27-4"><a href="#cb27-4"></a><span class="kw">cv.svy</span>(Auto, <span class="st">&quot;mpg~horsepower+I(horsepower^2)+I(horsepower^3)&quot;</span>,</span>
-<span id="cb27-5"><a href="#cb27-5"></a>       <span class="dt">nfolds =</span> <span class="dv">10</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>seed <span class="ot">=</span> <span class="dv">20210708</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(seed)</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="fu">cv.svy</span>(Auto, <span class="st">&quot;mpg~horsepower+I(horsepower^2)+I(horsepower^3)&quot;</span>,</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">nfolds =</span> <span class="dv">10</span>)</span></code></pre></div>
 <pre><code>##            mean     SE
 ## .Model_1 19.466 1.8254</code></pre>
-<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1"></a><span class="kw">set.seed</span>(seed)</span>
-<span id="cb29-2"><a href="#cb29-2"></a><span class="kw">cv.svydesign</span>(<span class="dt">formulae =</span> <span class="st">&quot;mpg~horsepower+I(horsepower^2)+I(horsepower^3)&quot;</span>,</span>
-<span id="cb29-3"><a href="#cb29-3"></a>             <span class="dt">design_object =</span> auto.srs.svy, <span class="dt">nfolds =</span> <span class="dv">10</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(seed)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cv.svydesign</span>(<span class="at">formulae =</span> <span class="st">&quot;mpg~horsepower+I(horsepower^2)+I(horsepower^3)&quot;</span>,</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">design_object =</span> auto.srs.svy, <span class="at">nfolds =</span> <span class="dv">10</span>)</span></code></pre></div>
 <pre><code>##            mean     SE
 ## .Model_1 19.466 1.8254</code></pre>
-<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1"></a>srs.model &lt;-<span class="st"> </span><span class="kw">svyglm</span>(mpg<span class="op">~</span>horsepower<span class="op">+</span><span class="kw">I</span>(horsepower<span class="op">^</span><span class="dv">2</span>)<span class="op">+</span><span class="kw">I</span>(horsepower<span class="op">^</span><span class="dv">3</span>), <span class="dt">design =</span> auto.srs.svy)</span>
-<span id="cb31-2"><a href="#cb31-2"></a><span class="kw">set.seed</span>(seed)</span>
-<span id="cb31-3"><a href="#cb31-3"></a><span class="kw">cv.svyglm</span>(<span class="dt">glm =</span> srs.model, <span class="dt">nfolds =</span> <span class="dv">10</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>srs.model <span class="ot">&lt;-</span> <span class="fu">svyglm</span>(mpg<span class="sc">~</span>horsepower<span class="sc">+</span><span class="fu">I</span>(horsepower<span class="sc">^</span><span class="dv">2</span>)<span class="sc">+</span><span class="fu">I</span>(horsepower<span class="sc">^</span><span class="dv">3</span>), <span class="at">design =</span> auto.srs.svy)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(seed)</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="fu">cv.svyglm</span>(<span class="at">glm =</span> srs.model, <span class="at">nfolds =</span> <span class="dv">10</span>)</span></code></pre></div>
 <pre><code>##            mean     SE
 ## .Model_1 19.466 1.8254</code></pre>
 </div>
 <div id="test-of-logistic-regression" class="section level2">
 <h2>Test of logistic regression</h2>
-<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1"></a>Auto<span class="op">$</span>isAmerican &lt;-<span class="st"> </span>Auto<span class="op">$</span>origin <span class="op">==</span><span class="st"> </span><span class="dv">1</span></span>
-<span id="cb33-2"><a href="#cb33-2"></a><span class="kw">with</span>(Auto, <span class="kw">plot</span>(horsepower, isAmerican))</span></code></pre></div>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>Auto<span class="sc">$</span>isAmerican <span class="ot">&lt;-</span> Auto<span class="sc">$</span>origin <span class="sc">==</span> <span class="dv">1</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(Auto, <span class="fu">plot</span>(horsepower, isAmerican))</span></code></pre></div>
 <p><img src="data:image/png;base64,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" /><!-- --></p>
-<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1"></a><span class="kw">cv.svy</span>(Auto, <span class="kw">c</span>(<span class="st">&quot;isAmerican~horsepower&quot;</span>,</span>
-<span id="cb34-2"><a href="#cb34-2"></a>               <span class="st">&quot;isAmerican~horsepower+I(horsepower^2)&quot;</span>,</span>
-<span id="cb34-3"><a href="#cb34-3"></a>               <span class="st">&quot;isAmerican~horsepower+I(horsepower^2)+I(horsepower^3)&quot;</span>),</span>
-<span id="cb34-4"><a href="#cb34-4"></a>       <span class="dt">nfolds =</span> <span class="dv">10</span>, <span class="dt">method =</span> <span class="st">&quot;logistic&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cv.svy</span>(Auto, <span class="fu">c</span>(<span class="st">&quot;isAmerican~horsepower&quot;</span>,</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>               <span class="st">&quot;isAmerican~horsepower+I(horsepower^2)&quot;</span>,</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>               <span class="st">&quot;isAmerican~horsepower+I(horsepower^2)+I(horsepower^3)&quot;</span>),</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">nfolds =</span> <span class="dv">10</span>, <span class="at">method =</span> <span class="st">&quot;logistic&quot;</span>)</span></code></pre></div>
 <pre><code>##             mean     SE
 ## .Model_1 0.50118 0.0231
 ## .Model_2 0.50184 0.0233
@@ -457,15 +279,15 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 </div>
 <div id="tests-that-we-expect-should-fail" class="section level2">
 <h2>Tests that we expect should fail</h2>
-<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1"></a><span class="co"># Should stop early because method isn&#39;t linear or logistic</span></span>
-<span id="cb36-2"><a href="#cb36-2"></a><span class="kw">try</span>(<span class="kw">cv.svy</span>(Auto, <span class="st">&quot;mpg~horsepower+I(horsepower^2)+I(horsepower^3)&quot;</span>,</span>
-<span id="cb36-3"><a href="#cb36-3"></a>           <span class="dt">nfolds =</span> <span class="dv">10</span>,</span>
-<span id="cb36-4"><a href="#cb36-4"></a>           <span class="dt">method =</span> <span class="st">&quot;abcde&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Should stop early because method isn&#39;t linear or logistic</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="fu">try</span>(<span class="fu">cv.svy</span>(Auto, <span class="st">&quot;mpg~horsepower+I(horsepower^2)+I(horsepower^3)&quot;</span>,</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">nfolds =</span> <span class="dv">10</span>,</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">method =</span> <span class="st">&quot;abcde&quot;</span>))</span></code></pre></div>
 <pre><code>## Error in match.arg(method) : &#39;arg&#39; should be one of &quot;linear&quot;, &quot;logistic&quot;</code></pre>
-<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1"></a><span class="co"># Should try to run but crash because response variable isn&#39;t 0/1</span></span>
-<span id="cb38-2"><a href="#cb38-2"></a><span class="kw">try</span>(<span class="kw">cv.svy</span>(Auto, <span class="st">&quot;mpg~horsepower+I(horsepower^2)+I(horsepower^3)&quot;</span>,</span>
-<span id="cb38-3"><a href="#cb38-3"></a>           <span class="dt">nfolds =</span> <span class="dv">10</span>,</span>
-<span id="cb38-4"><a href="#cb38-4"></a>           <span class="dt">method =</span> <span class="st">&quot;logistic&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Should try to run but crash because response variable isn&#39;t 0/1</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="fu">try</span>(<span class="fu">cv.svy</span>(Auto, <span class="st">&quot;mpg~horsepower+I(horsepower^2)+I(horsepower^3)&quot;</span>,</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">nfolds =</span> <span class="dv">10</span>,</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">method =</span> <span class="st">&quot;logistic&quot;</span>))</span></code></pre></div>
 <pre><code>## Error in eval(family$initialize) : y values must be 0 &lt;= y &lt;= 1</code></pre>
 </div>
 

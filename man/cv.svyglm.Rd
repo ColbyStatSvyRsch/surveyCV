@@ -2,21 +2,32 @@
 % Please edit documentation in R/cv.svyglm.R
 \name{cv.svyglm}
 \alias{cv.svyglm}
-\title{CV for `svyglm` objects}
+\title{CV for \code{svyglm} objects}
 \usage{
 cv.svyglm(glm_object, nfolds = 5)
 }
 \arguments{
-\item{glm_object}{Name of a `svyglm` object created from the `survey` package}
+\item{glm_object}{Name of a \code{svyglm} object created from the \code{survey} package}
 
 \item{nfolds}{Number of folds to be used during cross validation, defaults to
 5}
 }
+\value{
+Object of class \code{svystat}, which is a named vector with the survey CV estimate of the mean loss
+  (MSE for linear models, or binary cross-entropy for logistic models)
+  for the model in the \code{svyglm} object provided to \code{glm_object};
+  and with a \code{var} attribute giving the variance.
+  See \code{\link[survey]{surveysummary}} for details.
+}
 \description{
-Wrapper function which takes a `svyglm` object
-(which itself contains a `svydesign` object)
-and passes it through `cv.svydesign()` to `cv.svy()`.
-Chooses linear or logistic regression based on the `svyglm` object's family.
+Wrapper function which takes a \code{\link[survey]{svyglm}} object
+(which itself contains a \code{svydesign} object)
+and passes it through \code{\link{cv.svydesign}} to \code{\link{cv.svy}}.
+Chooses linear or logistic regression based on the \code{svyglm} object's value of \code{family}.
+Returns survey CV estimates of the mean loss for each model
+(MSE for linear models, or binary cross-entropy for logistic models).
+If you have created a \code{svydesign} object and want to compare several \code{svyglm} models,
+you may prefer the function \code{\link{cv.svydesign}}.
 }
 \examples{
 # Calculate CV MSE and its SE under one `svyglm` model
@@ -42,4 +53,9 @@ NSFG.svydes <- svydesign(id = ~SECU, strata = ~strata, nest = TRUE,
                          weights = ~wgt, data = NSFG_data)
 NSFG.svyglm <- svyglm(income ~ ns(age, df = 3), design = NSFG.svydes)
 cv.svyglm(glm_object = NSFG.svyglm, nfolds = 4)
+}
+\seealso{
+\code{\link[survey]{surveysummary}}, \code{\link[survey]{svydesign}}, \code{\link[survey]{svyglm}}
+
+\code{\link{cv.svydesign}} to use with a \code{svydesign} object for comparing several \code{svyglm} models
 }

@@ -10,7 +10,7 @@ vignette: >
 
 Writing cleaner code for **only** the simulations needed for our submission to *Stat* (the special issue for SDSS 2021 talks).
 
-Based on the sims from `plot_generation.R` -- but instead of having similar functions repeatedly defined separately as in that file, use our functions such as `cv.svy()` directly from the package.
+Based on the sims from `data-raw/plot_generation.R` -- but instead of having similar functions repeatedly defined separately as in that file, use our functions such as `cv.svy()` directly from the package.
 
 ```{r Packages, message=FALSE}
 library(survey)
@@ -272,8 +272,7 @@ usethis::use_data(srssrsds, srspopds,
 # if that's indeed better for R packages
 # ...
 # OK, now we've written those dataframes,
-#   AND the 4 below, AND the 3 lists from early-results vignette,
-#   all into R/sysdata.Rda together
+#   AND the 4 below, all into R/sysdata.Rda together
 ```
 
 
@@ -438,8 +437,7 @@ usethis::use_data(AllW, NoW,
 # if that's indeed better for R packages
 # ...
 # OK, now we've written those dataframes,
-#   AND the 8 above, AND the 3 lists from early-results vignette,
-#   all into R/sysdata.Rda together
+#   AND the 8 above, all into R/sysdata.Rda together
 ```
 
 ```{r WeightsSimsResultsAndPlots, fig.width=7, fig.height=7}

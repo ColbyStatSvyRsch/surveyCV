@@ -37,7 +37,7 @@ be the same as in the dataset used}
 \item{nest}{Specify nest = TRUE if clusters are nested within strata, defaults to FALSE}
 
 \item{fpcID}{String of the variable name used for finite population corrections, must
-be the same as in the dataset used, see `?svydesign` for details}
+be the same as in the dataset used, see \code{\link[survey]{svydesign}} for details}
 
 \item{method}{String, must be either "linear" or "logistic", determines type of
 model fit during cross validation, defaults to linear}
@@ -53,9 +53,21 @@ should not be set FALSE except for running simulations to understand the propert
 \item{useSvyForLoss}{Specify useSvyForLoss = TRUE (default) to take svydesign into account when calculating loss over test sets;
 should not be set FALSE except for running simulations to understand the properties of surveyCV}
 }
+\value{
+Object of class \code{svystat}, which is a named vector of survey CV estimates of the mean loss
+  (MSE for linear models, or binary cross-entropy for logistic models) for each model,
+  with names ".Model_1", ".Model_2", etc. corresponding to the models provided in \code{formulae};
+  and with a \code{var} attribute giving the variances.
+  See \code{\link[survey]{surveysummary}} for details.
+}
 \description{
 This is a cross validation function designed for survey samples taken using a SRS,
 stratified, clustered, or clustered-and-stratified sampling design.
+Returns survey CV estimates of the mean loss for each model
+(MSE for linear models, or binary cross-entropy for logistic models).
+If you have already created a \code{svydesign} object or fitted a \code{svyglm},
+you will probably prefer the convenience wrapper functions
+\code{\link{cv.svydesign}} or \code{\link{cv.svyglm}}.
 }
 \examples{
 # Compare CV MSEs and their SEs under 3 models
@@ -84,4 +96,10 @@ cv.svy(NSFG_data, c("income ~ ns(age, df = 2)",
        nfolds = 4,
        strataID = "strata", clusterID = "SECU",
        nest = TRUE, weightsID = "wgt")
+}
+\seealso{
+\code{\link[survey]{surveysummary}}, \code{\link[survey]{svydesign}}
+
+\code{\link{cv.svydesign}} for a wrapper to use with a \code{svydesign} object,
+  or \code{\link{cv.svyglm}} for a wrapper to use with a \code{svyglm} object
 }

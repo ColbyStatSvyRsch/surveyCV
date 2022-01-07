@@ -1,3 +1,18 @@
+# CAUTION: the functions below will set.seed() several times,
+# so don't try to do anything random after running them --
+# or set.seed() randomly yourself right afterwards.
+
+# Packages needed to run all functions below:
+#   dplyr, ggplot2, gridExtra, sampling, survey
+# (We originally did not load the packages directly up here
+#  because we had wanted this to be part of our surveyCV package,
+#  showing up in a vignette,
+#  and were trying to work around namespace issues...
+#  but now that these have become "old" prelim results,
+#  we've moved them out of the way to data-raw folder
+#  so they should be ignored during package building.)
+
+
 plot_generation <- function() {
 
   set.seed(47)

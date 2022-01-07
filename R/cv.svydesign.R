@@ -1,19 +1,32 @@
-#' CV for `svydesign` objects
+#' CV for \code{svydesign} objects
 #'
-#' Wrapper function which takes a `svydesign` object
+#' Wrapper function which takes a \code{\link[survey]{svydesign}} object
 #' and a vector of model formulas (as strings),
-#' and passes it into `cv.svy()`.
+#' and passes it into \code{\link{cv.svy}}.
+#' Returns survey CV estimates of the mean loss for each model
+#' (MSE for linear models, or binary cross-entropy for logistic models).
+#' If you have already fitted a \code{svyglm},
+#' you may prefer the convenience wrapper function
+#' \code{\link{cv.svyglm}}.
+
 #'
-#' @param design_object Name of a `svydesign` object created using the `survey`
-#'   package. The argument `ids` (also `strata`, `fpc`, and/or `weights` if used)
-#'   must be specified as formulas, e.g. `svydesign(ids = ~MyPSUs, ...)`.
-#'   We do not yet support use of `probs` or `pps`.
+#' @param design_object Name of a \code{svydesign} object created using the \code{survey}
+#'   package. The argument \code{id} (also \code{strata}, \code{fpc}, and/or \code{weights} if used)
+#'   must be specified as formulas, e.g. \code{svydesign(ids = ~MyPSUs, ...)}.
+#'   We do not yet support use of \code{probs} or \code{pps}.
 #' @param formulae Vector of formulas (as strings) for the GLMs to be compared in
 #'   cross validation
 #' @param nfolds Number of folds to be used during cross validation, defaults to
 #'   5
 #' @param method String, must be either "linear" or "logistic", determines type of
 #'   model fit during cross validation, defaults to linear
+#' @return Object of class \code{svystat}, which is a named vector of survey CV estimates of the mean loss
+#'   (MSE for linear models, or binary cross-entropy for logistic models) for each model,
+#'   with names ".Model_1", ".Model_2", etc. corresponding to the models provided in \code{formulae};
+#'   and with a \code{var} attribute giving the variances.
+#'   See \code{\link[survey]{surveysummary}} for details.
+#' @seealso \code{\link[survey]{surveysummary}}, \code{\link[survey]{svydesign}}
+#' @seealso \code{\link{cv.svyglm}} for a wrapper to use with a \code{svyglm} object
 #' @examples
 #' # Compare CV MSEs and their SEs under 3 models
 #' # for a stratified sample and a one-stage cluster sample,

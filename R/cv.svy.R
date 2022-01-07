@@ -2,6 +2,11 @@
 #'
 #' This is a cross validation function designed for survey samples taken using a SRS,
 #' stratified, clustered, or clustered-and-stratified sampling design.
+#' Returns survey CV estimates of the mean loss for each model
+#' (MSE for linear models, or binary cross-entropy for logistic models).
+#' If you have already created a \code{svydesign} object or fitted a \code{svyglm},
+#' you will probably prefer the convenience wrapper functions
+#' \code{\link{cv.svydesign}} or \code{\link{cv.svyglm}}.
 #'
 #' @param Data Dataframe of dataset to be tested
 #' @param formulae Vector of formulas (as strings) for the GLMs to be compared in
@@ -14,7 +19,7 @@
 #'   be the same as in the dataset used
 #' @param nest Specify nest = TRUE if clusters are nested within strata, defaults to FALSE
 #' @param fpcID String of the variable name used for finite population corrections, must
-#'   be the same as in the dataset used, see `?svydesign` for details
+#'   be the same as in the dataset used, see \code{\link[survey]{svydesign}} for details
 #' @param method String, must be either "linear" or "logistic", determines type of
 #'   model fit during cross validation, defaults to linear
 #' @param weightsID String of the variable name in the dataset that contains sampling weights
@@ -24,6 +29,14 @@
 #'   should not be set FALSE except for running simulations to understand the properties of surveyCV
 #' @param useSvyForLoss Specify useSvyForLoss = TRUE (default) to take svydesign into account when calculating loss over test sets;
 #'   should not be set FALSE except for running simulations to understand the properties of surveyCV
+#' @return Object of class \code{svystat}, which is a named vector of survey CV estimates of the mean loss
+#'   (MSE for linear models, or binary cross-entropy for logistic models) for each model,
+#'   with names ".Model_1", ".Model_2", etc. corresponding to the models provided in \code{formulae};
+#'   and with a \code{var} attribute giving the variances.
+#'   See \code{\link[survey]{surveysummary}} for details.
+#' @seealso \code{\link[survey]{surveysummary}}, \code{\link[survey]{svydesign}}
+#' @seealso \code{\link{cv.svydesign}} for a wrapper to use with a \code{svydesign} object,
+#'   or \code{\link{cv.svyglm}} for a wrapper to use with a \code{svyglm} object
 #' @examples
 #' # Compare CV MSEs and their SEs under 3 models
 #' # for a stratified sample and a one-stage cluster sample,
@@ -78,12 +91,8 @@ cv.svy <- function(Data, formulae, nfolds=5, strataID = NULL, clusterID = NULL, 
                    method = c("linear", "logistic"), weightsID = NULL,
                    useSvyForFolds = TRUE, useSvyForFits = TRUE, useSvyForLoss = TRUE) {
 
-  # Use stop-logic to check the dataset & arguments specified
-  if(nfolds < 1) {print ("nfolds is less that 1")}
-  if(nfolds >= nrow(Data)) {print ("Number of folds exceeds observations")}
   method <- match.arg(method)
-
-  stopifnot(nfolds > 0, nfolds <= nrow(Data))
+  stopifnot(nfolds >= 1, nfolds <= nrow(Data))
 
   # Turns the strings of formulas into a list of formulas
   formulae <- sapply(formulae, as.formula)

@@ -2,7 +2,7 @@
 % Please edit documentation in R/cv.svydesign.R
 \name{cv.svydesign}
 \alias{cv.svydesign}
-\title{CV for `svydesign` objects}
+\title{CV for \code{svydesign} objects}
 \usage{
 cv.svydesign(
   design_object,
@@ -12,10 +12,10 @@ cv.svydesign(
 )
 }
 \arguments{
-\item{design_object}{Name of a `svydesign` object created using the `survey`
-package. The argument `ids` (also `strata`, `fpc`, and/or `weights` if used)
-must be specified as formulas, e.g. `svydesign(ids = ~MyPSUs, ...)`.
-We do not yet support use of `probs` or `pps`.}
+\item{design_object}{Name of a \code{svydesign} object created using the \code{survey}
+package. The argument \code{id} (also \code{strata}, \code{fpc}, and/or \code{weights} if used)
+must be specified as formulas, e.g. \code{svydesign(ids = ~MyPSUs, ...)}.
+We do not yet support use of \code{probs} or \code{pps}.}
 
 \item{formulae}{Vector of formulas (as strings) for the GLMs to be compared in
 cross validation}
@@ -26,10 +26,22 @@ cross validation}
 \item{method}{String, must be either "linear" or "logistic", determines type of
 model fit during cross validation, defaults to linear}
 }
+\value{
+Object of class \code{svystat}, which is a named vector of survey CV estimates of the mean loss
+  (MSE for linear models, or binary cross-entropy for logistic models) for each model,
+  with names ".Model_1", ".Model_2", etc. corresponding to the models provided in \code{formulae};
+  and with a \code{var} attribute giving the variances.
+  See \code{\link[survey]{surveysummary}} for details.
+}
 \description{
-Wrapper function which takes a `svydesign` object
+Wrapper function which takes a \code{\link[survey]{svydesign}} object
 and a vector of model formulas (as strings),
-and passes it into `cv.svy()`.
+and passes it into \code{\link{cv.svy}}.
+Returns survey CV estimates of the mean loss for each model
+(MSE for linear models, or binary cross-entropy for logistic models).
+If you have already fitted a \code{svyglm},
+you may prefer the convenience wrapper function
+\code{\link{cv.svyglm}}.
 }
 \examples{
 # Compare CV MSEs and their SEs under 3 models
@@ -61,4 +73,9 @@ cv.svydesign(formulae = c("income ~ ns(age, df = 2)",
                           "income ~ ns(age, df = 3)",
                           "income ~ ns(age, df = 4)"),
              design_object = NSFG.svydes, nfolds = 4)
+}
+\seealso{
+\code{\link[survey]{surveysummary}}, \code{\link[survey]{svydesign}}
+
+\code{\link{cv.svyglm}} for a wrapper to use with a \code{svyglm} object
 }
