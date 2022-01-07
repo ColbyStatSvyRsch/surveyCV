@@ -27,7 +27,7 @@ but this function and vignette are not needed by package users.
 * devtools::check_rhub()
 * devtools::check_win_release()
 * devtools::check_win_devel()
-* GitHub Actions for windows-latest (release), macOS-latest (release), ubuntu-latest (release), ubuntu-latest (devel)
+* GitHub Actions for windows-latest (release), macOS-latest (release), ubuntu-latest (oldrel-1), ubuntu-latest (release), ubuntu-latest (devel)
 
 
 ## R CMD check results
