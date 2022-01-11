@@ -143,8 +143,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 
-<p>Writing cleaner code for <strong>only</strong> the simulations needed for our submission to <em>Stat</em> (the special issue for SDSS 2021 talks).</p>
-<p>Based on the sims from <code>data-raw/plot_generation.R</code> – but instead of having similar functions repeatedly defined separately as in that file, use our functions such as <code>cv.svy()</code> directly from the package.</p>
+<p>Writing cleaner code for <strong>only</strong> the simulations needed for <a href="https://github.com/ColbyStatSvyRsch/surveyCV/blob/master/data-raw/Stat_SDSS_submission.pdf">our submission to <em>Stat</em></a> (the special issue for SDSS 2021 talks).</p>
+<p>Based on the earlier sims (now on GitHub in <a href="https://github.com/ColbyStatSvyRsch/surveyCV/blob/master/data-raw/plot_generation.R"><code>data-raw/plot_generation.R</code></a> and <a href="https://github.com/ColbyStatSvyRsch/surveyCV/blob/master/data-raw/early-results.html"><code>data-raw/early-results.html</code></a>) – but instead of having similar functions repeatedly defined separately as in that file, use our functions such as <code>cv.svy()</code> directly from the package.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(survey)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(splines)</span>

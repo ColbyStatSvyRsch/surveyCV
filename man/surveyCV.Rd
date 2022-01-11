@@ -11,8 +11,8 @@ based on how a survey design is constructed
 You can input linear and logistic regression models, along with data and a
 type of survey design in order to get an output that can help you determine
 which model best fits the data using K-fold cross validation.
-Our draft paper on "K-Fold Cross-Validation for Complex Sample Surveys"
-(under review; a copy is in the \code{data-raw} folder of our GitHub repo)
+Our paper on "K-Fold Cross-Validation for Complex Sample Surveys"
+(accepted to \emph{Stat}; a copy is in the \code{data-raw} folder of our GitHub repo)
 explains why differing how we take folds based on survey design is useful.
 }
 \details{

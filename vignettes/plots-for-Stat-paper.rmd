@@ -8,9 +8,9 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-Writing cleaner code for **only** the simulations needed for our submission to *Stat* (the special issue for SDSS 2021 talks).
+Writing cleaner code for **only** the simulations needed for [our submission to *Stat*](https://github.com/ColbyStatSvyRsch/surveyCV/blob/master/data-raw/Stat_SDSS_submission.pdf) (the special issue for SDSS 2021 talks).
 
-Based on the sims from `data-raw/plot_generation.R` -- but instead of having similar functions repeatedly defined separately as in that file, use our functions such as `cv.svy()` directly from the package.
+Based on the earlier sims (now on GitHub in [`data-raw/plot_generation.R`](https://github.com/ColbyStatSvyRsch/surveyCV/blob/master/data-raw/plot_generation.R) and [`data-raw/early-results.html`](https://github.com/ColbyStatSvyRsch/surveyCV/blob/master/data-raw/early-results.html)) -- but instead of having similar functions repeatedly defined separately as in that file, use our functions such as `cv.svy()` directly from the package.
 
 ```{r Packages, message=FALSE}
 library(survey)
