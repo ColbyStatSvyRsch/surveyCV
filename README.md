@@ -2,6 +2,8 @@
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/ColbyStatSvyRsch/surveyCV/workflows/R-CMD-check/badge.svg)](https://github.com/ColbyStatSvyRsch/surveyCV/actions)
+[![CRAN
+downloads](https://cranlogs.r-pkg.org/badges/surveyCV)](https://cran.r-project.org/package=surveyCV)
 <!-- badges: end -->
 
 The R package `surveyCV` carries out cross-validation for complex sample survey data.  

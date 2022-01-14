@@ -18,7 +18,7 @@ explains why differing how we take folds based on survey design is useful.
 }
 \details{
 The code for this package seeks to create an alternative for the
-\code{boot::cv.glm()}
+\code{\link[boot:cv.glm]{boot::cv.glm}}
 function, so that results correctly account for survey designs during
 K-fold cross validation.
 }
