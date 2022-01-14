@@ -1,7 +1,7 @@
 Package: surveyCV
 Type: Package
 Title: Cross Validation Based on Survey Design
-Version: 0.1.1.9000
+Version: 0.1.1.9001
 Authors@R: c(
     person("Cole", "Guerin", email = "cole@guerincreative.com", role = "aut"),
     person("Thomas", "McMahon", email = "thomasmcmahon9@gmail.com", role = "aut"),
@@ -14,7 +14,8 @@ Description: Functions to generate test error estimates using cross validation,
     type of survey design in order to get an output that can help you determine
     which model best fits the data using K-fold cross validation.
     Our paper on "K-Fold Cross-Validation for Complex Sample Surveys"
-    (accepted to Stat; a copy is in the 'data-raw' folder of our GitHub repo)
+    by Wieczorek, Guerin, and McMahon (2022)
+    <doi:10.1002/sta4.454>
     explains why differing how we take folds based on survey design is useful.
 License: GPL-2 | GPL-3
 Encoding: UTF-8

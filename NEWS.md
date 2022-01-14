@@ -1,3 +1,7 @@
+# surveyCV 0.1.1.9001
+
+* Development version: update docs with link to *Stat* [<doi:10.1002/sta4.454>](https://doi.org/10.1002/sta4.454) following online publication on Jan 12, 2022.
+
 # surveyCV 0.1.1.9000
 
 * Development version: update docs with CRAN link and installation instruction, and with news about the paper's acceptance to *Stat* on Jan 9, 2022.
