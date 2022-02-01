@@ -2,7 +2,7 @@ Package: surveyCV
 Type: Package
 Title: Cross Validation Based on Survey Design
 Version: 0.1.1.9001
-Date: 2022-01-14
+Date: 2022-02-01
 Authors@R: c(
     person("Cole", "Guerin", email = "cole@guerincreative.com", role = "aut"),
     person("Thomas", "McMahon", email = "thomasmcmahon9@gmail.com", role = "aut"),
