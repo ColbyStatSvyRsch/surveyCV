@@ -16,7 +16,8 @@ cv.svy(
   weightsID = NULL,
   useSvyForFolds = TRUE,
   useSvyForFits = TRUE,
-  useSvyForLoss = TRUE
+  useSvyForLoss = TRUE,
+  na.rm = FALSE
 )
 }
 \arguments{
@@ -52,6 +53,9 @@ should not be set FALSE except for running simulations to understand the propert
 
 \item{useSvyForLoss}{Specify useSvyForLoss = TRUE (default) to take svydesign into account when calculating loss over test sets;
 should not be set FALSE except for running simulations to understand the properties of surveyCV}
+
+\item{na.rm}{Whether to drop cases with missing values when taking `svymean`
+of test losses}
 }
 \value{
 Object of class \code{svystat}, which is a named vector of survey CV estimates of the mean loss
@@ -70,9 +74,9 @@ you will probably prefer the convenience wrapper functions
 \code{\link{cv.svydesign}} or \code{\link{cv.svyglm}}.
 }
 \examples{
-# Compare CV MSEs and their SEs under 3 models
+# Compare CV MSEs and their SEs under 3 linear models
 # for a stratified sample and a one-stage cluster sample,
-# from the `survey` package
+# using data from the `survey` package
 library(survey)
 data("api", package = "survey")
 # stratified sample
@@ -86,7 +90,7 @@ cv.svy(apiclus1, c("api00~ell",
                    "api00~ell+meals+mobility"),
        nfolds = 5, clusterID = "dnum", weightsID = "pw", fpcID = "fpc")
 
-# Compare CV MSEs and their SEs under 3 models
+# Compare CV MSEs and their SEs under 3 linear models
 # for a stratified cluster sample with clusters nested within strata
 data(NSFG_data)
 library(splines)
@@ -96,6 +100,20 @@ cv.svy(NSFG_data, c("income ~ ns(age, df = 2)",
        nfolds = 4,
        strataID = "strata", clusterID = "SECU",
        nest = TRUE, weightsID = "wgt")
+
+# Logistic regression example, using the same stratified cluster sample;
+# instead of CV MSE, we calculate CV binary cross-entropy loss,
+# where (as with MSE) lower values indicate better fitting models
+# (NOTE: na.rm=TRUE is not usually ideal;
+#  it's used below purely for convenience, to keep the example short,
+#  but a thorough analysis would look for better ways to handle the missing data)
+cv.svy(NSFG_data, c("KnowPreg ~ ns(age, df = 1)",
+                    "KnowPreg ~ ns(age, df = 2)",
+                    "KnowPreg ~ ns(age, df = 3)"),
+       method = "logistic", nfolds = 4,
+       strataID = "strata", clusterID = "SECU",
+       nest = TRUE, weightsID = "wgt",
+       na.rm = TRUE)
 }
 \seealso{
 \code{\link[survey]{surveysummary}}, \code{\link[survey]{svydesign}}

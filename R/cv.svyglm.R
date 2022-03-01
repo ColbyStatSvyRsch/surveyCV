@@ -12,6 +12,8 @@
 #' @param glm_object Name of a \code{svyglm} object created from the \code{survey} package
 #' @param nfolds Number of folds to be used during cross validation, defaults to
 #'   5
+#' @param na.rm Whether to drop cases with missing values when taking `svymean`
+#'   of test losses
 #' @return Object of class \code{svystat}, which is a named vector with the survey CV estimate of the mean loss
 #'   (MSE for linear models, or binary cross-entropy for logistic models)
 #'   for the model in the \code{svyglm} object provided to \code{glm_object};
@@ -20,9 +22,9 @@
 #' @seealso \code{\link[survey]{surveysummary}}, \code{\link[survey]{svydesign}}, \code{\link[survey]{svyglm}}
 #' @seealso \code{\link{cv.svydesign}} to use with a \code{svydesign} object for comparing several \code{svyglm} models
 #' @examples
-#' # Calculate CV MSE and its SE under one `svyglm` model
+#' # Calculate CV MSE and its SE under one `svyglm` linear model
 #' # for a stratified sample and a one-stage cluster sample,
-#' # from the `survey` package
+#' # using data from the `survey` package
 #' library(survey)
 #' data("api", package = "survey")
 #' # stratified sample
@@ -35,7 +37,7 @@
 #' glmclus1 <- svyglm(api00 ~ ell+meals+mobility, design = dclus1)
 #' cv.svyglm(glmclus1, nfolds = 5)
 #'
-#' # Calculate CV MSE and its SE under one `svyglm` model
+#' # Calculate CV MSE and its SE under one `svyglm` linear model
 #' # for a stratified cluster sample with clusters nested within strata
 #' data(NSFG_data)
 #' library(splines)
@@ -43,18 +45,28 @@
 #'                          weights = ~wgt, data = NSFG_data)
 #' NSFG.svyglm <- svyglm(income ~ ns(age, df = 3), design = NSFG.svydes)
 #' cv.svyglm(glm_object = NSFG.svyglm, nfolds = 4)
+#'
+#' # Logistic regression example, using the same stratified cluster sample;
+#' # instead of CV MSE, we calculate CV binary cross-entropy loss,
+#' # where (as with MSE) lower values indicate better fitting models
+#' # (NOTE: na.rm=TRUE is not usually ideal;
+#' #  it's used below purely for convenience, to keep the example short,
+#' #  but a thorough analysis would look for better ways to handle the missing data)
+#' NSFG.svyglm.logreg <- svyglm(KnowPreg ~ ns(age, df = 2),
+#'                              design = NSFG.svydes, family = quasibinomial())
+#' cv.svyglm(glm_object = NSFG.svyglm.logreg, nfolds = 4, na.rm = TRUE)
 #' @export
 
 # TODO: Write formal unit tests
 
-cv.svyglm <- function(glm_object, nfolds = 5) {
+cv.svyglm <- function(glm_object, nfolds = 5, na.rm = FALSE) {
 
   family <- glm_object$family$family
   stopifnot(family %in% c("gaussian", "quasibinomial"))
   method <- if (family == "gaussian") {
     "linear"
   } else if (family == "quasibinomial" ) {
-      "logistic"
+    "logistic"
   }
 
   formulae <- deparse1(glm_object[["formula"]])
@@ -63,7 +75,7 @@ cv.svyglm <- function(glm_object, nfolds = 5) {
   # Runs our cv.svydesign() function using the pieces pulled from the glm object,
   # which will later push all of this information into our general cv.svy() function.
   cv.svydesign(design_object = design_object, formulae = formulae,
-               nfolds = nfolds, method = method)
+               nfolds = nfolds, method = method, na.rm = na.rm)
 
 }
 

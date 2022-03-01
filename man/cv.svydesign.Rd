@@ -8,7 +8,8 @@ cv.svydesign(
   design_object,
   formulae,
   nfolds = 5,
-  method = c("linear", "logistic")
+  method = c("linear", "logistic"),
+  na.rm = FALSE
 )
 }
 \arguments{
@@ -25,6 +26,9 @@ cross validation}
 
 \item{method}{String, must be either "linear" or "logistic", determines type of
 model fit during cross validation, defaults to linear}
+
+\item{na.rm}{Whether to drop cases with missing values when taking `svymean`
+of test losses}
 }
 \value{
 Object of class \code{svystat}, which is a named vector of survey CV estimates of the mean loss
@@ -44,9 +48,9 @@ you may prefer the convenience wrapper function
 \code{\link{cv.svyglm}}.
 }
 \examples{
-# Compare CV MSEs and their SEs under 3 models
+# Compare CV MSEs and their SEs under 3 linear models
 # for a stratified sample and a one-stage cluster sample,
-# from the `survey` package
+# using data from the `survey` package
 library(survey)
 data("api", package = "survey")
 # stratified sample
@@ -63,7 +67,7 @@ cv.svydesign(formulae = c("api00~ell",
                           "api00~ell+meals+mobility"),
              design_object = dclus1, nfolds = 5)
 
-# Compare CV MSEs and their SEs under 3 models
+# Compare CV MSEs and their SEs under 3 linear models
 # for a stratified cluster sample with clusters nested within strata
 data(NSFG_data)
 library(splines)
@@ -73,6 +77,18 @@ cv.svydesign(formulae = c("income ~ ns(age, df = 2)",
                           "income ~ ns(age, df = 3)",
                           "income ~ ns(age, df = 4)"),
              design_object = NSFG.svydes, nfolds = 4)
+
+# Logistic regression example, using the same stratified cluster sample;
+# instead of CV MSE, we calculate CV binary cross-entropy loss,
+# where (as with MSE) lower values indicate better fitting models
+# (NOTE: na.rm=TRUE is not usually ideal;
+#  it's used below purely for convenience, to keep the example short,
+#  but a thorough analysis would look for better ways to handle the missing data)
+cv.svydesign(formulae = c("KnowPreg ~ ns(age, df = 1)",
+                          "KnowPreg ~ ns(age, df = 2)",
+                          "KnowPreg ~ ns(age, df = 3)"),
+             design_object = NSFG.svydes, nfolds = 4,
+             method = "logistic", na.rm = TRUE)
 }
 \seealso{
 \code{\link[survey]{surveysummary}}, \code{\link[survey]{svydesign}}

@@ -4,13 +4,16 @@
 \alias{cv.svyglm}
 \title{CV for \code{svyglm} objects}
 \usage{
-cv.svyglm(glm_object, nfolds = 5)
+cv.svyglm(glm_object, nfolds = 5, na.rm = FALSE)
 }
 \arguments{
 \item{glm_object}{Name of a \code{svyglm} object created from the \code{survey} package}
 
 \item{nfolds}{Number of folds to be used during cross validation, defaults to
 5}
+
+\item{na.rm}{Whether to drop cases with missing values when taking `svymean`
+of test losses}
 }
 \value{
 Object of class \code{svystat}, which is a named vector with the survey CV estimate of the mean loss
@@ -30,9 +33,9 @@ If you have created a \code{svydesign} object and want to compare several \code{
 you may prefer the function \code{\link{cv.svydesign}}.
 }
 \examples{
-# Calculate CV MSE and its SE under one `svyglm` model
+# Calculate CV MSE and its SE under one `svyglm` linear model
 # for a stratified sample and a one-stage cluster sample,
-# from the `survey` package
+# using data from the `survey` package
 library(survey)
 data("api", package = "survey")
 # stratified sample
@@ -45,7 +48,7 @@ dclus1 <- svydesign(id = ~dnum, weights = ~pw, data = apiclus1, fpc = ~fpc)
 glmclus1 <- svyglm(api00 ~ ell+meals+mobility, design = dclus1)
 cv.svyglm(glmclus1, nfolds = 5)
 
-# Calculate CV MSE and its SE under one `svyglm` model
+# Calculate CV MSE and its SE under one `svyglm` linear model
 # for a stratified cluster sample with clusters nested within strata
 data(NSFG_data)
 library(splines)
@@ -53,6 +56,16 @@ NSFG.svydes <- svydesign(id = ~SECU, strata = ~strata, nest = TRUE,
                          weights = ~wgt, data = NSFG_data)
 NSFG.svyglm <- svyglm(income ~ ns(age, df = 3), design = NSFG.svydes)
 cv.svyglm(glm_object = NSFG.svyglm, nfolds = 4)
+
+# Logistic regression example, using the same stratified cluster sample;
+# instead of CV MSE, we calculate CV binary cross-entropy loss,
+# where (as with MSE) lower values indicate better fitting models
+# (NOTE: na.rm=TRUE is not usually ideal;
+#  it's used below purely for convenience, to keep the example short,
+#  but a thorough analysis would look for better ways to handle the missing data)
+NSFG.svyglm.logreg <- svyglm(KnowPreg ~ ns(age, df = 2),
+                             design = NSFG.svydes, family = quasibinomial())
+cv.svyglm(glm_object = NSFG.svyglm.logreg, nfolds = 4, na.rm = TRUE)
 }
 \seealso{
 \code{\link[survey]{surveysummary}}, \code{\link[survey]{svydesign}}, \code{\link[survey]{svyglm}}

@@ -29,6 +29,8 @@
 #'   should not be set FALSE except for running simulations to understand the properties of surveyCV
 #' @param useSvyForLoss Specify useSvyForLoss = TRUE (default) to take svydesign into account when calculating loss over test sets;
 #'   should not be set FALSE except for running simulations to understand the properties of surveyCV
+#' @param na.rm Whether to drop cases with missing values when taking `svymean`
+#'   of test losses
 #' @return Object of class \code{svystat}, which is a named vector of survey CV estimates of the mean loss
 #'   (MSE for linear models, or binary cross-entropy for logistic models) for each model,
 #'   with names ".Model_1", ".Model_2", etc. corresponding to the models provided in \code{formulae};
@@ -38,9 +40,9 @@
 #' @seealso \code{\link{cv.svydesign}} for a wrapper to use with a \code{svydesign} object,
 #'   or \code{\link{cv.svyglm}} for a wrapper to use with a \code{svyglm} object
 #' @examples
-#' # Compare CV MSEs and their SEs under 3 models
+#' # Compare CV MSEs and their SEs under 3 linear models
 #' # for a stratified sample and a one-stage cluster sample,
-#' # from the `survey` package
+#' # using data from the `survey` package
 #' library(survey)
 #' data("api", package = "survey")
 #' # stratified sample
@@ -54,7 +56,7 @@
 #'                    "api00~ell+meals+mobility"),
 #'        nfolds = 5, clusterID = "dnum", weightsID = "pw", fpcID = "fpc")
 #'
-#' # Compare CV MSEs and their SEs under 3 models
+#' # Compare CV MSEs and their SEs under 3 linear models
 #' # for a stratified cluster sample with clusters nested within strata
 #' data(NSFG_data)
 #' library(splines)
@@ -64,11 +66,27 @@
 #'        nfolds = 4,
 #'        strataID = "strata", clusterID = "SECU",
 #'        nest = TRUE, weightsID = "wgt")
+#'
+#' # Logistic regression example, using the same stratified cluster sample;
+#' # instead of CV MSE, we calculate CV binary cross-entropy loss,
+#' # where (as with MSE) lower values indicate better fitting models
+#' # (NOTE: na.rm=TRUE is not usually ideal;
+#' #  it's used below purely for convenience, to keep the example short,
+#' #  but a thorough analysis would look for better ways to handle the missing data)
+#' cv.svy(NSFG_data, c("KnowPreg ~ ns(age, df = 1)",
+#'                     "KnowPreg ~ ns(age, df = 2)",
+#'                     "KnowPreg ~ ns(age, df = 3)"),
+#'        method = "logistic", nfolds = 4,
+#'        strataID = "strata", clusterID = "SECU",
+#'        nest = TRUE, weightsID = "wgt",
+#'        na.rm = TRUE)
 #' @export
 
 
 # TODO: Improve the API / interface: be consistent with `survey`, with tidyverse,
 #       and with other packages that do cross-validation (or at least SOME of these)
+#       See for instance https://github.com/gergness/srvyr/issues/140
+#       about `srvyr` and `tidymodels`
 
 # TODO: Allow other svydesign features besides clusters, strata, weights, and nest,
 #       such as pps options, or the option to specify probs instead of weights
@@ -78,6 +96,17 @@
 # TODO: Add other GLMs (eg Poisson) and other models built in to `survey`;
 #       or is there a better way to write our code so it "just works" no matter what model,
 #       so users don't have to specify linear, logistic, etc.?
+
+# TODO: Add more error-handling checks on response variables:
+#       for each formula in formulae, are the response vars the same?
+#         (if not, we shouldn't be comparing them with CV)
+#       and are they either all continuous (for linear model)
+#         or all 0/1 or binary factor (for logistic)?
+#       and for logistic, are there enough of each class to fit models?
+#         (glmnet complains if any class has 0 or 1 observations;
+#          but we might also need to do that *within each fold*,
+#          so possibly might need to rerun appendfolds() a few times
+#          or build in an option to stratify on response???)
 
 # TODO: Condense the ways we create train.svydes and full.svydes to avoid code copies?
 
@@ -89,7 +118,8 @@
 # General Cross Validation
 cv.svy <- function(Data, formulae, nfolds=5, strataID = NULL, clusterID = NULL, nest = FALSE, fpcID = NULL,
                    method = c("linear", "logistic"), weightsID = NULL,
-                   useSvyForFolds = TRUE, useSvyForFits = TRUE, useSvyForLoss = TRUE) {
+                   useSvyForFolds = TRUE, useSvyForFits = TRUE, useSvyForLoss = TRUE,
+                   na.rm = FALSE) {
 
   method <- match.arg(method)
   stopifnot(nfolds >= 1, nfolds <= nrow(Data))
@@ -139,6 +169,13 @@ cv.svy <- function(Data, formulae, nfolds=5, strataID = NULL, clusterID = NULL, 
         current.model <- svyglm(formula=formulae[[form]], design=train.svydes, family = quasibinomial())
         predictions <- predict(current.model, newdata=test, type="response")
         test.responses <- eval(formulae[[form]][[2]], envir=test)
+        if(is.factor(test.responses)) {
+          stopifnot(length(levels(test.responses)) == 2)
+          # If y is a factor, R's glm and svyglm internally use a dummy var with
+          # values of 0 for the baseline level and 1 for the non-baseline;
+          # we must do the same to eval test.responses against numeric predictions
+          test.responses <- as.numeric(test.responses == levels(test.responses)[2])
+        }
         .test_loss[test$.ID, form] <- -(test.responses * log(predictions) + (1-test.responses) * log(1-predictions))
       }
     }
@@ -161,7 +198,8 @@ cv.svy <- function(Data, formulae, nfolds=5, strataID = NULL, clusterID = NULL, 
   # each of these columns is the .test_loss values for one of the formulae
   whichvars <- names(Data)[ncol(Data) - nformulae + (1:nformulae)]
   # Use make.formula() to tell svymean() to estimate their means and SEs
-  CVmeans <- svymean(make.formula(whichvars), full.svydes)
+  CVmeans <- svymean(make.formula(whichvars), full.svydes,
+                     na.rm = na.rm)
   # Return the resulting svystat object
   return(CVmeans)
 }
