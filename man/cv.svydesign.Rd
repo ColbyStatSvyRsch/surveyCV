@@ -14,9 +14,7 @@ cv.svydesign(
 }
 \arguments{
 \item{design_object}{Name of a \code{svydesign} object created using the \code{survey}
-package. The argument \code{id} (also \code{strata}, \code{fpc}, and/or \code{weights} if used)
-must be specified as formulas, e.g. \code{svydesign(ids = ~MyPSUs, ...)}.
-We do not yet support use of \code{probs} or \code{pps}.}
+package. We do not yet support use of \code{probs} or \code{pps}.}
 
 \item{formulae}{Vector of formulas (as strings) for the GLMs to be compared in
 cross validation}
@@ -46,6 +44,13 @@ Returns survey CV estimates of the mean loss for each model
 If you have already fitted a \code{svyglm},
 you may prefer the convenience wrapper function
 \code{\link{cv.svyglm}}.
+For models other than linear or logistic regression,
+you can use \code{\link{folds.svy}} or \code{\link{folds.svydesign}} to generate
+CV fold IDs that respect any stratification or clustering in the survey design.
+You can then carry out K-fold CV as usual,
+taking care to also use the survey design features and survey weights
+when fitting models in each training set
+and also when evaluating models against each test set.
 }
 \examples{
 # Compare CV MSEs and their SEs under 3 linear models

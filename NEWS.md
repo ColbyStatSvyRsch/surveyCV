@@ -1,3 +1,7 @@
+# surveyCV 0.2.0
+
+* Make `folds.svy()` and `folds.svydesign()` functions directly accessible and documented, so that users can form survey-design-based CV folds and use them with other models besides `svyglm`.
+
 # surveyCV 0.1.2
 
 * Allow logistic regression response variable to be a factor, not just 0/1. Add logistic regression `example()` to function documentation. Add `na.rm` arguments, passed internally to `svymean` when calculating average of CV test losses.

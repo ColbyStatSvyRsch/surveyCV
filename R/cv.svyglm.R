@@ -8,6 +8,13 @@
 #' (MSE for linear models, or binary cross-entropy for logistic models).
 #' If you have created a \code{svydesign} object and want to compare several \code{svyglm} models,
 #' you may prefer the function \code{\link{cv.svydesign}}.
+#' For models other than linear or logistic regression,
+#' you can use \code{\link{folds.svy}} or \code{\link{folds.svydesign}} to generate
+#' CV fold IDs that respect any stratification or clustering in the survey design.
+#' You can then carry out K-fold CV as usual,
+#' taking care to also use the survey design features and survey weights
+#' when fitting models in each training set
+#' and also when evaluating models against each test set.
 #'
 #' @param glm_object Name of a \code{svyglm} object created from the \code{survey} package
 #' @param nfolds Number of folds to be used during cross validation, defaults to

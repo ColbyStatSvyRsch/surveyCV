@@ -1,18 +1,71 @@
-# Utility functions for creating folds based on the survey design.
+#' Creating CV folds based on the survey design
+#'
+#' This function creates a fold ID for each row in the dataset,
+#' to be used for carrying out cross validation on survey samples taken using a
+#' SRS, stratified, clustered, or clustered-and-stratified sampling design.
+#' Returns a vector of fold IDs, which in most cases you will want to append
+#' to your dataset using \code{cbind} or similar (see Examples below).
+#' These fold IDs respect any stratification or clustering in the survey design.
+#' You can then carry out K-fold CV as usual,
+#' taking care to also use the survey design features and survey weights
+#' when fitting models in each training set
+#' and also when evaluating models against each test set.
+#' If you have already created a \code{svydesign} object,
+#' you will probably prefer the convenience wrapper function
+#' \code{\link{folds.svydesign}}.
+#' For the special cases of linear or logistic GLMs, use instead
+#' \code{\link{cv.svy}}, \code{\link{cv.svydesign}}, or \code{\link{cv.svyglm}}
+#' which will automate the whole CV process for you.
+#'
+#' @param Data Dataframe of dataset
+#' @param nfolds Number of folds to be used during cross validation
+#' @param strataID String of the variable name used to stratify during sampling, must
+#'   be the same as in the dataset used
+#' @param clusterID String of the variable name used to cluster during sampling, must
+#'   be the same as in the dataset used
+#' @return Integer vector of fold IDs with length \code{nrow(Data)}.
+#'   Most likely you will want to append the returned vector to your dataset,
+#'   for instance with \code{cbind} (see Examples below).
+#' @seealso \code{\link{folds.svydesign}} for a wrapper to use with a \code{svydesign} object
+#' @seealso \code{\link{cv.svy}}, \code{\link{cv.svydesign}}, or \code{\link{cv.svyglm}}
+#'   to carry out the whole CV process (not just forming folds but also training
+#'   and testing your models) for linear or logistic regression models
+#' @examples
+#' # Set up CV folds for a stratified sample and a one-stage cluster sample,
+#' # using data from the `survey` package
+#' library(survey)
+#' data("api", package = "survey")
+#' # stratified sample
+#' apistrat <- cbind(apistrat,
+#'                   .foldID = folds.svy(apistrat, nfolds = 5, strataID = "stype"))
+#' # Each fold will have observations from every stratum
+#' with(apistrat, table(stype, .foldID))
+#' # Fold sizes should be roughly equal
+#' table(apistrat$.foldID)
+#' #
+#' # one-stage cluster sample
+#' apiclus1 <- cbind(apiclus1,
+#'                   .foldID = folds.svy(apiclus1, nfolds = 5, clusterID = "dnum"))
+#' # For any given cluster, all its observations will be in the same fold;
+#' # and each fold should contain roughly the same number of clusters
+#' with(apiclus1, table(dnum, .foldID))
+#' # But if cluster sizes are unequal,
+#' # the number of individuals per fold will also vary
+#' table(apiclus1$.foldID)
+#' @export
+
+# TODO: add an example using folds.svy() to carry out survey CV manually
+# for some model (not linear or logistic) that surveyCV can't handle directly
 
 
-# TODO: DOCUMENTATION WILL NEED TO BE UPDATED
-#   (eventually, though perhaps no rush, since
-#   this is not currently meant to be a user-facing function)
-
-# TODO: Combine all these 4 cases (SRS, Clus, Strat, and Clus+Strat)
+# TODO: Consider combining all these 4 cases (SRS, Clus, Strat, and Clus+Strat)
 #   into one Clus+Strat case where we just
 #   set all cluster IDs to 1:n if there's no clustering, and/or
 #   set all stratum IDs to 1 if there's no stratification
 
 # TODO: Change the stopifnot() error message for strata:
 #   if some strata are too small and you don't want to decrease nfolds,
-#   you could instead manually create larger pseudo-strata
+#   suggest that the user could instead manually create larger pseudo-strata
 #   by combining several smaller ones... e.g. see Lumley p43?
 
 # TODO: Add a `verbose` argument, and if(verbose),
@@ -39,16 +92,18 @@
 
 
 
-# appendfolds()
+# folds.svy()
 # Inputs:
 #   the dataset,
 #   number of folds,
 #   and strings for the names of the stratum and cluster variables in Data
-#   (we don't ask whether nest=TRUE or FALSE because the code is written
+#   (we don't need to ask whether nest=TRUE or FALSE because the code is written
 #    to handle clusters separately within each stratum, if strata are given)
 # Outputs:
-#   same dataset with fold IDs appended in a .foldID variable
-appendfolds <- function(Data, nfolds, strataID = NULL, clusterID = NULL) {
+#   .foldID = a vector of fold IDs, from 1 to nfolds,
+#      in the order of original dataset's rows
+#      (meant to be appended to it, e.g. as `Data <- cbind(Data, .foldID)`)
+folds.svy <- function(Data, nfolds, strataID = NULL, clusterID = NULL) {
   stopifnot(nfolds <= nrow(Data))
 
   if(is.null(strataID) & is.null(clusterID)) {
@@ -142,6 +197,6 @@ appendfolds <- function(Data, nfolds, strataID = NULL, clusterID = NULL) {
 
   }
 
-  return(cbind(Data, .foldID = .foldID))
+  return(.foldID)
 }
 

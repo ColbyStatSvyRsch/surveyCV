@@ -7,8 +7,15 @@
 #' If you have already created a \code{svydesign} object or fitted a \code{svyglm},
 #' you will probably prefer the convenience wrapper functions
 #' \code{\link{cv.svydesign}} or \code{\link{cv.svyglm}}.
+#' For models other than linear or logistic regression,
+#' you can use \code{\link{folds.svy}} or \code{\link{folds.svydesign}} to generate
+#' CV fold IDs that respect any stratification or clustering in the survey design.
+#' You can then carry out K-fold CV as usual,
+#' taking care to also use the survey design features and survey weights
+#' when fitting models in each training set
+#' and also when evaluating models against each test set.
 #'
-#' @param Data Dataframe of dataset to be tested
+#' @param Data Dataframe of dataset to be used for CV
 #' @param formulae Vector of formulas (as strings) for the GLMs to be compared in
 #'   cross validation
 #' @param nfolds Number of folds to be used during cross validation, defaults to
@@ -129,11 +136,11 @@ cv.svy <- function(Data, formulae, nfolds=5, strataID = NULL, clusterID = NULL, 
   nformulae <- length(formulae)
   # Creates an observation ID variable for the dataset
   Data$.ID <- 1:nrow(Data)
-  # Runs our fold generation function seen in utils
+  # Runs our fold generation function
   if (useSvyForFolds == TRUE) {
-    Data <- appendfolds(Data = Data, nfolds = nfolds, strataID = strataID, clusterID = clusterID)
+    Data <- cbind(Data, .foldID = folds.svy(Data = Data, nfolds = nfolds, strataID = strataID, clusterID = clusterID))
   } else  {
-    Data <- appendfolds(Data = Data, nfolds = nfolds)
+    Data <- cbind(Data, .foldID = folds.svy(Data = Data, nfolds = nfolds))
   }
 
   # Makes a matrix that the test losses will be pumped back into inside the for loop

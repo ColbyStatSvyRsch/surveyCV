@@ -21,7 +21,7 @@ cv.svy(
 )
 }
 \arguments{
-\item{Data}{Dataframe of dataset to be tested}
+\item{Data}{Dataframe of dataset to be used for CV}
 
 \item{formulae}{Vector of formulas (as strings) for the GLMs to be compared in
 cross validation}
@@ -72,6 +72,13 @@ Returns survey CV estimates of the mean loss for each model
 If you have already created a \code{svydesign} object or fitted a \code{svyglm},
 you will probably prefer the convenience wrapper functions
 \code{\link{cv.svydesign}} or \code{\link{cv.svyglm}}.
+For models other than linear or logistic regression,
+you can use \code{\link{folds.svy}} or \code{\link{folds.svydesign}} to generate
+CV fold IDs that respect any stratification or clustering in the survey design.
+You can then carry out K-fold CV as usual,
+taking care to also use the survey design features and survey weights
+when fitting models in each training set
+and also when evaluating models against each test set.
 }
 \examples{
 # Compare CV MSEs and their SEs under 3 linear models

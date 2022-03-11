@@ -1,15 +1,16 @@
 Package: surveyCV
 Type: Package
 Title: Cross Validation Based on Survey Design
-Version: 0.1.2
-Date: 2022-03-01
+Version: 0.2.0
+Date: 2022-03-11
 Authors@R: c(
     person("Cole", "Guerin", email = "cole@guerincreative.com", role = "aut"),
     person("Thomas", "McMahon", email = "thomasmcmahon9@gmail.com", role = "aut"),
     person("Jerzy", "Wieczorek", email = "jawieczo@colby.edu", role = c("cre", "aut")),
     person("Hunter", "Ratliff", role = "ctb"))
-Description: Functions to generate test error estimates using cross validation, 
-    based on how a survey design is constructed
+Description: Functions to generate K-fold cross validation (CV) folds
+    and CV test error estimates that take into account
+    how a survey dataset's sampling design was constructed
     (SRS, clustering, stratification, and/or unequal sampling weights).
     You can input linear and logistic regression models, along with data and a 
     type of survey design in order to get an output that can help you determine

@@ -8,6 +8,10 @@ clus <- rep(rep(1:nclus, length.out = n/nstrat), nstrat)
 df <- data.frame(x, strat, clus)
 df <- df[sample(1:n), ]
 
+# Make a convenience wrapper for folds.svy()
+appendfolds <- function(Data, nfolds, strataID = NULL, clusterID = NULL) {
+  return(cbind(Data, .foldID = folds.svy(Data, nfolds, strataID, clusterID)))
+}
 
 
 test_that("SRS folds spread out cases evenly across folds", {
