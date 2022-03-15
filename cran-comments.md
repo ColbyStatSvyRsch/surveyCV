@@ -1,29 +1,15 @@
-## Resubmission
+## Summary of changes since last CRAN version (v0.1.1)
 
-This is a resubmission. In this version I have:
-
-* Used only undirected quotation marks in the DESCRIPTION text.
-
-* Added \value to .Rd files to describe function results and output structure,
-as well as \seealso and other links to related documentation,
-for each of man/cv.svy.Rd, man/cv.svydesign.Rd, and man/cv.svyglm.Rd.
-
-* Replaced print() information messages to the console with stopifnot(),
-in R/cv.svy.R.
-
-* Removed R/plot_generation.R and vignettes/early-results.Rmd,
-in which we used to set a random seed inside a function.
-Also removed the associated saved simulated data from R/sysdata.rda,
-and removed 'sampling' package from Suggests.
-We had been using them internally to document earlier work in progress,
-but this function and vignette are not needed by package users.
-
-* Changed Depends to earlier R 4.0 (as well as Suggests for grid and splines).
+* Update docs with link to *Stat* paper <doi:10.1002/sta4.454> published on Jan 12, 2022.
+* Allow logistic regression response variable to be a factor, not just 0/1. Add logistic regression `example()` to function documentation.
+* Add `na.rm` arguments, passed internally to `svymean` when calculating average of CV test losses.
+* Make `folds.svy()` and `folds.svydesign()` functions directly accessible and documented, so that users can form survey-design-based CV folds and use them with other models besides `svyglm`.
+* Add examples to README and `intro` vignette illustrating how to use `folds.svy()` with design-consistent random forest models from the `rpms` package.
 
 
 ## Test environments
 
-* local Windows 10 install, R 4.1.2
+* local Windows 10 install, R 4.1.3
 * devtools::check_rhub()
 * devtools::check_win_release()
 * devtools::check_win_devel()
@@ -32,20 +18,7 @@ but this function and vignette are not needed by package users.
 
 ## R CMD check results
 
-There were no ERRORs or WARNINGs.
-
-There were two NOTEs:
-
-* New submission
-
-This is indeed a new submission. 
-
-* Possibly misspelled words in DESCRIPTION:
-  GitHub (17:62)
-  SRS (12:6)
-  repo (17:69)
-
-Those words are not misspelled. SRS = simple random sample.
+There were no ERRORs, WARNINGs, or NOTEs.
 
 
 ## Downstream dependencies

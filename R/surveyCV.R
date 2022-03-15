@@ -9,7 +9,7 @@
 #' which model best fits the data using K-fold cross validation.
 #' Our paper on "K-Fold Cross-Validation for Complex Sample Surveys"
 #' by Wieczorek, Guerin, and McMahon (2022)
-#' \href{https://doi.org/10.1002/sta4.454}{<doi:10.1002/sta4.454>}
+#' <\doi{10.1002/sta4.454}>
 #' explains why differing how we take folds based on survey design is useful.
 #'
 #' The code for this package seeks to create an alternative for the
