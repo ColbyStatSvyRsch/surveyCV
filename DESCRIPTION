@@ -2,7 +2,7 @@ Package: surveyCV
 Type: Package
 Title: Cross Validation Based on Survey Design
 Version: 0.2.0
-Date: 2022-03-11
+Date: 2022-03-14
 Authors@R: c(
     person("Cole", "Guerin", email = "cole@guerincreative.com", role = "aut"),
     person("Thomas", "McMahon", email = "thomasmcmahon9@gmail.com", role = "aut"),
@@ -29,13 +29,14 @@ Imports:
 Suggests:
     dplyr (>= 1.0),
     ggplot2 (>= 3.3),
+    grid (>= 4.0),
     gridExtra (>= 2.3),
     ISLR (>= 1.2),
     knitr (>= 1.29),
     rmarkdown (>= 2.2),
-    testthat (>= 3.1),
-    grid (>= 4.0),
-    splines (>= 4.0)
+    rpms (>= 0.5),
+    splines (>= 4.0),
+    testthat (>= 3.1)
 VignetteBuilder: knitr
 URL: https://github.com/ColbyStatSvyRsch/surveyCV/
 BugReports: https://github.com/ColbyStatSvyRsch/surveyCV/issues

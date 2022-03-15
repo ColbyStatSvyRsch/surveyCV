@@ -1,6 +1,7 @@
 # surveyCV 0.2.0
 
 * Make `folds.svy()` and `folds.svydesign()` functions directly accessible and documented, so that users can form survey-design-based CV folds and use them with other models besides `svyglm`.
+* Add examples to README and `intro` vignette illustrating how to use `folds.svy()` with design-consistent random forest models from the `rpms` package.
 
 # surveyCV 0.1.2
 
