@@ -116,6 +116,8 @@
 #          or build in an option to stratify on response???)
 
 # TODO: Condense the ways we create train.svydes and full.svydes to avoid code copies?
+#       Can we replace the hardcoded train.svydesign details
+#       with just subset.survey.design() ???
 
 # TODO: Condense the ways we calculate test errors / losses for linear vs logistic, to avoid code copies?
 

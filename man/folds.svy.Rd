@@ -62,6 +62,9 @@ with(apiclus1, table(dnum, .foldID))
 # But if cluster sizes are unequal,
 # the number of individuals per fold will also vary
 table(apiclus1$.foldID)
+# See the end of `intro` vignette for an example of using such folds
+# as part of a custom loop over CV folds
+# to tune parameters in a design-consistent random forest model
 }
 \seealso{
 \code{\link{folds.svydesign}} for a wrapper to use with a \code{svydesign} object

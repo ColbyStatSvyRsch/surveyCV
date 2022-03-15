@@ -5,8 +5,9 @@
 \alias{surveyCV}
 \title{surveyCV: Cross Validation Based on Survey Design}
 \description{
-Functions to generate test error estimates using cross validation,
-based on how a survey design is constructed
+Functions to generate K-fold cross validation (CV) folds
+and CV test error estimates that take into account
+how a survey dataset's sampling design was constructed
 (SRS, clustering, stratification, and/or unequal sampling weights).
 You can input linear and logistic regression models, along with data and a
 type of survey design in order to get an output that can help you determine
