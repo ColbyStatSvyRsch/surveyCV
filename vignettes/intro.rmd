@@ -235,7 +235,7 @@ Here is an example of tuning the bin size parameter for a design-based random fo
 
 Note that while `folds.svy()` accounts for the clustering in this survey design, we need to do a bit of extra work to ensure that the model training and testing steps also account for the survey design. In this particular example, we must pass the cluster IDs and survey weights to `rpms_forest()` for design-consistent model-fitting, and we must use the survey weights in the MSE calculations.
 
-<!-- NOTE: the code below is too slow to run when knitting the vignette, which is why I set eval=FALSE -->
+<!-- NOTE: the code below is too slow to run when knitting the vignette, which is why I set eval=FALSE here; I ran the code manually in data-raw/rpms_example.R instead -->
 
 ```{r, eval = FALSE}
 # Based on example("rpms"):
