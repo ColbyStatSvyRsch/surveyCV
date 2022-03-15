@@ -1,3 +1,7 @@
+# surveyCV 0.2.0.9000
+
+* Development version
+
 # surveyCV 0.2.0
 
 * Make `folds.svy()` and `folds.svydesign()` functions directly accessible and documented, so that users can form survey-design-based CV folds and use them with other models besides `svyglm`.
