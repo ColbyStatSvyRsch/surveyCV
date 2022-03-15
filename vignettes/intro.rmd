@@ -19,10 +19,12 @@ knitr::opts_chunk$set(
 
 This package implements cross validation (CV) for complex survey data, by accounting for strata, clusters, FPCs, and survey weights when creating CV folds as well as when calculating test-set loss estimates (currently either mean squared error (MSE) for linear models, or binary cross-entropy for logistic models). It is meant to work smoothly with [the `survey` package](https://cran.r-project.org/package=survey).
 
+In addition, the function `folds.svy()` (which makes the design-based CV folds) can be used to code up custom CV loops to evaluate other models besides linear and logistic regression.
+
 To understand why we believe it's important to account for survey design when carrying out CV, please see our paper: Wieczorek, Guerin, and McMahon (2022), "K-Fold Cross-Validation for Complex Sample Surveys," *Stat* [<doi:10.1002/sta4.454>](https://doi.org/10.1002/sta4.454).  
 Briefly, the problem is that standard CV assumes exchangeable data, which is not true of most complex sampling designs. We argue (1) that CV folds should mimic the sampling design (so that we're honest about how much the model-fits will vary across "samples like this one"), and (2) that test set MSEs should be averaged and weighted in ways that generalize to the full population from which the sample was drawn, assuming that is the population for which the models will be applied.
 
-This vignette briefly illustrates how to use `surveyCV` with several common types of sampling design. We provide three equivalent ways to carry out CV: direct control with `cv.svy`, use of an existing survey design object with `cv.svydesign`, or use of an existing survey GLM object with `cv.svyglm`.
+This vignette briefly illustrates how to use `surveyCV` with several common types of sampling design. We provide three equivalent ways to carry out CV: direct control with `cv.svy`, use of an existing survey design object with `cv.svydesign`, or use of an existing survey GLM object with `cv.svyglm`. We also illustrate how to write your own design-based CV loop, with a design-consistent random forest example from the [`rpms`](https://cran.r-project.org/package=rpms) package.
 
 
 
@@ -41,8 +43,9 @@ data("api")
 ```
 
 
+# Linear and logistic regression with `cv.svy`, `cv.svydesign`, and `cv.svyglm`
 
-# Direct control with `cv.svy`
+## Direct control with `cv.svy`
 
 First, we borrow some examples from the documentation for `survey::svyglm()`, based on the `api` data (the Academic Performance Index for California schools in the year 2000).
 
@@ -84,6 +87,8 @@ Note that our intent in this vignette is **not** to compare the stratified sampl
 
 Finally, we show an example from a different dataset, the 2015-2017 National Survey of Family Growth (NSFG), which uses clusters nested within strata as well as unequal sample weights. In this case we are using 4 folds, not 5 as above, because each stratum only has 4 clusters.
 
+(Note: We use `nest = TRUE` only if cluster IDs are nested within strata, i.e., if clusters in different strata might reuse the same names.)
+
 ```{r}
 # complex sample from NSFG
 library(splines)
@@ -102,7 +107,7 @@ Here we tend to see that the spline with 3 degrees of freedom fits a little bett
 
 
 
-# Using a survey design object with `cv.svydesign`
+## Using a survey design object with `cv.svydesign`
 
 When using the `survey` package, we will often create a `svydesign` object in order to calculate means and totals, fit GLMs, etc. In that case, instead of using `cv.svy()`, it is more convenient to use `cv.svydesign()`, which will read the relevant information out of the `svydesign` object and internally pass it along to `cv.svy()` for us.
 
@@ -147,7 +152,7 @@ cv.svydesign(formulae = c("income ~ ns(age, df = 1)",
 
 
 
-# Using a survey GLM object with `cv.svyglm`
+## Using a survey GLM object with `cv.svyglm`
 
 Finally, if we have already fit a `svyglm` object, we can use `cv.svyglm()` which will read the formula as well as the survey design information and internally pass it along to `cv.svy()` for us. However, this approach only works for one GLM at time instead of comparing several models in a single function.
 
@@ -176,7 +181,7 @@ cv.svyglm(glm_object = NSFG.svyglm, nfolds = 4)
 
 
 
-# Fitting a logistic model instead of linear
+## Fitting a logistic model instead of linear
 
 If we have a binary response variable and wish to fit a logistic regression instead, we can use `family = quasibinomial()` in the call to `svyglm()` and feed that directly into `cv.svyglm()`:
 
@@ -186,7 +191,8 @@ NSFG.svyglm.logistic <- svyglm(LBW ~ ns(age, df = 3), design = NSFG.svydes,
 cv.svyglm(glm_object = NSFG.svyglm.logistic, nfolds = 4)
 ```
 
-In this case, the `mean` column shows the average of the binary cross-entropy loss $-[y_i \log(\hat y_i) + (1-y_i)\log(1-\hat y_i)]$ rather than MSE.
+In this case, the `mean` column shows the average of the binary cross-entropy loss $-[y_i \log(\hat y_i) + (1-y_i)\log(1-\hat y_i)]$ rather than MSE.  
+As with MSE, lower values of this loss indicate better-fitting models.
 
 Or we can set `method = "logistic"` in `cv.svydesign()` or in `cv.svy()`:
 
@@ -212,4 +218,94 @@ cv.svy(NSFG_data, c("LBW ~ ns(age, df = 1)",
        method = "logistic")
 ```
 
+These two examples are carrying out the same CV over the same data and same models; they have slightly different results only because of randomness in forming the CV folds for each example.
+
+In these examples, model 2 or model 3 has the lowest loss, though any differences between models are well within one SE.
+
+
+# Other models with `folds.svy` and `folds.svydesign`
+
+
+The function `folds.svy()` generates design-based fold IDs for K-fold CV, using any specified strata and clusters.  
+(Briefly: For a stratified sample, each fold will contain data from each stratum. For a cluster sample, a given cluster's rows will all be assigned to the same fold. See [our *Stat* paper](https://doi.org/10.1002/sta4.454) for details.)
+
+Using these fold IDs, you can write your own CV loop for models that our packages does not currently handle. These might be other models from the `survey` package (Poisson regression, Cox proportional hazards model, etc.) or from other design-based modeling packages such as [`rpms`](https://cran.r-project.org/package=rpms), [`mase`](https://cran.r-project.org/package=mase), or others in the [CRAN Task View on Official Statistics & Survey Statistics](https://cran.r-project.org/view=OfficialStatistics).
+
+Here is an example of tuning the bin size parameter for a design-based random forest, using the `rpms_forest()` function from the [`rpms`](https://cran.r-project.org/package=rpms) package. (I have also set the forest size to 50 trees instead of the default 500, purely in order to make the example run faster.)
+
+Note that while `folds.svy()` accounts for the clustering in this survey design, we need to do a bit of extra work to ensure that the model training and testing steps also account for the survey design. In this particular example, we must pass the cluster IDs and survey weights to `rpms_forest()` for design-consistent model-fitting, and we must use the survey weights in the MSE calculations.
+
+<!-- NOTE: the code below is too slow to run when knitting the vignette, which is why I set eval=FALSE -->
+
+```{r, eval = FALSE}
+# Based on example("rpms"):
+#   model the mean of retirement account value `IRAX` among households with 
+#   reported retirement account values > 0,
+#   predicted from householder education, age, and urban/rural location
+library(rpms)
+data(CE)
+
+# Generate fold IDs that account for clustering in the survey design
+# for the IRAX>0 subset of the CE dataset
+nfolds <- 5
+CEsubset <- CE[which(CE$IRAX > 0), ]
+CEsubset$.foldID <- folds.svy(CEsubset, nfolds = nfolds, clusterID = "CID")
+
+# Use CV to tune the bin_size parameter of rpms_forest()
+bin_sizes <- c(10, 20, 50, 100, 250, 500)
+
+# Create placeholder for weighted Sums of Squared Errors
+SSEs <- rep(0, length(bin_sizes))
+
+for(ff in 1:nfolds) { # For every fold...
+  # Use .foldID to split data into training and testing sets
+  train <- subset(CEsubset, .foldID != ff)
+  test  <- subset(CEsubset, .foldID == ff)
+
+  for(bb in 1:length(bin_sizes)) { # For every value of the tuning parameter...
+    # Fit a new model
+    rf <- rpms_forest(IRAX ~ EDUCA + AGE + BLS_URBN, 
+                      data = train,
+                      weights = ~FINLWT21, clusters = ~CID,
+                      bin_size = bin_sizes[bb], f_size = 50)
+    # Get predictions and squared errors
+    yhat <- predict(rf, newdata = test)
+    res2 <- (yhat - test$IRAX)^2
+    # Sum up weighted SSEs, not MSEs yet,
+    # b/c cluster sizes may differ across folds and b/c of survey weights
+    SSEs[bb] <- SSEs[bb] + sum(res2 * test$FINLWT21)
+  }
+}
+
+# Divide entire weighted sum by the sum of weights
+MSEs <- SSEs / sum(CEsubset$FINLWT21)
+
+# Show results
+cbind(bin_sizes, MSEs)
+#>      bin_sizes         MSEs
+#> [1,]        10 204246617270
+#> [2,]        20 202870633392
+#> [3,]        50 201393921358
+#> [4,]       100 201085838446
+#> [5,]       250 201825549231
+#> [6,]       500 204155844501
+```
+
+Bin size 100 had the lowest survey-weighted CV MSE estimate,
+although sizes 50 and 250 were quite similar.
+
+Using this chosen tuning parameter value, the next step could be to fit a random forest with bin size 100 on the full `CEsubset` dataset.
+
+In this case, `rpms_forest()` does not work with the `survey` package so there was no need to create a `svydesign` object for this analysis. But if we were working with a different model that expects us to create a `svydesign` object from `CEsubset`, we could have used `folds.svydesign()` instead, which would read out the cluster variable from the `svydesign` object automatically:
+
+```{r, eval = FALSE}
+CE.svydes <- svydesign(id = ~CID, weights = ~FINLWT21, data = CEsubset)
+# Use update() to add variables to a svydesign object
+CE.svydes <- update(CE.svydes,
+                    .foldID = folds.svydesign(CE.svydes, nfolds = nfolds))
+# Now the fold IDs are available as CE.svydes$variables$.foldID
+table(CE.svydes$variables$.foldID)
+#>   1   2   3   4   5 
+#> 813 923 928 885 960
+```
 
