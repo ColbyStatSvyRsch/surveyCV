@@ -10,9 +10,11 @@
 #' taking care to also use the survey design features and survey weights
 #' when fitting models in each training set
 #' and also when evaluating models against each test set.
+#'
 #' If you have already created a \code{svydesign} object,
 #' you will probably prefer the convenience wrapper function
 #' \code{\link{folds.svydesign}}.
+#'
 #' For the special cases of linear or logistic GLMs, use instead
 #' \code{\link{cv.svy}}, \code{\link{cv.svydesign}}, or \code{\link{cv.svyglm}}
 #' which will automate the whole CV process for you.

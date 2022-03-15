@@ -5,9 +5,11 @@
 #' and passes it into \code{\link{cv.svy}}.
 #' Returns survey CV estimates of the mean loss for each model
 #' (MSE for linear models, or binary cross-entropy for logistic models).
+#'
 #' If you have already fitted a \code{svyglm},
 #' you may prefer the convenience wrapper function
 #' \code{\link{cv.svyglm}}.
+#'
 #' For models other than linear or logistic regression,
 #' you can use \code{\link{folds.svy}} or \code{\link{folds.svydesign}} to generate
 #' CV fold IDs that respect any stratification or clustering in the survey design.

@@ -11,6 +11,7 @@
 #' taking care to also use the survey design features and survey weights
 #' when fitting models in each training set
 #' and also when evaluating models against each test set.
+#'
 #' For the special cases of linear or logistic GLMs, use instead
 #' \code{\link{cv.svydesign}} or \code{\link{cv.svyglm}}
 #' which will automate the whole CV process for you.

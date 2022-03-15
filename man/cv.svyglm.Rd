@@ -29,8 +29,11 @@ and passes it through \code{\link{cv.svydesign}} to \code{\link{cv.svy}}.
 Chooses linear or logistic regression based on the \code{svyglm} object's value of \code{family}.
 Returns survey CV estimates of the mean loss for each model
 (MSE for linear models, or binary cross-entropy for logistic models).
+}
+\details{
 If you have created a \code{svydesign} object and want to compare several \code{svyglm} models,
 you may prefer the function \code{\link{cv.svydesign}}.
+
 For models other than linear or logistic regression,
 you can use \code{\link{folds.svy}} or \code{\link{folds.svydesign}} to generate
 CV fold IDs that respect any stratification or clustering in the survey design.

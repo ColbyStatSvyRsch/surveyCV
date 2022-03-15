@@ -69,9 +69,12 @@ This is a cross validation function designed for survey samples taken using a SR
 stratified, clustered, or clustered-and-stratified sampling design.
 Returns survey CV estimates of the mean loss for each model
 (MSE for linear models, or binary cross-entropy for logistic models).
+}
+\details{
 If you have already created a \code{svydesign} object or fitted a \code{svyglm},
 you will probably prefer the convenience wrapper functions
 \code{\link{cv.svydesign}} or \code{\link{cv.svyglm}}.
+
 For models other than linear or logistic regression,
 you can use \code{\link{folds.svy}} or \code{\link{folds.svydesign}} to generate
 CV fold IDs that respect any stratification or clustering in the survey design.

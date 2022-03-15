@@ -2,7 +2,6 @@
 #'
 #' We downloaded this data from the NSFG website and cleaned it following
 #' an approach posted to RPubs by Hunter Ratliff.
-
 #'
 #' Note that these data were filtered down to include only:
 #'
