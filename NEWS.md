@@ -9,7 +9,9 @@
 
 # surveyCV 0.1.2
 
-* Allow logistic regression response variable to be a factor, not just 0/1. Add logistic regression `example()` to function documentation. Add `na.rm` arguments, passed internally to `svymean` when calculating average of CV test losses.
+* Allow logistic regression response variable to be a factor, not just 0/1. (Thanks to Aja Sutton @amsutton and Michelle Jamieson @themichjam.)
+* Add logistic regression `example()` to function documentation.
+* Add `na.rm` arguments, passed internally to `svymean` when calculating average of CV test losses.
 
 # surveyCV 0.1.1.9001
 
