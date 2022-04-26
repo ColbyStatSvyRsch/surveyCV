@@ -1,4 +1,4 @@
-# surveyCV
+# `surveyCV`: Cross Validation Based on Survey Design
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/ColbyStatSvyRsch/surveyCV/workflows/R-CMD-check/badge.svg)](https://github.com/ColbyStatSvyRsch/surveyCV/actions)
