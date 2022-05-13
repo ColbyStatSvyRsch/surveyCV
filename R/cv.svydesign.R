@@ -19,7 +19,7 @@
 #' and also when evaluating models against each test set.
 #'
 #' @param design_object Name of a \code{svydesign} object created using the \code{survey}
-#'   package. We do not yet support use of \code{probs} or \code{pps}.
+#'   package. We do not yet support use of replicate designs.
 #' @param formulae Vector of formulas (as strings) for the GLMs to be compared in
 #'   cross validation
 #' @param nfolds Number of folds to be used during cross validation, defaults to
@@ -86,67 +86,52 @@
 
 cv.svydesign <- function(design_object, formulae, nfolds = 5,
                          method = c("linear", "logistic"), na.rm = FALSE) {
-  # When a survey design object is specified,
-  # then the function can pull pieces of information needed from the design object
 
   method <- match.arg(method)
 
-  # Extract the dataframe from the design object
-  .data <- design_object[["variables"]]
-
-  # Create a clusterID variable from the design object
-  ids.formula <- design_object[["call"]]$id
-  stopifnot(length(ids.formula) == 2)
-  clusterID = as.character(ids.formula[[2]])
-  if (clusterID %in% c("0", "1")) {
-    clusterID = NULL
+  # Check whether the input is the appropriate type of object
+  # Note that replicate designs do not have the class 'survey.design'
+  if (inherits(design_object, "svyrep.design")) {
+    stop("Replicate designs are not currently supported.")
+  }
+  if (!inherits(design_object, "survey.design")) {
+    stop("`design_object` must be a survey design object created with the 'survey' or 'srvyr' packages.")
   }
 
-  # Create a strataID variable if it is present in the design object
-  if (design_object[["has.strata"]] == TRUE) {
-    strata.formula <- design_object[["call"]][["strata"]]
-    stopifnot(length(strata.formula) == 2)
-    strataID = as.character(strata.formula[[2]])
+  if (ncol(design_object[['cluster']]) > 1) {
+    warning("Only first-stage clusters and strata will be used.")
+  }
+
+  # Extract the variables and design information from the design object
+  # Special handling for the variables is needed for database-backed designs
+  if (inherits(design_object, "DBIsvydesign")) {
+    formula_vars <- lapply(formulae, function(formula_string) all.vars(as.formula(formula_string)))
+    formula_vars <- Reduce(x = formula_vars, f = unique)
+    getvars_fn <- utils::getFromNamespace(x = "getvars", ns = "survey")
+    .data <- getvars_fn(formula = formula_vars,
+                        dbconnection = design_object$db$connection,
+                        tables = design_object$db$tablename,
+                        updates = design_object$updates,
+                        subset = design_object$subset)
   } else {
-    strataID = NULL
+    .data <- design_object[["variables"]]
   }
 
-  # Makes a nest = TRUE for later use if needed
-  if (is.null(design_object[["call"]][["nest"]])) {
-    nest = FALSE
-  } else if (design_object[["call"]][["nest"]] == TRUE) {
-    nest = TRUE
+  .data[['DESIGN__PSU__']] <- design_object[['cluster']][[1]]
+  .data[['DESIGN__FIRST_STAGE_STRATUM__']] <- design_object[['strata']][[1]]
+  .data[['DESIGN__WEIGHTS__']] <- 1/design_object$prob
+  if (!is.null(design_object$fpc$popsize)) {
+    .data[['DESIGN__N_POP_PSUS_IN_STRATUM__']] <- design_object$fpc$popsize[,1, drop = TRUE]
+    fpcID <- 'DESIGN__N_POP_PSUS_IN_STRATUM__'
   } else {
-    nest = FALSE
+    fpcID <- NULL
   }
-
-  # Makes a weights variable if present in the design object
-  if ( !is.null(design_object[["call"]][["probs"]]) ) {
-    stop("`svydesign(probs=...) is not supported yet. Please specify weights instead.")
-  }
-  weights.formula <- design_object[["call"]][["weights"]]
-  if ( !is.null(weights.formula) ) {
-    stopifnot(length(weights.formula) == 2)
-    weightsID = as.character(weights.formula[[2]])
-  } else {
-    weightsID = NULL
-  }
-
-  # Makes a fpc variable if present in the design object
-  fpc.formula <- design_object[["call"]][["fpc"]]
-  if ( !is.null(fpc.formula) ) {
-    stopifnot(length(fpc.formula) == 2)
-    fpcID = as.character(fpc.formula[[2]])
-  } else {
-    fpcID = NULL
-  }
-
 
   # Runs our general cv.svy() function with all of the variables and data pulled from the design object
   cv.svy(Data = .data, formulae = formulae, nfolds = nfolds,
-         clusterID = clusterID, strataID = strataID, nest = nest,
+         clusterID = "DESIGN__PSU__", strataID = "DESIGN__FIRST_STAGE_STRATUM__", nest = FALSE,
+         weightsID = "DESIGN__WEIGHTS__",
          fpcID = fpcID, method = method,
-         weightsID = weightsID,
          na.rm = na.rm)
 
 }
