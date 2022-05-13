@@ -8,8 +8,8 @@ folds.svydesign(design_object, nfolds)
 }
 \arguments{
 \item{design_object}{Name of a \code{svydesign} object created using the \code{survey}
-package. The arguments \code{id} and \code{strata} (if used)
-must be specified as formulas, e.g. \code{svydesign(ids = ~MyPSUs, ...)}.}
+package. Replicate designs are not currently supported, and only first-stage
+stratification and clusters are used.}
 
 \item{nfolds}{Number of folds to be used during cross validation}
 }
@@ -26,7 +26,7 @@ and passes it into \code{\link{folds.svy}}.
 Returns a vector of fold IDs, which in most cases you will want to append
 to your \code{svydesign} object using \code{update.svydesign}
 (see Examples below).
-These fold IDs respect any stratification or clustering in the survey design.
+These fold IDs respect any first-stage stratification or clustering in the survey design.
 You can then carry out K-fold CV as usual,
 taking care to also use the survey design features and survey weights
 when fitting models in each training set
