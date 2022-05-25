@@ -6,7 +6,7 @@
 #' Returns a vector of fold IDs, which in most cases you will want to append
 #' to your \code{svydesign} object using \code{update.svydesign}
 #' (see Examples below).
-#' These fold IDs respect any stratification or clustering in the survey design.
+#' These fold IDs respect any first-stage stratification or clustering in the survey design.
 #' You can then carry out K-fold CV as usual,
 #' taking care to also use the survey design features and survey weights
 #' when fitting models in each training set
@@ -17,8 +17,8 @@
 #' which will automate the whole CV process for you.
 #'
 #' @param design_object Name of a \code{svydesign} object created using the \code{survey}
-#'   package. The arguments \code{id} and \code{strata} (if used)
-#'   must be specified as formulas, e.g. \code{svydesign(ids = ~MyPSUs, ...)}.
+#'   package. Replicate designs are not currently supported, and only first-stage
+#'   stratification and clusters are used.
 #' @param nfolds Number of folds to be used during cross validation
 #' @return Integer vector of fold IDs with length \code{nrow(Data)}.
 #'   Most likely you will want to append the returned vector
@@ -71,32 +71,30 @@
 #      (meant to be appended to it, e.g. as `Data <- cbind(Data, .foldID)`)
 folds.svydesign <- function(design_object, nfolds) {
 
-  # When a survey design object is specified,
-  # then the function can pull pieces of information needed from the design object
-
-  # Extract the dataframe from the design object
-  .data <- design_object[["variables"]]
-
-  # Create a clusterID variable from the design object
-  ids.formula <- design_object[["call"]]$id
-  stopifnot(length(ids.formula) == 2)
-  clusterID = as.character(ids.formula[[2]])
-  if (clusterID %in% c("0", "1")) {
-    clusterID = NULL
+  # Check whether the input is the appropriate type of object
+  # Note that replicate designs do not have the class 'survey.design'
+  if (inherits(design_object, "svyrep.design")) {
+    stop("Replicate designs are not currently supported.")
+  }
+  if (!inherits(design_object, "survey.design")) {
+    stop("`design_object` must be a survey design object created with the 'survey' or 'srvyr' packages.")
   }
 
-  # Create a strataID variable if it is present in the design object
-  if (design_object[["has.strata"]] == TRUE) {
-    strata.formula <- design_object[["call"]][["strata"]]
-    stopifnot(length(strata.formula) == 2)
-    strataID = as.character(strata.formula[[2]])
-  } else {
-    strataID = NULL
+  if (ncol(design_object[['cluster']]) > 1) {
+    warning("Only first-stage clusters and strata will be used.")
   }
+
+  # Create clusterID and strataID variables from the design object
+  # using only the first stage of sampling
+    .data <- data.frame(
+      'PSU' = design_object[['cluster']][[1]],
+      'FIRST_STAGE_STRATUM' = design_object[['strata']][[1]]
+    )
+
 
   # Runs our general folds.svy() function
   # with all of the variables and data pulled from the design object
   return(.foldID = folds.svy(Data = .data, nfolds = nfolds,
-                             strataID = strataID, clusterID = clusterID))
+                             strataID = "FIRST_STAGE_STRATUM", clusterID = "PSU"))
 }
 

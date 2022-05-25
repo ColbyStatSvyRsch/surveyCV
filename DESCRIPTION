@@ -26,7 +26,8 @@ LazyData: TRUE
 Depends: R (>= 4.0)
 Imports:
     survey (>= 4.1),
-    magrittr (>= 2.0)
+    magrittr (>= 2.0),
+    utils
 Suggests:
     dplyr (>= 1.0),
     ggplot2 (>= 3.3),

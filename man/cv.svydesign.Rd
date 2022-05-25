@@ -14,7 +14,7 @@ cv.svydesign(
 }
 \arguments{
 \item{design_object}{Name of a \code{svydesign} object created using the \code{survey}
-package. We do not yet support use of \code{probs} or \code{pps}.}
+package. We do not yet support use of replicate designs.}
 
 \item{formulae}{Vector of formulas (as strings) for the GLMs to be compared in
 cross validation}
