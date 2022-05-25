@@ -1,6 +1,9 @@
-# surveyCV 0.2.0.9000
+# surveyCV 0.2.0.9002
 
-* Development version
+* Development version: Thanks to Ben Schneider @bschneidr for all of the following updates.
+* Robustify `folds.svydesign()` and `cv.svydesign()` to extract information from `svydesign` objects more safely, enabling them to work with `srvyr` package as well as designs that have been subsetted (e.g. with `subset()`) or updated (e.g. with `update()` or `transform()`).
+* Throw informative warnings (if trying to use a multi-stage sampling design) and errors (if trying to use a replicate design or not providing a design object).
+* Allow `cv.svydesign()` to extract information from a `DBIsvydesign` object. (Currently, just turns it into a regular `svydesign` object after extracting the minimal necessary `data.frame`. Dealing with `DBIsvydesign` objects natively is on the to-do list.)
 
 # surveyCV 0.2.0
 

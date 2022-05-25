@@ -1,13 +1,14 @@
 Package: surveyCV
 Type: Package
 Title: Cross Validation Based on Survey Design
-Version: 0.2.0.9001
-Date: 2022-04-25
+Version: 0.2.0.9002
+Date: 2022-05-25
 Authors@R: c(
     person("Cole", "Guerin", email = "cole@guerincreative.com", role = "aut"),
     person("Thomas", "McMahon", email = "thomasmcmahon9@gmail.com", role = "aut"),
     person("Jerzy", "Wieczorek", email = "jawieczo@colby.edu", role = c("cre", "aut"),
            comment = c(ORCID = "0000-0002-2859-6534")),
+    person("Ben", "Schneider", email = "benjamin.julius.schneider@gmail.com", role = "ctb"),
     person("Hunter", "Ratliff", role = "ctb"))
 Description: Functions to generate K-fold cross validation (CV) folds
     and CV test error estimates that take into account
