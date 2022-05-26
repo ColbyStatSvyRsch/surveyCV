@@ -8,7 +8,8 @@ folds.svydesign(design_object, nfolds)
 }
 \arguments{
 \item{design_object}{Name of a \code{svydesign} object created using the \code{survey}
-package. Replicate designs are not currently supported, and only first-stage
+package. Replicate designs are not currently supported, nor is
+PPS sampling without replacement; and only first-stage
 stratification and clusters are used.}
 
 \item{nfolds}{Number of folds to be used during cross validation}

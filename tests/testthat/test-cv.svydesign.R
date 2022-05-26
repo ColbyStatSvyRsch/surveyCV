@@ -4,6 +4,14 @@ suppressPackageStartupMessages({
 
 data('api', package = 'survey')
 
+srs_design <- svydesign(data = apisrs,
+                        id = ~1,
+                        fpc = ~fpc)
+stratified_design <- svydesign(data = apistrat,
+                               id = ~1,
+                               strata = ~stype,
+                               weights = ~pw,
+                               fpc = ~fpc)
 single_stage_design <- svydesign(data = apiclus1,
                                  id = ~dnum, fpc = ~fpc,
                                  weights = ~pw)
@@ -17,6 +25,66 @@ clustered_stratified_design <- svydesign(data = apiclus1,
                                          nest = TRUE)
 
 test_that("`cv.svydesign` matches `cv.svy`", {
+  # SRS sample
+  set.seed(2022)
+  apisrs[['PSU']] <- 1:nrow(apisrs)
+  apisrs[['STRATUM']] <- rep(1, nrow(apisrs))
+  cv.svy_result <- cv.svy(
+    Data = apisrs,
+    clusterID = "PSU",
+    strataID = "STRATUM",
+    fpcID = 'fpc',
+    nfolds = 5,
+    formulae = c("api00~ell",
+                 "api00~ell+meals",
+                 "api00~ell+meals+mobility"),
+    method = "linear"
+  )
+  set.seed(2022)
+  cv.svydesign_result <- cv.svydesign(
+    design_object = srs_design,
+    nfolds = 5,
+    formulae = c("api00~ell",
+                 "api00~ell+meals",
+                 "api00~ell+meals+mobility"),
+    method = "linear"
+  )
+  expect_equal(
+    object = cv.svydesign_result,
+    expected = cv.svy_result,
+    label = "SRS design"
+  )
+
+  # Single-stage stratified sample
+  set.seed(2022)
+  apistrat[['PSU']] <- 1:nrow(apistrat)
+  cv.svy_result <- cv.svy(
+    Data = apistrat,
+    weightsID = "pw",
+    clusterID = "PSU",
+    strataID = "stype",
+    fpcID = 'fpc',
+    nfolds = 5,
+    formulae = c("api00~ell",
+                 "api00~ell+meals",
+                 "api00~ell+meals+mobility"),
+    method = "linear"
+  )
+  set.seed(2022)
+  cv.svydesign_result <- cv.svydesign(
+    design_object = stratified_design,
+    nfolds = 5,
+    formulae = c("api00~ell",
+                 "api00~ell+meals",
+                 "api00~ell+meals+mobility"),
+    method = "linear"
+  )
+  expect_equal(
+    object = cv.svydesign_result,
+    expected = cv.svy_result,
+    label = "Single-stage stratified design"
+  )
+
   # Single-stage unstratified cluster sample
   set.seed(2022)
   apiclus1[['STRATUM']] <- rep(1, nrow(apiclus1))
@@ -62,7 +130,6 @@ test_that("`cv.svydesign` matches `cv.svy`", {
                  "api00~ell+meals+mobility"),
     method = "linear"
   )
-
   suppressWarnings({
     set.seed(2022)
     cv.svydesign_result <- cv.svydesign(
@@ -74,13 +141,11 @@ test_that("`cv.svydesign` matches `cv.svy`", {
       method = "linear"
     )
   })
-
   expect_equal(
     object = cv.svydesign_result,
     expected = cv.svy_result,
     label = "Multistage, unstratified cluster design"
   )
-
 
   # Single-stage, stratified cluster sample
   apiclus1[['DNUM_BY_STYPE']] <- interaction(apiclus1$stype,
@@ -131,7 +196,6 @@ test_that("Informative warning for multistage designs", {
 })
 
 test_that("Informative error for replicate designs", {
-
   replicate_design <- single_stage_design |>
     as.svrepdesign(type = "JK1")
   expect_error(
@@ -149,7 +213,6 @@ test_that("Informative error for replicate designs", {
 })
 
 test_that("Informative error for non-design objects", {
-
   expect_error(
     object = {folds.svydesign(
       design_object = apiclus1,

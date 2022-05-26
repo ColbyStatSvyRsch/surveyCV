@@ -4,6 +4,14 @@ suppressPackageStartupMessages({
 
 data('api', package = 'survey')
 
+srs_design <- svydesign(data = apisrs,
+                        id = ~1,
+                        fpc = ~fpc)
+stratified_design <- svydesign(data = apistrat,
+                               id = ~1,
+                               strata = ~stype,
+                               weights = ~pw,
+                               fpc = ~fpc)
 single_stage_design <- svydesign(data = apiclus1,
                                  id = ~dnum, fpc = ~fpc,
                                  weights = ~pw)
@@ -16,7 +24,49 @@ clustered_stratified_design <- svydesign(data = apiclus1,
                                          weights = ~ pw,
                                          nest = TRUE)
 
+
 test_that("`folds.svydesign` matches `folds.svy`", {
+  # SRS sample
+  set.seed(2022)
+  apisrs[['PSU']] <- 1:nrow(apisrs)
+  apisrs[['STRATUM']] <- rep(1, nrow(apisrs))
+  folds.svy_result <- folds.svy(
+    Data = apisrs,
+    clusterID = "PSU",
+    strataID = "STRATUM",
+    nfolds = 5
+  )
+  set.seed(2022)
+  folds.svydesign_result <- folds.svydesign(
+    design_object = srs_design,
+    nfolds = 5
+  )
+  expect_equal(
+    object = folds.svydesign_result,
+    expected = folds.svy_result,
+    label = "SRS design"
+  )
+
+  # Single-stage stratified sample
+  set.seed(2022)
+  apistrat[['PSU']] <- 1:nrow(apistrat)
+  folds.svy_result <- folds.svy(
+    Data = apistrat,
+    clusterID = "PSU",
+    strataID = "stype",
+    nfolds = 5
+  )
+  set.seed(2022)
+  folds.svydesign_result <- folds.svydesign(
+    design_object = stratified_design,
+    nfolds = 5
+  )
+  expect_equal(
+    object = folds.svydesign_result,
+    expected = folds.svy_result,
+    label = "Single-stage stratified design"
+  )
+
   # Single-stage unstratified cluster sample
   set.seed(2022)
   apiclus1[['STRATUM']] <- rep(1, nrow(apiclus1))
@@ -59,7 +109,6 @@ test_that("`folds.svydesign` matches `folds.svy`", {
     label = "Multistage, unstratified cluster design"
   )
 
-
   # Single-stage, stratified cluster sample
   apiclus1[['DNUM_BY_STYPE']] <- interaction(apiclus1$stype,
                                              apiclus1$dnum,
@@ -96,7 +145,6 @@ test_that("Informative warning for multistage designs", {
 })
 
 test_that("Informative error for replicate designs", {
-
   replicate_design <- single_stage_design |>
     as.svrepdesign(type = "JK1")
   expect_error(
@@ -110,9 +158,6 @@ test_that("Informative error for replicate designs", {
 })
 
 test_that("Informative error for non-design objects", {
-
-  replicate_design <- single_stage_design |>
-    as.svrepdesign(type = "JK1")
   expect_error(
     object = {folds.svydesign(
       design_object = apiclus1,

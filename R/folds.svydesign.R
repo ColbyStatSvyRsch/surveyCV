@@ -17,7 +17,8 @@
 #' which will automate the whole CV process for you.
 #'
 #' @param design_object Name of a \code{svydesign} object created using the \code{survey}
-#'   package. Replicate designs are not currently supported, and only first-stage
+#'   package. Replicate designs are not currently supported, nor is
+#'   PPS sampling without replacement; and only first-stage
 #'   stratification and clusters are used.
 #' @param nfolds Number of folds to be used during cross validation
 #' @return Integer vector of fold IDs with length \code{nrow(Data)}.
@@ -80,7 +81,8 @@ folds.svydesign <- function(design_object, nfolds) {
     stop("`design_object` must be a survey design object created with the 'survey' or 'srvyr' packages.")
   }
 
-  if (ncol(design_object[['cluster']]) > 1) {
+  if (ncol(design_object[['cluster']]) > 1 |
+      ncol(design_object[['strata']])  > 1) {
     warning("Only first-stage clusters and strata will be used.")
   }
 

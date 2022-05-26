@@ -146,4 +146,5 @@ Simulation code is in the `plots-for-Stat-paper` vignette.
 
 [Jerzy Wieczorek](https://github.com/civilstat),  
 [Cole Guerin](https://github.com/cole164), and  
-[Thomas McMahon](https://github.com/twmcma21).
+[Thomas McMahon](https://github.com/twmcma21),  
+with contributions from [Ben Schneider](https://github.com/bschneidr).

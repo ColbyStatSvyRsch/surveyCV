@@ -1,3 +1,7 @@
+# surveyCV 0.2.0.9003
+
+* Development version: Fix handling of variable extraction for `DBIsvydesign` objects. Add several warnings, errors, documentation notes, and test cases.
+
 # surveyCV 0.2.0.9002
 
 * Development version: Thanks to Ben Schneider @bschneidr for all of the following updates.

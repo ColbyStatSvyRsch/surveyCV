@@ -14,7 +14,11 @@ cv.svydesign(
 }
 \arguments{
 \item{design_object}{Name of a \code{svydesign} object created using the \code{survey}
-package. We do not yet support use of replicate designs.}
+package. We do not yet support use of replicate designs,
+nor of PPS sampling without replacement. A database-backed object can be
+supplied, but the current version of \code{cv.svydesign} will convert it to
+a dataframe-based object; avoid this unless your database is small enough
+to be loaded into memory.}
 
 \item{formulae}{Vector of formulas (as strings) for the GLMs to be compared in
 cross validation}

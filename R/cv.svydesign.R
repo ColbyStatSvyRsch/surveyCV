@@ -19,7 +19,11 @@
 #' and also when evaluating models against each test set.
 #'
 #' @param design_object Name of a \code{svydesign} object created using the \code{survey}
-#'   package. We do not yet support use of replicate designs.
+#'   package. We do not yet support use of replicate designs,
+#'   nor of PPS sampling without replacement. A database-backed object can be
+#'   supplied, but the current version of \code{cv.svydesign} will convert it to
+#'   a dataframe-based object; avoid this unless your database is small enough
+#'   to be loaded into memory.
 #' @param formulae Vector of formulas (as strings) for the GLMs to be compared in
 #'   cross validation
 #' @param nfolds Number of folds to be used during cross validation, defaults to
@@ -97,16 +101,21 @@ cv.svydesign <- function(design_object, formulae, nfolds = 5,
   if (!inherits(design_object, "survey.design")) {
     stop("`design_object` must be a survey design object created with the 'survey' or 'srvyr' packages.")
   }
+  if (!isFALSE(design_object$pps)) {
+    stop("PPS sampling without replacement is not currently supported.")
+  }
 
-  if (ncol(design_object[['cluster']]) > 1) {
+  if (ncol(design_object[['cluster']]) > 1 |
+      ncol(design_object[['strata']])  > 1) {
     warning("Only first-stage clusters and strata will be used.")
   }
 
   # Extract the variables and design information from the design object
   # Special handling for the variables is needed for database-backed designs
   if (inherits(design_object, "DBIsvydesign")) {
+    warning("Database-backed objects are not currently natively supported. The needed variables from `design_object` will be converted to a dataframe-based object and loaded into memory.")
     formula_vars <- lapply(formulae, function(formula_string) all.vars(as.formula(formula_string)))
-    formula_vars <- Reduce(x = formula_vars, f = unique)
+    formula_vars <- unique(unlist(formula_vars))
     getvars_fn <- utils::getFromNamespace(x = "getvars", ns = "survey")
     .data <- getvars_fn(formula = formula_vars,
                         dbconnection = design_object$db$connection,
